@@ -55,6 +55,11 @@ binary_files_matches.log
 collisions_errors.log
 test_temp/
 
+# uv package management
+uv.lock
+dist/
+*.egg-info/
+
 
 # Project specific
 PYTHON/WATCH/fc.json

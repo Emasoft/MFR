@@ -28,19 +28,116 @@ uv pip install -r requirements-dev.txt
 ```
 
 ### Building and Packaging
+
+#### Complete uv Package Setup Workflow
+
+1. **Initialize Project**
 ```bash
-# Initialize project with uv (if starting fresh)
-uv init --python 3.10 --app
+# For new projects
+uv init --name your-package-name --no-readme
 
-# Add dependencies from requirements.txt to pyproject.toml
-uv add -r requirements-dev.txt
+# For existing projects (creates pyproject.toml)
+uv init --name your-package-name
+```
 
-# Build the package
+2. **Configure pyproject.toml**
+```toml
+[project]
+name = "your-package-name"
+version = "0.1.0"
+description = "Package description"
+authors = [{name = "Name", email = "email@example.com"}]
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+dependencies = [
+    "dependency1>=1.0.0",
+    "dependency2>=2.0.0",
+]
+
+[project.scripts]
+command-name = "module:main_function"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=6.0.0",
+    "mypy>=1.0.0",
+    "ruff>=0.5.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+# For flat layout (modules in root)
+packages = ["module1", "module2"]
+
+# For src layout
+# packages = ["src/module1", "src/module2"]
+```
+
+3. **Sync Dependencies**
+```bash
+# Install project dependencies
+uv sync
+
+# Install with optional dependencies
+uv sync --extra dev
+
+# Add new dependencies
+uv add package-name
+uv add --dev pytest  # Add to dev group
+```
+
+4. **Build the Package**
+```bash
+# Build both wheel and source distribution
 uv build
 
-# Install in development mode
-uv pip install -e .
+# Build only wheel
+uv build --wheel
+
+# Build only source distribution
+uv build --sdist
+
+# Build with constraints
+uv build --build-constraint constraints.txt
 ```
+
+5. **Install for Development**
+```bash
+# Install in editable mode
+uv pip install -e .
+
+# Install with dev dependencies
+uv pip install -e ".[dev]"
+```
+
+6. **Project Structure**
+```
+project-root/
+├── pyproject.toml       # Project configuration
+├── uv.lock             # Lock file (auto-generated)
+├── README.md           # Project readme
+├── .gitignore          # Git ignore file
+├── module1.py          # Python modules (flat layout)
+├── module2.py
+├── test_module.py      # Tests
+└── dist/               # Built distributions (after uv build)
+    ├── package-0.1.0.tar.gz
+    └── package-0.1.0-py3-none-any.whl
+```
+
+#### Key uv Commands Summary
+- `uv init` - Initialize new project
+- `uv add` - Add dependencies
+- `uv remove` - Remove dependencies
+- `uv sync` - Sync environment with pyproject.toml
+- `uv build` - Build distributions
+- `uv run` - Run commands in project environment
+- `uv pip install -e .` - Install project in editable mode
 
 ### Running the Tool
 
