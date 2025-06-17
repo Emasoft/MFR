@@ -1,0 +1,78 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# python
+/venv
+/venv2
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.ipynb_checkpoints/
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+dist-electron/*
+
+# testing
+/coverage
+/cypress/screenshots/
+tests/temp/
+.pytest_cache/
+coverage.xml
+.nyc_output/
+coverage-cy/
+
+# gitpod config to prevent unwanted installations
+.gitpod.yml
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+dump.rdb
+*.rdb
+*~
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.python-version
+.history/
+.logs/
+bin/
+out/
+test-results/
+docs/pnpm-lock.yml
+.aider*
+
+# Mass Find Replace (MFR) tool temporary files
+planned_transactions.json
+planned_transactions.json.bak
+binary_files_matches.log
+collisions_errors.log
+test_temp/
+
+
+# Project specific
+PYTHON/WATCH/fc.json
+PYTHON/obj-detection.jpg
+PYTHON/utils/object_detection/yolov3.weights
+src/feature/flow_chart_panel/manifest/pythonFunctions.json
+dist
+build
+update_apps.js
+worker-manager/node_modules
+
+# IDE specific
+/**/.idea/*
+.vscode/*
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Data files that might be generated or downloaded
+src/data/*.json
+# Re-add if pythonFunctions.json is truly generated and shouldn't be tracked
+# src/feature/flow_chart_panel/manifest/pythonFunctions.json
