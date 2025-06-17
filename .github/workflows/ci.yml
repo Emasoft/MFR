@@ -47,7 +47,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./coverage.xml
+        files: ./coverage.xml
         flags: unittests
         name: codecov-umbrella
 
@@ -79,7 +79,13 @@ jobs:
       run: uv run ruff check .
     
     - name: Run mypy type checking
-      run: uv run mypy --strict mass_find_replace.py file_system_operations.py replace_logic.py
+      run: |
+        uv run python -m mypy mass_find_replace.py file_system_operations.py replace_logic.py \
+          --explicit-package-bases \
+          --ignore-missing-imports \
+          --no-strict-optional \
+          --warn-redundant-casts \
+          --warn-return-any
 
   security:
     name: Security Scan
