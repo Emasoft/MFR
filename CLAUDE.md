@@ -25,9 +25,21 @@ source .venv/bin/activate  # Linux/macOS
 
 # Install dependencies
 uv pip install -r requirements-dev.txt
+```
 
-# Or install individual dependencies
-uv pip install prefect chardet isbinary pathspec striprtf
+### Building and Packaging
+```bash
+# Initialize project with uv (if starting fresh)
+uv init --python 3.10 --app
+
+# Add dependencies from requirements.txt to pyproject.toml
+uv add -r requirements-dev.txt
+
+# Build the package
+uv build
+
+# Install in development mode
+uv pip install -e .
 ```
 
 ### Running the Tool
@@ -143,10 +155,61 @@ uv run mypy --strict mass_find_replace.py file_system_operations.py replace_logi
 
 ## Development Guidelines
 
-- Use TDD methodology - write tests first
-- Keep functions small and focused
-- Use type annotations throughout
-- Follow Google-style docstrings (no markdown)
-- Commit frequently with atomic changes
-- Run linters before committing
+### Critical Rules
+- **ALWAYS read entire source files** when searching or editing (not just a few lines)
+- **Never make unplanned changes** - discuss with user first and update DEVELOPMENT_PLAN.md
+- **Commit after EACH change**, no matter how small
+- **Always run linters** (ruff, mypy) before committing
+- **Never output abridged code** with placeholders like `# ... rest of code ...`
+
+### Code Quality Standards
+- Use Test-Driven Development (TDD) - write tests first, implementation later
+- Keep source files under 10KB - split into modules if larger
+- Always use type annotations
+- Write Google-style docstrings (no markdown in comments)
 - Preserve the surgical nature of replacements
+- Use Prefect for scripted processing with max_concurrency=1 for safety
+
+### Python File Requirements
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# HERE IS THE CHANGELOG FOR THIS VERSION OF THE CODE:
+# <your changelog here...>
+# 
+```
+
+### Testing Requirements
+- Use pytest and pytest-cov
+- Never use mocked tests unless absolutely necessary
+- Show results in a formatted table with unicode borders
+- Include test descriptions from docstrings
+- Mark slow tests with 🐌 emoji
+
+### Linting Commands
+```bash
+# Python formatting and linting
+uv run ruff format
+uv run ruff check --ignore E203,E402,E501,E266,W505,F841,F842,F401,W293,I001,UP015,C901,W291 --isolated --fix --output-format full
+COLUMNS=400 uv run mypy --strict --show-error-context --pretty --install-types --no-color-output --non-interactive --show-error-codes --show-error-code-links --no-error-summary --follow-imports=normal <files>
+
+# Check for secrets
+gitleaks git --verbose
+gitleaks dir --verbose
+```
+
+### Git Configuration
+- Author: Emasoft
+- Email: 713559+Emasoft@users.noreply.github.com
+- Commit messages: atomic, specific, focus on WHAT changed with WHY in body
+- Never mention Claude as author or co-author
+
+### Development Best Practices
+- Be conservative - only change what's strictly necessary
+- Check if features already exist before implementing
+- Reuse existing functions instead of duplicating code
+- Create small, focused, reusable modules
+- Always set Bash timeout to 1800000 (30 minutes)
+- If solution isn't obvious, ask user for help
+- Never use workarounds - implement proper solutions

@@ -98,8 +98,8 @@ def test_dry_run_behavior(temp_test_dir: dict, default_map_file: Path, assert_fi
     assert orig_deep_file_path.exists()
     assert_file_content(orig_deep_file_path, original_content)
 
-    # Verify no actual renaming occurred
-    assert not (context_dir / "atlasvibe_root").exists()
+    # Verify no actual renaming occurred - original directories should still exist
+    assert (context_dir / "atlasvibe_root").exists()
 
     print(f"Transaction file: {context_dir / MAIN_TRANSACTION_FILE_NAME}")
     transactions = load_transactions(context_dir / MAIN_TRANSACTION_FILE_NAME)
@@ -164,13 +164,13 @@ def test_path_resolution_after_rename(temp_test_dir: dict, default_map_file: Pat
     path_map = {}
     for tx in txn_json:
         if tx["TYPE"] == TransactionType.FOLDER_NAME.value:
-            path_map[tx["PATH"]] = tx["PATH"].replace("atlasvibe", "atlasvibe").replace("ATLASVIBE", "ATLASVIBE")
+            path_map[tx["PATH"]] = tx["PATH"].replace("atlasvibe", "flojoy").replace("ATLASVIBE", "FLOJOY").replace("Atlasvibe", "Flojoy")
     
     # Fix 3: Validate with actual paths from fixture
     expected_path_map = {
-        "atlasvibe_root": "atlasvibe_root",
-        "atlasvibe_root/sub_atlasvibe_folder": "atlasvibe_root/sub_atlasvibe_folder",
-        "atlasvibe_root/sub_atlasvibe_folder/another_ATLASVIBE_dir": "atlasvibe_root/sub_atlasvibe_folder/another_ATLASVIBE_dir"
+        "atlasvibe_root": "flojoy_root",
+        "atlasvibe_root/sub_atlasvibe_folder": "flojoy_root/sub_flojoy_folder",
+        "atlasvibe_root/sub_atlasvibe_folder/another_ATLASVIBE_dir": "flojoy_root/sub_flojoy_folder/another_FLOJOY_dir"
     }
     
     for original, expected in expected_path_map.items():

@@ -3,3 +3,5 @@ chardet
 isbinary
 pathspec
 striprtf
+pytest
+pytest-cov

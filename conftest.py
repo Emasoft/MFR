@@ -49,11 +49,11 @@ def default_map_file(temp_test_dir: dict) -> Path:
     # Create and populate replacement mapping file
     map_data = {
         "REPLACEMENT_MAPPING": {
-            "atlasvibe": "atlasvibe",
-            "Atlasvibe": "Atlasvibe",
-            "atlasVibe": "atlasVibe",
-            "AtlasVibe": "AtlasVibe",
-            "ATLASVIBE": "ATLASVIBE"
+            "atlasvibe": "flojoy",
+            "Atlasvibe": "Flojoy",
+            "atlasVibe": "floJoy",
+            "AtlasVibe": "FloJoy",
+            "ATLASVIBE": "FLOJOY"
         }
     }
     map_file.write_text(json.dumps(map_data, ensure_ascii=False, indent=2), encoding='utf-8')
