@@ -4,12 +4,11 @@ title = "Gitleaks Configuration for MFR"
 description = "Allowlist for MFR project"
 paths = [
   '''.gitleaks.toml''',
-  '''CLAUDE.md''',
-  '''CLAUDE2.md''',
   '''.venv/.*''',
   '''venv/.*''',
   '''__pycache__/.*''',
   '''dist/.*''',
+  '''CLAUDE.*\.md''',
 ]
 
 commits = [
