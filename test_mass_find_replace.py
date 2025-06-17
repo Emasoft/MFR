@@ -18,6 +18,7 @@ from pathlib import Path
 import os
 from typing import List
 import logging
+import unicodedata
 from unittest.mock import patch
 import sys
 
@@ -222,7 +223,7 @@ def test_unicode_combining_chars(temp_test_dir, default_map_file):
             original_name = tx.get("ORIGINAL_NAME", "")
             new_name = replace_logic.replace_occurrences(original_name)
             # We'll check if the new name contains "atlasvibe" and the accent preserving by seeing if the original accent is present
-            if "atlasvibe" in new_name and "café" in original_name:
+            if "flojoy" in new_name and "café" in original_name:
                 found = True
                 break
     assert found, "Expected replacement for filename with combining characters"
@@ -387,8 +388,8 @@ def test_recursive_path_resolution(temp_test_dir, default_map_file):
         assert any(tx["ORIGINAL_NAME"] == component for tx in txn_json), f"Missing transaction for folder {component}"
     
     # Check the deep path translation in the folder mapping
-    assert "Atlasvibe_A" in path_map.get("Atlasvibe_A").rsplit("/", 1)[-1]
-    assert "Atlasvibe_B" in path_map.get("Atlasvibe_A/Atlasvibe_B").rsplit("/", 1)[-1]
+    assert "Flojoy_A" in path_map.get("Atlasvibe_A").rsplit("/", 1)[-1]
+    assert "Flojoy_B" in path_map.get("Atlasvibe_A/Atlasvibe_B").rsplit("/", 1)[-1]
 
 # =============== NEW TEST: GB18030 ENCODING SUPPORT =================
 def test_gb18030_encoding(temp_test_dir: dict, default_map_file: Path):
@@ -401,7 +402,7 @@ def test_gb18030_encoding(temp_test_dir: dict, default_map_file: Path):
     
     # Test config
     test_string = "Atlasvibe"
-    replacement_string = "Atlasvibe"
+    replacement_string = "Flojoy"
     encoding = "gb18030"
     small_file = context_dir / "small_gb18030.txt"
     large_file = context_dir / "large_gb18030.txt"
@@ -446,7 +447,7 @@ def test_gb18030_encoding(temp_test_dir: dict, default_map_file: Path):
             large_file_processed = True
             # Verify transaction contains expected fields
             assert "NEW_LINE_CONTENT" in tx, "Missing NEW_LINE_CONTENT field"
-            assert "Atlasvibe" in tx["NEW_LINE_CONTENT"], "Replacement not in new content"
+            assert "Flojoy" in tx["NEW_LINE_CONTENT"], "Replacement not in new content"
             encoding_in_tx = tx.get("ORIGINAL_ENCODING", "").lower().replace("-", "")
             assert encoding_in_tx == "gb18030", \
                 f"Wrong encoding: {tx.get('ORIGINAL_ENCODING')}"
@@ -477,21 +478,23 @@ def test_collision_error_logging(temp_test_dir: dict, default_map_file: Path):
     test_dir = temp_test_dir["runtime"] / "collision_test"
     test_dir.mkdir()
     
-    # Test 1: Exact match collision
-    source_file = test_dir / "AtlasvibeTheme.ts"
-    source_file.write_text("export const atlasvibe = 'test';")
+    # Test 1: File that will rename to collide with existing file
+    # This file will be renamed from atlasvibe_config.py to flojoy_config.py
+    source_file = test_dir / "atlasvibe_config.py"
+    source_file.write_text("# Config file")
     
-    exact_collision = test_dir / "AtlasvibeTheme.ts"
-    exact_collision.write_text("export const atlasvibe = 'existing';")
+    # Existing file that will cause collision
+    exact_collision = test_dir / "flojoy_config.py"
+    exact_collision.write_text("# Existing config")
     
-    # Test 2: Case-insensitive collision
-    # Create a file that would be renamed to "atlasvibe_config.py"
-    case_test_file = test_dir / "atlasvibe_config.py"
-    case_test_file.write_text("# Config file")
+    # Test 2: File with different case that will collide after rename
+    # AtlasvibeTheme.ts will be renamed to FlojoyTheme.ts
+    case_test_file = test_dir / "AtlasvibeTheme.ts"
+    case_test_file.write_text("export const theme = 'test';")
     
-    # Create existing file with different case
-    case_collision = test_dir / "ATLASVIBE_CONFIG.py"
-    case_collision.write_text("# Existing config")
+    # Existing file with different case that will cause collision
+    case_collision = test_dir / "FLOJOYTHEME.ts"
+    case_collision.write_text("export const theme = 'existing';")
     
     # Debug: List all files before running
     print("\n=== Files before running ===")
@@ -554,11 +557,12 @@ def test_interactive_mode_collision_skip(temp_test_dir: dict, default_map_file: 
     test_dir = temp_test_dir["runtime"] / "interactive_test"
     test_dir.mkdir()
     
-    # Create collision scenario
+    # Create collision scenario - file that will collide after rename
     source_file = test_dir / "atlasvibe_config.py"
     source_file.write_text("# Config")
     
-    collision_file = test_dir / "atlasvibe_config.py"
+    # Existing file that will cause collision when source_file is renamed
+    collision_file = test_dir / "flojoy_config.py"
     collision_file.write_text("# Existing")
     
     # Create non-collision file for comparison
@@ -611,7 +615,7 @@ def test_interactive_mode_collision_skip(temp_test_dir: dict, default_map_file: 
     # Verify files state
     assert source_file.exists(), "Collision file should not be renamed"
     assert collision_file.exists(), "Existing collision file should remain"
-    assert normal_file.exists() or (test_dir / "atlasvibe_utils.py").exists(), "Non-collision file should be processed"
+    assert normal_file.exists() or (test_dir / "flojoy_utils.py").exists(), "Non-collision file should be processed"
 
 
 def test_malformed_json_handling(temp_test_dir: dict):
