@@ -20,10 +20,14 @@ import os
 import json
 import uuid
 from pathlib import Path
-from typing import Any, Optional, Iterator # Keep Any if specifically needed for dynamic parts
+from typing import (
+    Any,
+    Optional,
+    Iterator,
+)  # Keep Any if specifically needed for dynamic parts
 from enum import Enum
 import chardet
-import unicodedata # For NFC normalization
+import unicodedata  # For NFC normalization
 import time
 import pathspec
 import errno
@@ -35,19 +39,25 @@ from prefect import flow
 
 import replace_logic
 
+
 class SandboxViolationError(Exception):
     pass
+
+
 class MockableRetriableError(OSError):
     pass
 
-DEFAULT_ENCODING_FALLBACK = 'utf-8'
+
+DEFAULT_ENCODING_FALLBACK = "utf-8"
 TRANSACTION_FILE_BACKUP_EXT = ".bak"
 SELF_TEST_ERROR_FILE_BASENAME = "error_file_atlasvibe.txt"
 BINARY_MATCHES_LOG_FILE = "binary_files_matches.log"
 COLLISIONS_ERRORS_LOG_FILE = "collisions_errors.log"
 
 RETRYABLE_OS_ERRORNOS = {
-    errno.EACCES, errno.EBUSY, errno.ETXTBSY,
+    errno.EACCES,
+    errno.EBUSY,
+    errno.ETXTBSY,
 }
 
 # ANSI escape codes for interactive mode
@@ -67,6 +77,7 @@ class TransactionType(str, Enum):
     FOLDER_NAME = "FOLDER_NAME"
     FILE_CONTENT_LINE = "FILE_CONTENT_LINE"
 
+
 class TransactionStatus(str, Enum):
     PENDING = "PENDING"
     IN_PROGRESS = "IN_PROGRESS"
@@ -74,6 +85,7 @@ class TransactionStatus(str, Enum):
     FAILED = "FAILED"
     SKIPPED = "SKIPPED"
     RETRY_LATER = "RETRY_LATER"
+
 
 def _log_fs_op_message(level: int, message: str, logger: logging.Logger | None = None):
     """Helper to log messages using provided logger or print as fallback for fs_operations."""
@@ -93,23 +105,33 @@ def _log_fs_op_message(level: int, message: str, logger: logging.Logger | None =
 
 
 def _log_collision_error(
-    root_dir: Path, 
-    tx: dict[str, Any], 
-    source_path: Path, 
-    collision_path: Path, 
+    root_dir: Path,
+    tx: dict[str, Any],
+    source_path: Path,
+    collision_path: Path,
     collision_type: str,
-    logger: logging.Logger | None = None
+    logger: logging.Logger | None = None,
 ):
     """Log collision errors to a dedicated file."""
     collision_log_path = root_dir / COLLISIONS_ERRORS_LOG_FILE
-    
+
     try:
         # Get relative paths for cleaner logging
-        source_rel = source_path.relative_to(root_dir) if root_dir in source_path.parents or source_path == root_dir else source_path
-        collision_rel = collision_path.relative_to(root_dir) if root_dir in collision_path.parents or collision_path == root_dir else collision_path
-        
-        with open(collision_log_path, 'a', encoding='utf-8') as log_f:
-            log_f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - COLLISION ({collision_type}):\n")
+        source_rel = (
+            source_path.relative_to(root_dir)
+            if root_dir in source_path.parents or source_path == root_dir
+            else source_path
+        )
+        collision_rel = (
+            collision_path.relative_to(root_dir)
+            if root_dir in collision_path.parents or collision_path == root_dir
+            else collision_path
+        )
+
+        with open(collision_log_path, "a", encoding="utf-8") as log_f:
+            log_f.write(
+                f"{time.strftime('%Y-%m-%d %H:%M:%S')} - COLLISION ({collision_type}):\n"
+            )
             log_f.write(f"  Transaction ID: {tx.get('id', 'N/A')}\n")
             log_f.write(f"  Type: {tx.get('TYPE', 'N/A')}\n")
             log_f.write(f"  Original Path: {tx.get('PATH', 'N/A')}\n")
@@ -119,13 +141,19 @@ def _log_collision_error(
             log_f.write(f"  Collision With: {collision_rel}\n")
             log_f.write(f"  Collision Type: {collision_type}\n")
             log_f.write("-" * 80 + "\n")
-            
-        _log_fs_op_message(logging.DEBUG, f"Logged collision error to {collision_log_path}", logger)
+
+        _log_fs_op_message(
+            logging.DEBUG, f"Logged collision error to {collision_log_path}", logger
+        )
     except Exception as e:
-        _log_fs_op_message(logging.WARNING, f"Could not write to collision log: {e}", logger)
+        _log_fs_op_message(
+            logging.WARNING, f"Could not write to collision log: {e}", logger
+        )
 
 
-def get_file_encoding(file_path: Path, sample_size: int = 10240, logger: logging.Logger | None = None) -> str:
+def get_file_encoding(
+    file_path: Path, sample_size: int = 10240, logger: logging.Logger | None = None
+) -> str:
     if not file_path.is_file():
         return DEFAULT_ENCODING_FALLBACK
     try:
@@ -135,14 +163,18 @@ def get_file_encoding(file_path: Path, sample_size: int = 10240, logger: logging
         if file_size <= 1_048_576:  # Increased threshold to 1MB
             try:
                 raw_data = file_path.read_bytes()
-                raw_data.decode('utf-8', errors='strict') # Try strict UTF-8
-                return 'utf-8'
+                raw_data.decode("utf-8", errors="strict")  # Try strict UTF-8
+                return "utf-8"
             except (UnicodeDecodeError, FileNotFoundError):
                 pass  # Not UTF-8, fall through to chardet
             except Exception as e:
-                _log_fs_op_message(logging.WARNING, f"Unexpected error decoding small file {file_path} as UTF-8: {e}", logger)
+                _log_fs_op_message(
+                    logging.WARNING,
+                    f"Unexpected error decoding small file {file_path} as UTF-8: {e}",
+                    logger,
+                )
 
-        with open(file_path, 'rb') as f:
+        with open(file_path, "rb") as f:
             raw_data = f.read(sample_size)
 
         if not raw_data:
@@ -150,107 +182,161 @@ def get_file_encoding(file_path: Path, sample_size: int = 10240, logger: logging
 
         # 1. Try UTF-8 for all files regardless of size
         try:
-            if file_path.suffix.lower() != '.rtf':
-                raw_data.decode('utf-8', errors='strict')
-                return 'utf-8'
+            if file_path.suffix.lower() != ".rtf":
+                raw_data.decode("utf-8", errors="strict")
+                return "utf-8"
         except UnicodeDecodeError:
             pass
 
         # RTF files use Latin-1
-        if file_path.suffix.lower() == '.rtf':
-            return 'latin-1' 
+        if file_path.suffix.lower() == ".rtf":
+            return "latin-1"
 
         # 2. Use chardet detection
         detected = chardet.detect(raw_data)
-        encoding = detected.get('encoding') or DEFAULT_ENCODING_FALLBACK
-        confidence = detected.get('confidence', 0)
+        encoding = detected.get("encoding") or DEFAULT_ENCODING_FALLBACK
+        confidence = detected.get("confidence", 0)
 
         # Normalize GB2312 to GB18030
-        if encoding and encoding.lower().startswith('gb2312'):
-            encoding = 'gb18030'
+        if encoding and encoding.lower().startswith("gb2312"):
+            encoding = "gb18030"
 
         # Only consider chardet results with reasonable confidence
         if confidence > 0.5 and encoding:
             encoding = encoding.lower()
             # Handle common encoding aliases
             try:
-                raw_data.decode(encoding, errors='surrogateescape')
+                raw_data.decode(encoding, errors="surrogateescape")
                 return encoding
             except (UnicodeDecodeError, LookupError):
                 pass
 
         # 3. Fallback explicit checks if UTF-8 and chardet's primary suggestion failed or wasn't definitive
-        for enc_try in ['cp1252', 'latin1', 'iso-8859-1']:
+        for enc_try in ["cp1252", "latin1", "iso-8859-1"]:
             try:
                 if encoding != enc_try:
-                    raw_data.decode(enc_try, errors='surrogateescape')
+                    raw_data.decode(enc_try, errors="surrogateescape")
                     return enc_try
             except (UnicodeDecodeError, LookupError):
                 pass
 
-        _log_fs_op_message(logging.DEBUG, f"Encoding for {file_path} could not be confidently determined. Chardet: {detected}. Using {DEFAULT_ENCODING_FALLBACK}.", logger)
+        _log_fs_op_message(
+            logging.DEBUG,
+            f"Encoding for {file_path} could not be confidently determined. Chardet: {detected}. Using {DEFAULT_ENCODING_FALLBACK}.",
+            logger,
+        )
         return DEFAULT_ENCODING_FALLBACK
     except Exception as e:
-        _log_fs_op_message(logging.WARNING, f"Error detecting encoding for {file_path}: {e}. Falling back to {DEFAULT_ENCODING_FALLBACK}.", logger)
+        _log_fs_op_message(
+            logging.WARNING,
+            f"Error detecting encoding for {file_path}: {e}. Falling back to {DEFAULT_ENCODING_FALLBACK}.",
+            logger,
+        )
         return DEFAULT_ENCODING_FALLBACK
 
 
-def load_ignore_patterns(ignore_file_path: Path, logger: logging.Logger | None = None) -> pathspec.PathSpec | None:
+def load_ignore_patterns(
+    ignore_file_path: Path, logger: logging.Logger | None = None
+) -> pathspec.PathSpec | None:
     if not ignore_file_path.is_file():
         return None
     try:
-        with open(ignore_file_path, 'r', encoding=DEFAULT_ENCODING_FALLBACK, errors='ignore') as f:
+        with open(
+            ignore_file_path, "r", encoding=DEFAULT_ENCODING_FALLBACK, errors="ignore"
+        ) as f:
             patterns = f.readlines()
-        valid_patterns = [p for p in (line.strip() for line in patterns) if p and not p.startswith('#')]
-        return pathspec.PathSpec.from_lines('gitwildmatch', valid_patterns) if valid_patterns else None
+        valid_patterns = [
+            p
+            for p in (line.strip() for line in patterns)
+            if p and not p.startswith("#")
+        ]
+        return (
+            pathspec.PathSpec.from_lines("gitwildmatch", valid_patterns)
+            if valid_patterns
+            else None
+        )
     except Exception as e:
-        _log_fs_op_message(logging.WARNING, f"Could not load ignore file {ignore_file_path}: {e}", logger)
+        _log_fs_op_message(
+            logging.WARNING,
+            f"Could not load ignore file {ignore_file_path}: {e}",
+            logger,
+        )
         return None
 
+
 def _walk_for_scan(
-    root_dir: Path, excluded_dirs_abs: list[Path],
-    ignore_symlinks: bool, ignore_spec: Optional[pathspec.PathSpec],
-    logger: logging.Logger | None = None
+    root_dir: Path,
+    excluded_dirs_abs: list[Path],
+    ignore_symlinks: bool,
+    ignore_spec: Optional[pathspec.PathSpec],
+    logger: logging.Logger | None = None,
 ) -> Iterator[Path]:
     for item_path_from_rglob in root_dir.rglob("*"):
         try:
             if ignore_symlinks and item_path_from_rglob.is_symlink():
                 continue
-            is_excluded_by_dir_arg = any(item_path_from_rglob == ex_dir or \
-                                    (ex_dir.is_dir() and str(item_path_from_rglob).startswith(str(ex_dir) + os.sep))
-                                    for ex_dir in excluded_dirs_abs)
+            is_excluded_by_dir_arg = any(
+                item_path_from_rglob == ex_dir
+                or (
+                    ex_dir.is_dir()
+                    and str(item_path_from_rglob).startswith(str(ex_dir) + os.sep)
+                )
+                for ex_dir in excluded_dirs_abs
+            )
             if is_excluded_by_dir_arg:
                 continue
             if ignore_spec:
                 try:
-                    path_rel_to_root_for_spec = item_path_from_rglob.relative_to(root_dir)
-                    rel_posix = str(path_rel_to_root_for_spec).replace('\\', '/')
-                    if ignore_spec.match_file(rel_posix) or \
-                       (item_path_from_rglob.is_dir() and ignore_spec.match_file(rel_posix + '/')):
+                    path_rel_to_root_for_spec = item_path_from_rglob.relative_to(
+                        root_dir
+                    )
+                    rel_posix = str(path_rel_to_root_for_spec).replace("\\", "/")
+                    if ignore_spec.match_file(rel_posix) or (
+                        item_path_from_rglob.is_dir()
+                        and ignore_spec.match_file(rel_posix + "/")
+                    ):
                         continue
-                except ValueError: # Not relative, should not happen with rglob from root
-                    pass 
-                except Exception as e_spec: # Catch other pathspec errors
-                    _log_fs_op_message(logging.WARNING, f"Error during ignore_spec matching for {item_path_from_rglob} relative to {root_dir}: {e_spec}", logger)
+                except (
+                    ValueError
+                ):  # Not relative, should not happen with rglob from root
+                    pass
+                except Exception as e_spec:  # Catch other pathspec errors
+                    _log_fs_op_message(
+                        logging.WARNING,
+                        f"Error during ignore_spec matching for {item_path_from_rglob} relative to {root_dir}: {e_spec}",
+                        logger,
+                    )
             yield item_path_from_rglob
-        except OSError as e_os: # Catch OSError from is_symlink, is_dir
-            _log_fs_op_message(logging.WARNING, f"OS error accessing attributes of {item_path_from_rglob}: {e_os}. Skipping item.", logger)
+        except OSError as e_os:  # Catch OSError from is_symlink, is_dir
+            _log_fs_op_message(
+                logging.WARNING,
+                f"OS error accessing attributes of {item_path_from_rglob}: {e_os}. Skipping item.",
+                logger,
+            )
             continue
-        except Exception as e_gen: # Catch any other unexpected error for this item
-            _log_fs_op_message(logging.ERROR, f"Unexpected error processing item {item_path_from_rglob} in _walk_for_scan: {e_gen}. Skipping item.", logger)
+        except Exception as e_gen:  # Catch any other unexpected error for this item
+            _log_fs_op_message(
+                logging.ERROR,
+                f"Unexpected error processing item {item_path_from_rglob} in _walk_for_scan: {e_gen}. Skipping item.",
+                logger,
+            )
             continue
 
 
 def _get_current_absolute_path(
-    original_relative_path_str: str, root_dir: Path,
-    path_translation_map: dict[str, str], cache: dict[str, Path],
-    dry_run: bool = False
+    original_relative_path_str: str,
+    root_dir: Path,
+    path_translation_map: dict[str, str],
+    cache: dict[str, Path],
+    dry_run: bool = False,
 ) -> Path:
     if dry_run:
         # During dry run, update virtual mapping to enable child transactions to resolve correctly
         if original_relative_path_str not in path_translation_map:
             # Use original name as fallback
-            path_translation_map[original_relative_path_str] = Path(original_relative_path_str).name
+            path_translation_map[original_relative_path_str] = Path(
+                original_relative_path_str
+            ).name
         # Compose current absolute path using virtual mapping
         if original_relative_path_str in cache:
             return cache[original_relative_path_str]
@@ -258,9 +344,17 @@ def _get_current_absolute_path(
             cache["."] = root_dir
             return root_dir
         original_path_obj = Path(original_relative_path_str)
-        parent_rel_str = "." if original_path_obj.parent == Path('.') else str(original_path_obj.parent)
-        current_parent_abs_path = _get_current_absolute_path(parent_rel_str, root_dir, path_translation_map, cache, dry_run)
-        current_item_name = path_translation_map.get(original_relative_path_str, original_path_obj.name)
+        parent_rel_str = (
+            "."
+            if original_path_obj.parent == Path(".")
+            else str(original_path_obj.parent)
+        )
+        current_parent_abs_path = _get_current_absolute_path(
+            parent_rel_str, root_dir, path_translation_map, cache, dry_run
+        )
+        current_item_name = path_translation_map.get(
+            original_relative_path_str, original_path_obj.name
+        )
         current_abs_path = current_parent_abs_path / current_item_name
         cache[original_relative_path_str] = current_abs_path
         return current_abs_path
@@ -271,25 +365,39 @@ def _get_current_absolute_path(
         cache["."] = root_dir
         return root_dir
     original_path_obj = Path(original_relative_path_str)
-    parent_rel_str = "." if original_path_obj.parent == Path('.') else str(original_path_obj.parent)
-    current_parent_abs_path = _get_current_absolute_path(parent_rel_str, root_dir, path_translation_map, cache, dry_run)
-    current_item_name = path_translation_map.get(original_relative_path_str, original_path_obj.name)
+    parent_rel_str = (
+        "." if original_path_obj.parent == Path(".") else str(original_path_obj.parent)
+    )
+    current_parent_abs_path = _get_current_absolute_path(
+        parent_rel_str, root_dir, path_translation_map, cache, dry_run
+    )
+    current_item_name = path_translation_map.get(
+        original_relative_path_str, original_path_obj.name
+    )
     current_abs_path = current_parent_abs_path / current_item_name
     cache[original_relative_path_str] = current_abs_path
     return current_abs_path
 
+
 def scan_directory_for_occurrences(
-    root_dir: Path, excluded_dirs: list[str], excluded_files: list[str],
-    file_extensions: list[str] | None, ignore_symlinks: bool,
+    root_dir: Path,
+    excluded_dirs: list[str],
+    excluded_files: list[str],
+    file_extensions: list[str] | None,
+    ignore_symlinks: bool,
     ignore_spec: Optional[pathspec.PathSpec],
     resume_from_transactions: list[dict[str, Any]] | None = None,
     paths_to_force_rescan: set[str] | None = None,
-    skip_file_renaming: bool = False, skip_folder_renaming: bool = False, skip_content: bool = False,
-    logger: logging.Logger | None = None
+    skip_file_renaming: bool = False,
+    skip_folder_renaming: bool = False,
+    skip_content: bool = False,
+    logger: logging.Logger | None = None,
 ) -> list[dict[str, Any]]:
     processed_transactions: list[dict[str, Any]] = []
     existing_transaction_ids: set[tuple[str, str, int]] = set()
-    paths_to_force_rescan_internal: set[str] = paths_to_force_rescan if paths_to_force_rescan is not None else set()
+    paths_to_force_rescan_internal: set[str] = (
+        paths_to_force_rescan if paths_to_force_rescan is not None else set()
+    )
     abs_root_dir = root_dir
 
     binary_log_path = root_dir / BINARY_MATCHES_LOG_FILE
@@ -301,11 +409,18 @@ def scan_directory_for_occurrences(
         processed_transactions = list(resume_from_transactions)
         # Backfill NEW_NAME for existing rename transactions if missing
         for tx in resume_from_transactions:
-            if tx["TYPE"] in [TransactionType.FILE_NAME.value, TransactionType.FOLDER_NAME.value] and "NEW_NAME" not in tx:
+            if (
+                tx["TYPE"]
+                in [TransactionType.FILE_NAME.value, TransactionType.FOLDER_NAME.value]
+                and "NEW_NAME" not in tx
+            ):
                 tx["NEW_NAME"] = replace_logic.replace_occurrences(tx["ORIGINAL_NAME"])
         for tx in resume_from_transactions:
             tx_rel_path = tx.get("PATH")
-            if tx_rel_path in paths_to_force_rescan_internal and tx.get("TYPE") == TransactionType.FILE_CONTENT_LINE.value:
+            if (
+                tx_rel_path in paths_to_force_rescan_internal
+                and tx.get("TYPE") == TransactionType.FILE_CONTENT_LINE.value
+            ):
                 continue
             tx_type, tx_line = tx.get("TYPE"), tx.get("LINE_NUMBER", 0)
             if tx_type and tx_rel_path:
@@ -314,24 +429,42 @@ def scan_directory_for_occurrences(
     resolved_abs_excluded_dirs = []
     for d_str in excluded_dirs:
         try:
-            resolved_abs_excluded_dirs.append(abs_root_dir.joinpath(d_str).resolve(strict=False))
+            resolved_abs_excluded_dirs.append(
+                abs_root_dir.joinpath(d_str).resolve(strict=False)
+            )
         except Exception:
             resolved_abs_excluded_dirs.append(abs_root_dir.joinpath(d_str).absolute())
 
-    excluded_basenames = {Path(f).name for f in excluded_files if Path(f).name == f and os.path.sep not in f and not ('/' in f or '\\' in f)}
-    excluded_relative_paths_set = {f.replace("\\", "/") for f in excluded_files if os.path.sep in f or '/' in f or '\\' in f}
+    excluded_basenames = {
+        Path(f).name
+        for f in excluded_files
+        if Path(f).name == f and os.path.sep not in f and not ("/" in f or "\\" in f)
+    }
+    excluded_relative_paths_set = {
+        f.replace("\\", "/")
+        for f in excluded_files
+        if os.path.sep in f or "/" in f or "\\" in f
+    }
 
-    normalized_extensions = {ext.lower() for ext in file_extensions} if file_extensions else None
+    normalized_extensions = (
+        {ext.lower() for ext in file_extensions} if file_extensions else None
+    )
 
     # Fix: If resume_from_transactions is not None and paths_to_force_rescan is empty, initialize as empty set
     if resume_from_transactions is not None and not paths_to_force_rescan_internal:
         paths_to_force_rescan_internal = set()
 
-    item_iterator = _walk_for_scan(abs_root_dir, resolved_abs_excluded_dirs, ignore_symlinks, ignore_spec, logger=logger)
-    
+    item_iterator = _walk_for_scan(
+        abs_root_dir,
+        resolved_abs_excluded_dirs,
+        ignore_symlinks,
+        ignore_spec,
+        logger=logger,
+    )
+
     # Collect items with depth for proper ordering
     all_items_with_depth = []
-    
+
     for item_abs_path in item_iterator:
         # Depth calculation for ordering
         depth = len(item_abs_path.relative_to(abs_root_dir).parts)
@@ -342,17 +475,31 @@ def scan_directory_for_occurrences(
 
     for depth, item_abs_path in all_items_with_depth:
         try:
-            relative_path_str = str(item_abs_path.relative_to(abs_root_dir)).replace("\\", "/")
+            relative_path_str = str(item_abs_path.relative_to(abs_root_dir)).replace(
+                "\\", "/"
+            )
         except ValueError:
-            _log_fs_op_message(logging.WARNING, f"Could not get relative path for {item_abs_path} against {abs_root_dir}. Skipping.", logger)
+            _log_fs_op_message(
+                logging.WARNING,
+                f"Could not get relative path for {item_abs_path} against {abs_root_dir}. Skipping.",
+                logger,
+            )
             continue
-        
-        if item_abs_path.name in excluded_basenames or relative_path_str in excluded_relative_paths_set:
+
+        if (
+            item_abs_path.name in excluded_basenames
+            or relative_path_str in excluded_relative_paths_set
+        ):
             continue
 
         original_name = item_abs_path.name
-        searchable_name = unicodedata.normalize('NFC', replace_logic.strip_control_characters(replace_logic.strip_diacritics(original_name)))
-        
+        searchable_name = unicodedata.normalize(
+            "NFC",
+            replace_logic.strip_control_characters(
+                replace_logic.strip_diacritics(original_name)
+            ),
+        )
+
         item_is_dir = False
         item_is_file = False
         item_is_symlink = False
@@ -364,10 +511,18 @@ def scan_directory_for_occurrences(
                 try:
                     target = item_abs_path.resolve(strict=False)
                 except Exception as e_resolve:
-                    _log_fs_op_message(logging.WARNING, f"Could not resolve symlink target for {relative_path_str}: {e_resolve}. Skipping.", logger)
+                    _log_fs_op_message(
+                        logging.WARNING,
+                        f"Could not resolve symlink target for {relative_path_str}: {e_resolve}. Skipping.",
+                        logger,
+                    )
                     continue
                 if root_dir not in target.parents and target != root_dir:
-                    _log_fs_op_message(logging.INFO, f"Skipping external symlink: {relative_path_str} -> {target}", logger)
+                    _log_fs_op_message(
+                        logging.INFO,
+                        f"Skipping external symlink: {relative_path_str} -> {target}",
+                        logger,
+                    )
                     continue
                 # Treat symlink as file for name replacement
                 item_is_file = True
@@ -376,35 +531,43 @@ def scan_directory_for_occurrences(
                 item_is_file = item_abs_path.is_file()
             item_is_symlink = item_abs_path.is_symlink()
         except OSError as e_stat:
-            _log_fs_op_message(logging.WARNING, f"OS error checking type of {item_abs_path}: {e_stat}. Skipping item.", logger)
+            _log_fs_op_message(
+                logging.WARNING,
+                f"OS error checking type of {item_abs_path}: {e_stat}. Skipping item.",
+                logger,
+            )
             continue
 
-
-        if (scan_pattern and scan_pattern.search(searchable_name)) and \
-           (replace_logic.replace_occurrences(original_name) != original_name):
+        if (scan_pattern and scan_pattern.search(searchable_name)) and (
+            replace_logic.replace_occurrences(original_name) != original_name
+        ):
             tx_type_val: str | None = None
-            if item_is_dir: # True only if not a symlink and is_dir() was true
+            if item_is_dir:  # True only if not a symlink and is_dir() was true
                 if not skip_folder_renaming:
                     tx_type_val = TransactionType.FOLDER_NAME.value
-            elif item_is_file or item_is_symlink: # True if is_file() or is_symlink() (and not ignore_symlinks)
+            elif (
+                item_is_file or item_is_symlink
+            ):  # True if is_file() or is_symlink() (and not ignore_symlinks)
                 if not skip_file_renaming:
                     tx_type_val = TransactionType.FILE_NAME.value
-            
+
             if tx_type_val:
                 tx_id_tuple = (relative_path_str, tx_type_val, 0)
                 if tx_id_tuple not in existing_transaction_ids:
                     # Calculate new name and store in transaction
                     new_name = replace_logic.replace_occurrences(original_name)
                     transaction_entry = {
-                        "id":str(uuid.uuid4()),  # Changed to uuid4 for privacy and uniqueness
-                        "TYPE":tx_type_val, 
-                        "PATH":relative_path_str, 
-                        "ORIGINAL_NAME":original_name,
+                        "id": str(
+                            uuid.uuid4()
+                        ),  # Changed to uuid4 for privacy and uniqueness
+                        "TYPE": tx_type_val,
+                        "PATH": relative_path_str,
+                        "ORIGINAL_NAME": original_name,
                         "NEW_NAME": new_name,
-                        "LINE_NUMBER":0, 
-                        "STATUS":TransactionStatus.PENDING.value, 
-                        "timestamp_created":time.time(), 
-                        "retry_count":0
+                        "LINE_NUMBER": 0,
+                        "STATUS": TransactionStatus.PENDING.value,
+                        "timestamp_created": time.time(),
+                        "retry_count": 0,
                     }
                     processed_transactions.append(transaction_entry)
                     existing_transaction_ids.add(tx_id_tuple)
@@ -414,31 +577,43 @@ def scan_directory_for_occurrences(
         # The `item_abs_path.is_file()` check inside this block will resolve the symlink if it's one.
         if not skip_content:
             try:
-                if item_abs_path.is_file(): # This resolves symlinks to files
+                if item_abs_path.is_file():  # This resolves symlinks to files
                     # Skip large files early
                     if item_abs_path.stat().st_size > 100_000_000:  # 100MB
                         continue
-    
-                    is_rtf = item_abs_path.suffix.lower() == '.rtf'
+
+                    is_rtf = item_abs_path.suffix.lower() == ".rtf"
                     try:
                         is_bin = is_binary_file(str(item_abs_path))
-                    except FileNotFoundError: 
-                        _log_fs_op_message(logging.WARNING, f"File not found for binary check: {item_abs_path}. Skipping content scan.", logger)
+                    except FileNotFoundError:
+                        _log_fs_op_message(
+                            logging.WARNING,
+                            f"File not found for binary check: {item_abs_path}. Skipping content scan.",
+                            logger,
+                        )
                         continue
                     except Exception as e_isbin:
-                        _log_fs_op_message(logging.WARNING, f"Could not determine if {item_abs_path} is binary: {e_isbin}. Skipping content scan.", logger)
+                        _log_fs_op_message(
+                            logging.WARNING,
+                            f"Could not determine if {item_abs_path} is binary: {e_isbin}. Skipping content scan.",
+                            logger,
+                        )
                         continue
 
                     if is_bin and not is_rtf:
                         # Skip binary files but log them
-                        _log_fs_op_message(logging.DEBUG, f"Skipping binary file: {relative_path_str}", logger)
+                        _log_fs_op_message(
+                            logging.DEBUG,
+                            f"Skipping binary file: {relative_path_str}",
+                            logger,
+                        )
                         if raw_keys_for_binary_search:
                             try:
-                                with open(item_abs_path, 'rb') as bf:
+                                with open(item_abs_path, "rb") as bf:
                                     content_bytes = bf.read()
                                 for key_str in raw_keys_for_binary_search:
                                     try:
-                                        key_bytes = key_str.encode('utf-8')
+                                        key_bytes = key_str.encode("utf-8")
                                     except UnicodeEncodeError:
                                         continue
                                     offset = 0
@@ -450,17 +625,35 @@ def scan_directory_for_occurrences(
                                         if not Path(relative_path_str).is_absolute():
                                             log_path_str = relative_path_str
                                         else:
-                                            log_path_str = str(item_abs_path.relative_to(root_dir)).replace("\\", "/")
-                                        with open(binary_log_path, 'a', encoding='utf-8') as log_f:
-                                            log_f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - MATCH: File: {log_path_str}, Key: '{key_str}', Offset: {idx}\n")
+                                            log_path_str = str(
+                                                item_abs_path.relative_to(root_dir)
+                                            ).replace("\\", "/")
+                                        with open(
+                                            binary_log_path, "a", encoding="utf-8"
+                                        ) as log_f:
+                                            log_f.write(
+                                                f"{time.strftime('%Y-%m-%d %H:%M:%S')} - MATCH: File: {log_path_str}, Key: '{key_str}', Offset: {idx}\n"
+                                            )
                                         offset = idx + len(key_bytes)
-                            except OSError as e_bin_read: 
-                                _log_fs_op_message(logging.WARNING, f"OS error reading binary file {item_abs_path} for logging: {e_bin_read}", logger)
-                            except Exception as e_bin_proc: 
-                                _log_fs_op_message(logging.WARNING, f"Error processing binary {item_abs_path} for logging: {e_bin_proc}", logger)
+                            except OSError as e_bin_read:
+                                _log_fs_op_message(
+                                    logging.WARNING,
+                                    f"OS error reading binary file {item_abs_path} for logging: {e_bin_read}",
+                                    logger,
+                                )
+                            except Exception as e_bin_proc:
+                                _log_fs_op_message(
+                                    logging.WARNING,
+                                    f"Error processing binary {item_abs_path} for logging: {e_bin_proc}",
+                                    logger,
+                                )
                         continue
 
-                    if normalized_extensions and item_abs_path.suffix.lower() not in normalized_extensions and not is_rtf:
+                    if (
+                        normalized_extensions
+                        and item_abs_path.suffix.lower() not in normalized_extensions
+                        and not is_rtf
+                    ):
                         continue
 
                     file_content_for_scan: str | None = None
@@ -470,69 +663,150 @@ def scan_directory_for_occurrences(
                         try:
                             rtf_source_bytes = item_abs_path.read_bytes()
                             rtf_source_str = ""
-                            for enc_try in ['latin-1', 'cp1252', 'utf-8']:
+                            for enc_try in ["latin-1", "cp1252", "utf-8"]:
                                 try:
                                     rtf_source_str = rtf_source_bytes.decode(enc_try)
                                     break
                                 except UnicodeDecodeError:
                                     pass
                             if not rtf_source_str:
-                                rtf_source_str = rtf_source_bytes.decode('utf-8', errors='ignore')
-                            file_content_for_scan = rtf_to_text(rtf_source_str, errors="ignore")
-                            file_encoding = 'utf-8' # Content is now plain text
+                                rtf_source_str = rtf_source_bytes.decode(
+                                    "utf-8", errors="ignore"
+                                )
+                            file_content_for_scan = rtf_to_text(
+                                rtf_source_str, errors="ignore"
+                            )
+                            file_encoding = "utf-8"  # Content is now plain text
                         except OSError as e_rtf_read:
-                            _log_fs_op_message(logging.WARNING, f"OS error reading RTF file {item_abs_path}: {e_rtf_read}", logger)
+                            _log_fs_op_message(
+                                logging.WARNING,
+                                f"OS error reading RTF file {item_abs_path}: {e_rtf_read}",
+                                logger,
+                            )
                             continue
                         except Exception as e_rtf_proc:
-                            _log_fs_op_message(logging.WARNING, f"Error extracting text from RTF {item_abs_path}: {e_rtf_proc}", logger)
+                            _log_fs_op_message(
+                                logging.WARNING,
+                                f"Error extracting text from RTF {item_abs_path}: {e_rtf_proc}",
+                                logger,
+                            )
                             continue
                     else:
-                        file_encoding = get_file_encoding(item_abs_path, logger=logger) or DEFAULT_ENCODING_FALLBACK
+                        file_encoding = (
+                            get_file_encoding(item_abs_path, logger=logger)
+                            or DEFAULT_ENCODING_FALLBACK
+                        )
                         try:
-                            with open(item_abs_path, 'r', encoding=file_encoding, errors='surrogateescape', newline='') as f_scan:
+                            with open(
+                                item_abs_path,
+                                "r",
+                                encoding=file_encoding,
+                                errors="surrogateescape",
+                                newline="",
+                            ) as f_scan:
                                 file_content_for_scan = f_scan.read()
                         except OSError as e_txt_read:
-                            _log_fs_op_message(logging.WARNING, f"OS error reading text file {item_abs_path} (enc:{file_encoding}): {e_txt_read}", logger)
+                            _log_fs_op_message(
+                                logging.WARNING,
+                                f"OS error reading text file {item_abs_path} (enc:{file_encoding}): {e_txt_read}",
+                                logger,
+                            )
                             continue
-                        except Exception as e_txt_proc: # Catch other errors like LookupError for encoding
-                            _log_fs_op_message(logging.WARNING, f"Error reading text file {item_abs_path} (enc:{file_encoding}): {e_txt_proc}", logger)
+                        except Exception as e_txt_proc:  # Catch other errors like LookupError for encoding
+                            _log_fs_op_message(
+                                logging.WARNING,
+                                f"Error reading text file {item_abs_path} (enc:{file_encoding}): {e_txt_proc}",
+                                logger,
+                            )
                             continue
-                    
+
                     if file_content_for_scan is not None:
                         lines_for_scan = file_content_for_scan.splitlines(keepends=True)
-                        if not lines_for_scan and file_content_for_scan: # Handle files with no newlines but content
+                        if (
+                            not lines_for_scan and file_content_for_scan
+                        ):  # Handle files with no newlines but content
                             lines_for_scan = [file_content_for_scan]
 
                         for line_idx, line_content in enumerate(lines_for_scan):
-                            searchable_line_content = unicodedata.normalize('NFC', replace_logic.strip_control_characters(replace_logic.strip_diacritics(line_content)))
+                            searchable_line_content = unicodedata.normalize(
+                                "NFC",
+                                replace_logic.strip_control_characters(
+                                    replace_logic.strip_diacritics(line_content)
+                                ),
+                            )
                             # Calculate new content once for consistency
-                            new_line_content = replace_logic.replace_occurrences(line_content)
-                            if (scan_pattern and scan_pattern.search(searchable_line_content)) and \
-                               (new_line_content != line_content):
-                                tx_id_tuple = (relative_path_str, TransactionType.FILE_CONTENT_LINE.value, line_idx + 1)
+                            new_line_content = replace_logic.replace_occurrences(
+                                line_content
+                            )
+                            if (
+                                scan_pattern
+                                and scan_pattern.search(searchable_line_content)
+                            ) and (new_line_content != line_content):
+                                tx_id_tuple = (
+                                    relative_path_str,
+                                    TransactionType.FILE_CONTENT_LINE.value,
+                                    line_idx + 1,
+                                )
                                 if tx_id_tuple not in existing_transaction_ids:
                                     # ADD NEW_LINE_CONTENT FIELD
-                                    processed_transactions.append({"id":str(uuid.uuid4()), "TYPE":TransactionType.FILE_CONTENT_LINE.value, "PATH":relative_path_str, "LINE_NUMBER":line_idx+1, "ORIGINAL_LINE_CONTENT":line_content, "NEW_LINE_CONTENT":new_line_content, "ORIGINAL_ENCODING":file_encoding, "IS_RTF":is_rtf, "STATUS":TransactionStatus.PENDING.value, "timestamp_created":time.time(), "retry_count":0})
+                                    processed_transactions.append(
+                                        {
+                                            "id": str(uuid.uuid4()),
+                                            "TYPE": TransactionType.FILE_CONTENT_LINE.value,
+                                            "PATH": relative_path_str,
+                                            "LINE_NUMBER": line_idx + 1,
+                                            "ORIGINAL_LINE_CONTENT": line_content,
+                                            "NEW_LINE_CONTENT": new_line_content,
+                                            "ORIGINAL_ENCODING": file_encoding,
+                                            "IS_RTF": is_rtf,
+                                            "STATUS": TransactionStatus.PENDING.value,
+                                            "timestamp_created": time.time(),
+                                            "retry_count": 0,
+                                        }
+                                    )
                                     existing_transaction_ids.add(tx_id_tuple)
-            except OSError as e_stat_content: # Catch OSError from item_abs_path.is_file()
-                _log_fs_op_message(logging.WARNING, f"OS error checking if {item_abs_path} is a file for content processing: {e_stat_content}. Skipping content scan for this item.", logger)
+            except (
+                OSError
+            ) as e_stat_content:  # Catch OSError from item_abs_path.is_file()
+                _log_fs_op_message(
+                    logging.WARNING,
+                    f"OS error checking if {item_abs_path} is a file for content processing: {e_stat_content}. Skipping content scan for this item.",
+                    logger,
+                )
 
     # Order transactions: folders first (shallow to deep), then files, then content
-    folder_txs = [tx for tx in processed_transactions if tx["TYPE"] in (TransactionType.FOLDER_NAME.value,)]
-    file_txs = [tx for tx in processed_transactions if tx["TYPE"] == TransactionType.FILE_NAME.value]
-    content_txs = [tx for tx in processed_transactions if tx["TYPE"] == TransactionType.FILE_CONTENT_LINE.value]
-    
+    folder_txs = [
+        tx
+        for tx in processed_transactions
+        if tx["TYPE"] in (TransactionType.FOLDER_NAME.value,)
+    ]
+    file_txs = [
+        tx
+        for tx in processed_transactions
+        if tx["TYPE"] == TransactionType.FILE_NAME.value
+    ]
+    content_txs = [
+        tx
+        for tx in processed_transactions
+        if tx["TYPE"] == TransactionType.FILE_CONTENT_LINE.value
+    ]
+
     # Sort folders by depth (shallow then deep) and path for deterministic order
     folder_txs.sort(key=lambda tx: (len(Path(tx["PATH"]).parts), tx["PATH"]))
-    
+
     processed_transactions = folder_txs + file_txs + content_txs
 
     return processed_transactions
 
-def save_transactions(transactions: list[dict[str, Any]], transactions_file_path: Path, logger: logging.Logger | None = None) -> None:
+
+def save_transactions(
+    transactions: list[dict[str, Any]],
+    transactions_file_path: Path,
+    logger: logging.Logger | None = None,
+) -> None:
     """
     Save the list of transactions to a JSON file atomically.
-    
+
     Args:
         transactions: List of transaction dictionaries
         transactions_file_path: Path to save the transactions file
@@ -554,38 +828,60 @@ def save_transactions(transactions: list[dict[str, Any]], transactions_file_path
             if temp_file_path.exists():
                 os.remove(temp_file_path)
         except Exception as cleanup_e:
-            _log_fs_op_message(logging.WARNING, f"Error cleaning up temp transaction file: {cleanup_e}", logger)
+            _log_fs_op_message(
+                logging.WARNING,
+                f"Error cleaning up temp transaction file: {cleanup_e}",
+                logger,
+            )
         raise
 
-def load_transactions(transactions_file_path: Path, logger: logging.Logger | None = None) -> list[dict[str, Any]] | None:
+
+def load_transactions(
+    transactions_file_path: Path, logger: logging.Logger | None = None
+) -> list[dict[str, Any]] | None:
     """
     Load transactions from a JSON file.
-    
+
     Args:
         transactions_file_path: Path to the transactions file
         logger: Optional logger instance
-        
+
     Returns:
         List of transaction dictionaries or None if file not found/invalid
     """
     if not transactions_file_path.is_file():
-        _log_fs_op_message(logging.WARNING, f"Transaction file not found: {transactions_file_path}", logger)
+        _log_fs_op_message(
+            logging.WARNING,
+            f"Transaction file not found: {transactions_file_path}",
+            logger,
+        )
         return None
     try:
         with open(transactions_file_path, "r", encoding="utf-8") as f:
             data = json.load(f)
         if not isinstance(data, list):
-            _log_fs_op_message(logging.ERROR, f"Transaction file {transactions_file_path} does not contain a list.", logger)
+            _log_fs_op_message(
+                logging.ERROR,
+                f"Transaction file {transactions_file_path} does not contain a list.",
+                logger,
+            )
             return None
         return data
     except Exception as e:
-        _log_fs_op_message(logging.ERROR, f"Error loading transactions from {transactions_file_path}: {e}", logger)
+        _log_fs_op_message(
+            logging.ERROR,
+            f"Error loading transactions from {transactions_file_path}: {e}",
+            logger,
+        )
         return None
 
+
 def update_transaction_status_in_list(
-    transactions: list[dict[str, Any]], transaction_id: str,
-    new_status: TransactionStatus, error_message: str | None = None,
-    logger: logging.Logger | None = None
+    transactions: list[dict[str, Any]],
+    transaction_id: str,
+    new_status: TransactionStatus,
+    error_message: str | None = None,
+    logger: logging.Logger | None = None,
 ) -> bool:
     """
     Update the status and optional error message of a transaction in the list by id.
@@ -597,16 +893,22 @@ def update_transaction_status_in_list(
             if error_message is not None:
                 tx["ERROR_MESSAGE"] = error_message
             if logger:
-                logger.debug(f"Transaction {transaction_id} updated to {new_status.value} with error: {error_message}")
+                logger.debug(
+                    f"Transaction {transaction_id} updated to {new_status.value} with error: {error_message}"
+                )
             return True
     if logger:
         logger.warning(f"Transaction {transaction_id} not found for status update.")
     return False
 
+
 def _execute_rename_transaction(
-    tx: dict[str, Any], root_dir: Path,
-    path_translation_map: dict[str, str], path_cache: dict[str, Path],
-    dry_run: bool, logger: logging.Logger | None = None
+    tx: dict[str, Any],
+    root_dir: Path,
+    path_translation_map: dict[str, str],
+    path_cache: dict[str, Path],
+    dry_run: bool,
+    logger: logging.Logger | None = None,
 ) -> tuple[TransactionStatus, str, bool]:
     """
     Execute a rename transaction (file or folder).
@@ -618,8 +920,10 @@ def _execute_rename_transaction(
 
     # Use precomputed NEW_NAME if available
     new_name = tx.get("NEW_NAME", replace_logic.replace_occurrences(original_name))
-    
-    current_abs_path = _get_current_absolute_path(original_relative_path_str, root_dir, path_translation_map, path_cache, dry_run)
+
+    current_abs_path = _get_current_absolute_path(
+        original_relative_path_str, root_dir, path_translation_map, path_cache, dry_run
+    )
     if not dry_run and not current_abs_path.exists():
         return TransactionStatus.FAILED, f"Path not found: {current_abs_path}", False
 
@@ -630,13 +934,19 @@ def _execute_rename_transaction(
 
     # Check for exact match first
     if new_abs_path.exists():
-        _log_collision_error(root_dir, tx, current_abs_path, new_abs_path, "exact match", logger)
-        return TransactionStatus.FAILED, f"Target path already exists: {new_abs_path}", False
-    
+        _log_collision_error(
+            root_dir, tx, current_abs_path, new_abs_path, "exact match", logger
+        )
+        return (
+            TransactionStatus.FAILED,
+            f"Target path already exists: {new_abs_path}",
+            False,
+        )
+
     # Case-insensitive collision check
     parent_dir = current_abs_path.parent
     new_name_lower = new_name.lower()
-    
+
     try:
         for existing_item in parent_dir.iterdir():
             # Skip self
@@ -644,10 +954,25 @@ def _execute_rename_transaction(
                 continue
             # Check for case-insensitive match
             if existing_item.name.lower() == new_name_lower:
-                _log_collision_error(root_dir, tx, current_abs_path, existing_item, "case-insensitive match", logger)
-                return TransactionStatus.FAILED, f"Case-insensitive collision with existing path: {existing_item}", False
+                _log_collision_error(
+                    root_dir,
+                    tx,
+                    current_abs_path,
+                    existing_item,
+                    "case-insensitive match",
+                    logger,
+                )
+                return (
+                    TransactionStatus.FAILED,
+                    f"Case-insensitive collision with existing path: {existing_item}",
+                    False,
+                )
     except OSError as e:
-        _log_fs_op_message(logging.WARNING, f"Could not check for collisions in {parent_dir}: {e}", logger)
+        _log_fs_op_message(
+            logging.WARNING,
+            f"Could not check for collisions in {parent_dir}: {e}",
+            logger,
+        )
 
     try:
         if dry_run:
@@ -671,10 +996,13 @@ def _execute_rename_transaction(
     except Exception as e:
         return TransactionStatus.FAILED, f"Rename error: {e}", False
 
+
 def _execute_content_line_transaction(
-    tx: dict[str, Any], root_dir: Path,
-    path_translation_map: dict[str, str], path_cache: dict[str, Path],
-    logger: logging.Logger | None = None
+    tx: dict[str, Any],
+    root_dir: Path,
+    path_translation_map: dict[str, str],
+    path_cache: dict[str, Path],
+    logger: logging.Logger | None = None,
 ) -> tuple[TransactionStatus, str, bool]:
     """
     Execute a content line transaction.
@@ -687,41 +1015,54 @@ def _execute_content_line_transaction(
 
     # Skip RTF as they're converted text files with unique formatting
     if is_rtf:
-        return (TransactionStatus.SKIPPED, "RTF content modification not supported", False)
+        return (
+            TransactionStatus.SKIPPED,
+            "RTF content modification not supported",
+            False,
+        )
 
     try:
         # Get current file location (accounts for renames)
-        current_abs_path = _get_current_absolute_path(relative_path_str, root_dir, path_translation_map, path_cache, dry_run=False)
-        
+        current_abs_path = _get_current_absolute_path(
+            relative_path_str, root_dir, path_translation_map, path_cache, dry_run=False
+        )
+
         # Read file with original encoding
-        with open(current_abs_path, "r", encoding=file_encoding, errors='surrogateescape') as f:
+        with open(
+            current_abs_path, "r", encoding=file_encoding, errors="surrogateescape"
+        ) as f:
             lines = f.readlines()  # Preserve line endings
 
         if line_no - 1 < 0 or line_no - 1 >= len(lines):
-            return (TransactionStatus.FAILED, f"Line number {line_no} out of range. File has {len(lines)} lines.", False)
-            
+            return (
+                TransactionStatus.FAILED,
+                f"Line number {line_no} out of range. File has {len(lines)} lines.",
+                False,
+            )
+
         # Get new content from transaction
         new_line_content = tx.get("NEW_LINE_CONTENT", "")
-        
+
         # Skip if line didn't change (shouldn't happen but safeguard)
-        if lines[line_no-1] == new_line_content:
+        if lines[line_no - 1] == new_line_content:
             return (TransactionStatus.SKIPPED, "Line already matches target", False)
-            
+
         # Update the line
-        lines[line_no-1] = new_line_content
-        
+        lines[line_no - 1] = new_line_content
+
         # Write back with same encoding
-        with open(current_abs_path, "w", encoding=file_encoding, errors='surrogateescape') as f:
+        with open(
+            current_abs_path, "w", encoding=file_encoding, errors="surrogateescape"
+        ) as f:
             f.writelines(lines)
-            
+
         return (TransactionStatus.COMPLETED, "", True)
     except Exception as e:
         return (TransactionStatus.FAILED, f"Content update failed: {e}", False)
 
+
 def _execute_file_content_batch(
-    abs_filepath: Path,
-    transactions: list[dict],
-    logger: logging.Logger | None = None
+    abs_filepath: Path, transactions: list[dict], logger: logging.Logger | None = None
 ) -> tuple[int, int, int]:
     """
     Execute content line transactions for a single file in batch.
@@ -735,7 +1076,9 @@ def _execute_file_content_batch(
                 tx["ERROR_MESSAGE"] = "File not found"
             return (0, 0, len(transactions))
 
-        file_encoding = transactions[0].get("ORIGINAL_ENCODING", DEFAULT_ENCODING_FALLBACK)
+        file_encoding = transactions[0].get(
+            "ORIGINAL_ENCODING", DEFAULT_ENCODING_FALLBACK
+        )
         is_rtf = transactions[0].get("IS_RTF", False)
         if is_rtf:
             for tx in transactions:
@@ -743,7 +1086,9 @@ def _execute_file_content_batch(
                 tx["ERROR_MESSAGE"] = "RTF content modification not supported"
             return (0, 0, len(transactions))
 
-        with open(abs_filepath, "r", encoding=file_encoding, errors='surrogateescape') as f:
+        with open(
+            abs_filepath, "r", encoding=file_encoding, errors="surrogateescape"
+        ) as f:
             lines = f.readlines()
 
         # Apply replacements
@@ -762,12 +1107,26 @@ def _execute_file_content_batch(
                 tx["ERROR_MESSAGE"] = f"Line number {line_no} out of range"
 
         # Write back
-        with open(abs_filepath, "w", encoding=file_encoding, errors='surrogateescape') as f:
+        with open(
+            abs_filepath, "w", encoding=file_encoding, errors="surrogateescape"
+        ) as f:
             f.writelines(lines)
 
-        completed = sum(1 for tx in transactions if tx.get("STATUS") == TransactionStatus.COMPLETED.value)
-        skipped = sum(1 for tx in transactions if tx.get("STATUS") == TransactionStatus.SKIPPED.value)
-        failed = sum(1 for tx in transactions if tx.get("STATUS") == TransactionStatus.FAILED.value)
+        completed = sum(
+            1
+            for tx in transactions
+            if tx.get("STATUS") == TransactionStatus.COMPLETED.value
+        )
+        skipped = sum(
+            1
+            for tx in transactions
+            if tx.get("STATUS") == TransactionStatus.SKIPPED.value
+        )
+        failed = sum(
+            1
+            for tx in transactions
+            if tx.get("STATUS") == TransactionStatus.FAILED.value
+        )
         return (completed, skipped, failed)
     except Exception as e:
         for tx in transactions:
@@ -775,16 +1134,17 @@ def _execute_file_content_batch(
             tx["ERROR_MESSAGE"] = f"Unhandled error: {e}"
         return (0, 0, len(transactions))
 
+
 # New function for streaming large file content
 def process_large_file_content(
-    txns_for_file: list[dict], 
+    txns_for_file: list[dict],
     abs_filepath: Path,
     file_encoding: str,
     is_rtf: bool,
-    logger: logging.Logger | None = None
+    logger: logging.Logger | None = None,
 ) -> None:
     """Process content replacements for large files using streaming approach.
-    
+
     Args:
         txns_for_file: List of transactions for this file
         abs_filepath: Absolute path to the file
@@ -794,7 +1154,7 @@ def process_large_file_content(
     """
     SAFE_LINE_LENGTH_THRESHOLD = 1000  # Only split lines longer than this
     CHUNK_SIZE = 1000
-    
+
     if is_rtf:
         for tx in txns_for_file:
             tx["STATUS"] = TransactionStatus.SKIPPED.value
@@ -803,21 +1163,24 @@ def process_large_file_content(
 
     # Get all characters that might be in replacement keys
     key_characters = replace_logic.get_key_characters()
-    
+
     # Sort transactions by line number
     txns_sorted = sorted(txns_for_file, key=lambda tx: tx["LINE_NUMBER"])
     max_line = txns_sorted[-1]["LINE_NUMBER"]
-    
+
     # Map from line number to transaction with precomputed new content
     txn_map = {tx["LINE_NUMBER"]: tx for tx in txns_sorted}
 
     # Use unique temp file name
     temp_file = abs_filepath.with_suffix(f".tmp.{uuid.uuid4().hex[:8]}")
-    
+
     try:
-        
-        with open(abs_filepath, 'r', encoding=file_encoding, errors="surrogateescape") as src_file:
-            with open(temp_file, 'w', encoding=file_encoding, errors="surrogateescape") as dst_file:
+        with open(
+            abs_filepath, "r", encoding=file_encoding, errors="surrogateescape"
+        ) as src_file:
+            with open(
+                temp_file, "w", encoding=file_encoding, errors="surrogateescape"
+            ) as dst_file:
                 # Track state between lines
                 current_line = 1
 
@@ -831,7 +1194,7 @@ def process_large_file_content(
                     else:
                         # This line won't be modified
                         upgrade_content = None
-                    
+
                     # Read full line using readline() with size hint
                     line_buffer = []
                     while True:
@@ -840,17 +1203,20 @@ def process_large_file_content(
                         if not part:
                             break
                         line_buffer.append(part)
-                        if part.endswith('\n') or part.endswith('\r'):
+                        if part.endswith("\n") or part.endswith("\r"):
                             break
-                    current_line_content = ''.join(line_buffer)
-                    
+                    current_line_content = "".join(line_buffer)
+
                     # Skip empty lines
                     if not current_line_content:
                         current_line += 1
                         continue
-                    
+
                     # Only process long lines with chunked approach
-                    if len(current_line_content) > SAFE_LINE_LENGTH_THRESHOLD and not upgrade_content:
+                    if (
+                        len(current_line_content) > SAFE_LINE_LENGTH_THRESHOLD
+                        and not upgrade_content
+                    ):
                         # Process in safe chunks for unmmodified long lines
                         buffer_idx = 0
                         while buffer_idx < len(current_line_content):
@@ -858,7 +1224,7 @@ def process_large_file_content(
                             if end_idx >= len(current_line_content):
                                 dst_file.write(current_line_content[buffer_idx:])
                                 break
-                                
+
                             # Find safe split position - scan backward to find a character not in keys
                             split_pos = end_idx
                             search_pos = min(end_idx - 1, len(current_line_content) - 1)
@@ -867,16 +1233,21 @@ def process_large_file_content(
                             key_characters = replace_logic.get_key_characters()
 
                             while search_pos >= buffer_idx:
-                                if current_line_content[search_pos] not in key_characters:
+                                if (
+                                    current_line_content[search_pos]
+                                    not in key_characters
+                                ):
                                     split_pos = search_pos + 1
                                     break
                                 search_pos -= 1
-                                
+
                             # Special case: if we didn't find any non-key character
                             if split_pos == end_idx and search_pos < buffer_idx:
                                 # Backtrack further if necessary (shouldn't happen often)
-                                split_pos = min(buffer_idx + 1000, len(current_line_content))
-                            
+                                split_pos = min(
+                                    buffer_idx + 1000, len(current_line_content)
+                                )
+
                             # Process and write the chunk
                             dst_file.write(current_line_content[buffer_idx:split_pos])
                             buffer_idx = split_pos
@@ -888,13 +1259,15 @@ def process_large_file_content(
                         else:
                             # Write line as is
                             dst_file.write(current_line_content)
-                    
+
                     # Update transaction status
                     if current_line in txn_map:
-                        txn_map[current_line]["STATUS"] = TransactionStatus.COMPLETED.value
-                        
+                        txn_map[current_line]["STATUS"] = (
+                            TransactionStatus.COMPLETED.value
+                        )
+
                     current_line += 1
-                
+
                 # Handle potential trailing lines not in transactions
                 trailing_content = src_file.read()
                 dst_file.write(trailing_content)
@@ -912,7 +1285,11 @@ def process_large_file_content(
             if temp_file.exists():
                 os.remove(temp_file)
         except Exception as cleanup_e:
-            _log_fs_op_message(logging.WARNING, f"Could not remove temp file {temp_file}: {cleanup_e}", logger)
+            _log_fs_op_message(
+                logging.WARNING,
+                f"Could not remove temp file {temp_file}: {cleanup_e}",
+                logger,
+            )
     finally:
         # Ensure temp file is cleaned up
         try:
@@ -921,6 +1298,7 @@ def process_large_file_content(
         except Exception:
             pass
 
+
 def group_and_process_file_transactions(
     transactions: list[dict],
     root_dir: Path,
@@ -928,7 +1306,7 @@ def group_and_process_file_transactions(
     path_cache: dict[str, Path],
     dry_run: bool,
     skip_content: bool,
-    logger: logging.Logger | None = None
+    logger: logging.Logger | None = None,
 ) -> None:
     """Group transactions by file and process them efficiently"""
     # Group transactions by file path
@@ -936,47 +1314,45 @@ def group_and_process_file_transactions(
     for tx in transactions:
         if tx["TYPE"] != TransactionType.FILE_CONTENT_LINE.value:
             continue
-            
-        abs_path = _get_current_absolute_path(tx["PATH"], root_dir, path_translation_map, path_cache, dry_run)
+
+        abs_path = _get_current_absolute_path(
+            tx["PATH"], root_dir, path_translation_map, path_cache, dry_run
+        )
         file_id = str(abs_path.resolve())
-        
+
         if file_id not in file_groups:
             file_groups[file_id] = {
                 "abs_path": abs_path,
                 "txns": [],
                 "encoding": tx.get("ORIGINAL_ENCODING", DEFAULT_ENCODING_FALLBACK),
-                "is_rtf": tx.get("IS_RTF", False)
+                "is_rtf": tx.get("IS_RTF", False),
             }
         file_groups[file_id]["txns"].append(tx)
-    
+
     # Process each file group
     for file_data in file_groups.values():
         abs_path = file_data["abs_path"]
-        
+
         if skip_content:
             # Mark all as skipped
             for tx in file_data["txns"]:
                 tx["STATUS"] = TransactionStatus.SKIPPED.value
             continue
-            
+
         if dry_run:
             # Dry-run completes without actual write
             for tx in file_data["txns"]:
                 tx["STATUS"] = TransactionStatus.COMPLETED.value
                 tx["ERROR_MESSAGE"] = "DRY_RUN"
             continue
-        
+
         try:
             # Get file stats
             file_size = abs_path.stat().st_size
-            
+
             if file_size <= 1 * 1024 * 1024:
                 # Small file - use existing method
-                _execute_file_content_batch(
-                    abs_path,
-                    file_data["txns"],
-                    logger
-                )
+                _execute_file_content_batch(abs_path, file_data["txns"], logger)
             else:
                 # Large file - new streaming method
                 process_large_file_content(
@@ -984,9 +1360,9 @@ def group_and_process_file_transactions(
                     abs_path,
                     file_data["encoding"],
                     file_data["is_rtf"],
-                    logger
+                    logger,
                 )
-                    
+
         except Exception as e:
             # Mark all transactions as failed
             for tx in file_data["txns"]:
@@ -995,13 +1371,19 @@ def group_and_process_file_transactions(
 
     # Return nothing - transactions modified in-place
 
+
 @flow(name="execute-all-transactions")
 def execute_all_transactions(
-    transactions_file_path: Path, root_dir: Path,
-    dry_run: bool, resume: bool, timeout_minutes: int,
-    skip_file_renaming: bool, skip_folder_renaming: bool, skip_content: bool,
+    transactions_file_path: Path,
+    root_dir: Path,
+    dry_run: bool,
+    resume: bool,
+    timeout_minutes: int,
+    skip_file_renaming: bool,
+    skip_folder_renaming: bool,
+    skip_content: bool,
     interactive_mode: bool,
-    logger: logging.Logger | None = None
+    logger: logging.Logger | None = None,
 ) -> dict[str, int]:
     """
     Execute all transactions in the transaction file.
@@ -1032,11 +1414,13 @@ def execute_all_transactions(
     path_translation_map: dict[str, str] = {}
     path_cache: dict[str, Path] = {}
 
-
     # Track which transactions we've seen to prevent duplicate processing
     if not dry_run and resume:
         for tx in transactions:
-            if tx["STATUS"] == TransactionStatus.COMPLETED.value and tx.get("ERROR_MESSAGE") == "DRY_RUN":
+            if (
+                tx["STATUS"] == TransactionStatus.COMPLETED.value
+                and tx.get("ERROR_MESSAGE") == "DRY_RUN"
+            ):
                 tx["STATUS"] = TransactionStatus.PENDING.value
                 tx.pop("ERROR_MESSAGE", None)
     seen_transaction_ids = set([tx["id"] for tx in transactions])
@@ -1045,12 +1429,17 @@ def execute_all_transactions(
     if resume:
         reset_transactions = []
         for tx in transactions:
-            if tx["STATUS"] in [TransactionStatus.FAILED.value, TransactionStatus.RETRY_LATER.value]:
+            if tx["STATUS"] in [
+                TransactionStatus.FAILED.value,
+                TransactionStatus.RETRY_LATER.value,
+            ]:
                 tx["STATUS"] = TransactionStatus.PENDING.value
                 tx.pop("ERROR_MESSAGE", None)
                 reset_transactions.append(tx)
         if reset_transactions and logger:
-            logger.info(f"Reset {len(reset_transactions)} transactions to PENDING for retry.")
+            logger.info(
+                f"Reset {len(reset_transactions)} transactions to PENDING for retry."
+            )
 
     finished = False
     pass_count = 0
@@ -1067,28 +1456,46 @@ def execute_all_transactions(
                 continue
 
             # Check timeout
-            if timeout_seconds is not None and (time.time() - start_time) > timeout_seconds:
+            if (
+                timeout_seconds is not None
+                and (time.time() - start_time) > timeout_seconds
+            ):
                 if logger:
-                    logger.warning("Timeout reached during transaction execution retry loop.")
+                    logger.warning(
+                        "Timeout reached during transaction execution retry loop."
+                    )
                 finished = True
                 break
 
             # Pre-check for collisions in interactive mode to avoid prompting for doomed transactions
-            if interactive_mode and not dry_run and tx_type in [TransactionType.FILE_NAME.value, TransactionType.FOLDER_NAME.value]:
+            if (
+                interactive_mode
+                and not dry_run
+                and tx_type
+                in [TransactionType.FILE_NAME.value, TransactionType.FOLDER_NAME.value]
+            ):
                 # Pre-flight collision check
                 original_name = tx_item.get("ORIGINAL_NAME", "")
-                new_name = tx_item.get("NEW_NAME", replace_logic.replace_occurrences(original_name))
-                current_abs_path = _get_current_absolute_path(relative_path_str, root_dir, path_translation_map, path_cache, dry_run)
+                new_name = tx_item.get(
+                    "NEW_NAME", replace_logic.replace_occurrences(original_name)
+                )
+                current_abs_path = _get_current_absolute_path(
+                    relative_path_str,
+                    root_dir,
+                    path_translation_map,
+                    path_cache,
+                    dry_run,
+                )
                 if current_abs_path.exists():
                     new_abs_path = current_abs_path.parent / new_name
                     parent_dir = current_abs_path.parent
                     new_name_lower = new_name.lower()
-                    
+
                     # Check for collision
                     has_collision = False
                     collision_path = None
                     collision_type = None
-                    
+
                     if new_abs_path.exists():
                         has_collision = True
                         collision_path = new_abs_path
@@ -1097,41 +1504,74 @@ def execute_all_transactions(
                         # Check case-insensitive
                         try:
                             for existing_item in parent_dir.iterdir():
-                                if existing_item != current_abs_path and existing_item.name.lower() == new_name_lower:
+                                if (
+                                    existing_item != current_abs_path
+                                    and existing_item.name.lower() == new_name_lower
+                                ):
                                     has_collision = True
                                     collision_path = existing_item
                                     collision_type = "case-insensitive match"
                                     break
                         except OSError:
                             pass
-                    
+
                     if has_collision:
                         # Log the collision
-                        _log_collision_error(root_dir, tx_item, current_abs_path, collision_path, collision_type, logger)
+                        _log_collision_error(
+                            root_dir,
+                            tx_item,
+                            current_abs_path,
+                            collision_path,
+                            collision_type,
+                            logger,
+                        )
                         # Update status
                         error_msg = f"Collision detected with {collision_path}"
-                        update_transaction_status_in_list(transactions, tx_id, TransactionStatus.FAILED, error_msg, logger=logger)
+                        update_transaction_status_in_list(
+                            transactions,
+                            tx_id,
+                            TransactionStatus.FAILED,
+                            error_msg,
+                            logger=logger,
+                        )
                         stats["failed"] += 1
                         # Print result for user
-                        print(f"{RED_FG}✗ FAILED{RESET_STYLE} - {tx_type}: {relative_path_str}")
-                        print(f"  {DIM_STYLE}Collision with existing file/folder{RESET_STYLE}")
+                        print(
+                            f"{RED_FG}✗ FAILED{RESET_STYLE} - {tx_type}: {relative_path_str}"
+                        )
+                        print(
+                            f"  {DIM_STYLE}Collision with existing file/folder{RESET_STYLE}"
+                        )
                         continue
 
             # Interactive mode prompt (only for non-collision cases)
             if interactive_mode and not dry_run:
                 # Show transaction details and ask for approval
-                print(f"{DIM_STYLE}Transaction {tx_id} - Type: {tx_type}, Path: {relative_path_str}{RESET_STYLE}")
-                if tx_type in [TransactionType.FILE_NAME.value, TransactionType.FOLDER_NAME.value]:
+                print(
+                    f"{DIM_STYLE}Transaction {tx_id} - Type: {tx_type}, Path: {relative_path_str}{RESET_STYLE}"
+                )
+                if tx_type in [
+                    TransactionType.FILE_NAME.value,
+                    TransactionType.FOLDER_NAME.value,
+                ]:
                     original_name = tx_item.get("ORIGINAL_NAME", "")
-                    new_name = tx_item.get("NEW_NAME", replace_logic.replace_occurrences(original_name))
+                    new_name = tx_item.get(
+                        "NEW_NAME", replace_logic.replace_occurrences(original_name)
+                    )
                     print(f"  {original_name} → {new_name}")
                 elif tx_type == TransactionType.FILE_CONTENT_LINE.value:
                     line_num = tx_item.get("LINE_NUMBER", 0)
                     print(f"  Line {line_num}: content replacement")
-                
+
                 choice = input("Approve? (A/Approve, S/Skip, Q/Quit): ").strip().upper()
                 if choice == "S":
-                    update_transaction_status_in_list(transactions, tx_id, TransactionStatus.SKIPPED, "Skipped by user", logger=logger)
+                    update_transaction_status_in_list(
+                        transactions,
+                        tx_id,
+                        TransactionStatus.SKIPPED,
+                        "Skipped by user",
+                        logger=logger,
+                    )
                     stats["skipped"] += 1
                     print(f"{YELLOW_FG}⊘ SKIPPED{RESET_STYLE}")
                     continue
@@ -1143,32 +1583,77 @@ def execute_all_transactions(
                 # else proceed with execution
 
             try:
-                if tx_type in [TransactionType.FILE_NAME.value, TransactionType.FOLDER_NAME.value]:
-                    if (tx_type == TransactionType.FILE_NAME.value and skip_file_renaming) or \
-                       (tx_type == TransactionType.FOLDER_NAME.value and skip_folder_renaming):
-                        update_transaction_status_in_list(transactions, tx_id, TransactionStatus.SKIPPED, "Skipped by flags", logger=logger)
+                if tx_type in [
+                    TransactionType.FILE_NAME.value,
+                    TransactionType.FOLDER_NAME.value,
+                ]:
+                    if (
+                        tx_type == TransactionType.FILE_NAME.value
+                        and skip_file_renaming
+                    ) or (
+                        tx_type == TransactionType.FOLDER_NAME.value
+                        and skip_folder_renaming
+                    ):
+                        update_transaction_status_in_list(
+                            transactions,
+                            tx_id,
+                            TransactionStatus.SKIPPED,
+                            "Skipped by flags",
+                            logger=logger,
+                        )
                         stats["skipped"] += 1
                         continue
-                    status_result, error_msg, changed = _execute_rename_transaction(tx_item, root_dir, path_translation_map, path_cache, dry_run, logger)
+                    status_result, error_msg, changed = _execute_rename_transaction(
+                        tx_item,
+                        root_dir,
+                        path_translation_map,
+                        path_cache,
+                        dry_run,
+                        logger,
+                    )
                     if status_result == TransactionStatus.COMPLETED:
-                        update_transaction_status_in_list(transactions, tx_id, TransactionStatus.COMPLETED, "DRY_RUN" if dry_run else None, logger=logger)
+                        update_transaction_status_in_list(
+                            transactions,
+                            tx_id,
+                            TransactionStatus.COMPLETED,
+                            "DRY_RUN" if dry_run else None,
+                            logger=logger,
+                        )
                         stats["completed"] += 1
                         if interactive_mode and not dry_run:
                             print(f"{GREEN_FG}✓ SUCCESS{RESET_STYLE}")
                     elif status_result == TransactionStatus.SKIPPED:
-                        update_transaction_status_in_list(transactions, tx_id, TransactionStatus.SKIPPED, error_msg, logger=logger)
+                        update_transaction_status_in_list(
+                            transactions,
+                            tx_id,
+                            TransactionStatus.SKIPPED,
+                            error_msg,
+                            logger=logger,
+                        )
                         stats["skipped"] += 1
                         if interactive_mode and not dry_run:
                             print(f"{YELLOW_FG}⊘ SKIPPED{RESET_STYLE} - {error_msg}")
                     else:
-                        update_transaction_status_in_list(transactions, tx_id, TransactionStatus.FAILED, error_msg, logger=logger)
+                        update_transaction_status_in_list(
+                            transactions,
+                            tx_id,
+                            TransactionStatus.FAILED,
+                            error_msg,
+                            logger=logger,
+                        )
                         stats["failed"] += 1
                         items_still_requiring_retry.append(tx_item)
                         if interactive_mode and not dry_run:
                             print(f"{RED_FG}✗ FAILED{RESET_STYLE} - {error_msg}")
                 elif tx_type == TransactionType.FILE_CONTENT_LINE.value:
                     if skip_content:
-                        update_transaction_status_in_list(transactions, tx_id, TransactionStatus.SKIPPED, "Skipped by flag", logger=logger)
+                        update_transaction_status_in_list(
+                            transactions,
+                            tx_id,
+                            TransactionStatus.SKIPPED,
+                            "Skipped by flag",
+                            logger=logger,
+                        )
                         stats["skipped"] += 1
                         continue
 
@@ -1178,22 +1663,46 @@ def execute_all_transactions(
 
                     # Skip if no actual change (shouldn't happen but added as safeguard)
                     if new_line_content == original_line_content:
-                        update_transaction_status_in_list(transactions, tx_id, TransactionStatus.SKIPPED, "No change needed", logger=logger)
+                        update_transaction_status_in_list(
+                            transactions,
+                            tx_id,
+                            TransactionStatus.SKIPPED,
+                            "No change needed",
+                            logger=logger,
+                        )
                         stats["skipped"] += 1
                         continue
 
                     if dry_run:
                         # For dry-run, mark as completed without modifying file
-                        update_transaction_status_in_list(transactions, tx_id, TransactionStatus.COMPLETED, "DRY_RUN", logger=logger)
+                        update_transaction_status_in_list(
+                            transactions,
+                            tx_id,
+                            TransactionStatus.COMPLETED,
+                            "DRY_RUN",
+                            logger=logger,
+                        )
                         stats["completed"] += 1
                     else:
                         # Defer actual content line processing to batch/group processor
                         pass
                 else:
-                    update_transaction_status_in_list(transactions, tx_id, TransactionStatus.SKIPPED, "Unknown transaction type", logger=logger)
+                    update_transaction_status_in_list(
+                        transactions,
+                        tx_id,
+                        TransactionStatus.SKIPPED,
+                        "Unknown transaction type",
+                        logger=logger,
+                    )
                     stats["skipped"] += 1
             except Exception as e:
-                update_transaction_status_in_list(transactions, tx_id, TransactionStatus.FAILED, f"Exception: {e}", logger=logger)
+                update_transaction_status_in_list(
+                    transactions,
+                    tx_id,
+                    TransactionStatus.FAILED,
+                    f"Exception: {e}",
+                    logger=logger,
+                )
                 stats["failed"] += 1
                 items_still_requiring_retry.append(tx_item)
 
@@ -1208,7 +1717,12 @@ def execute_all_transactions(
         # Wait and retry logic here (omitted for brevity)
 
     # After rename and individual transaction processing, process content transactions grouped by file
-    content_txs = [tx for tx in transactions if tx["TYPE"] == TransactionType.FILE_CONTENT_LINE.value and tx["STATUS"] == TransactionStatus.PENDING.value]
+    content_txs = [
+        tx
+        for tx in transactions
+        if tx["TYPE"] == TransactionType.FILE_CONTENT_LINE.value
+        and tx["STATUS"] == TransactionStatus.PENDING.value
+    ]
 
     group_and_process_file_transactions(
         content_txs,
@@ -1217,18 +1731,24 @@ def execute_all_transactions(
         path_cache,
         dry_run,
         skip_content,
-        logger
+        logger,
     )
 
     # Update stats for content transactions after batch processing
-    stats["completed"] += sum(1 for tx in content_txs if tx.get("STATUS") == TransactionStatus.COMPLETED.value)
-    stats["skipped"] += sum(1 for tx in content_txs if tx.get("STATUS") == TransactionStatus.SKIPPED.value)
-    stats["failed"] += sum(1 for tx in content_txs if tx.get("STATUS") == TransactionStatus.FAILED.value)
+    stats["completed"] += sum(
+        1 for tx in content_txs if tx.get("STATUS") == TransactionStatus.COMPLETED.value
+    )
+    stats["skipped"] += sum(
+        1 for tx in content_txs if tx.get("STATUS") == TransactionStatus.SKIPPED.value
+    )
+    stats["failed"] += sum(
+        1 for tx in content_txs if tx.get("STATUS") == TransactionStatus.FAILED.value
+    )
 
     save_transactions(transactions, transactions_file_path, logger=logger)
     if logger:
         logger.info(f"Execution phase complete. Stats: {stats}")
-    
+
     # Print summary for interactive mode
     if interactive_mode and not dry_run:
         print(f"\n{BOLD_STYLE}=== Execution Summary ==={RESET_STYLE}")
@@ -1236,18 +1756,20 @@ def execute_all_transactions(
         print(f"{GREEN_FG}Completed: {stats['completed']}{RESET_STYLE}")
         print(f"{YELLOW_FG}Skipped: {stats['skipped']}{RESET_STYLE}")
         print(f"{RED_FG}Failed: {stats['failed']}{RESET_STYLE}")
-        
+
         # Check for collision and binary logs
         collision_log_path = root_dir / COLLISIONS_ERRORS_LOG_FILE
         binary_log_path = root_dir / BINARY_MATCHES_LOG_FILE
-        
+
         if collision_log_path.exists() and collision_log_path.stat().st_size > 0:
-            print(f"\n{RED_FG}⚠ File/folder rename collisions were detected.{RESET_STYLE}")
+            print(
+                f"\n{RED_FG}⚠ File/folder rename collisions were detected.{RESET_STYLE}"
+            )
             print(f"  See '{collision_log_path.name}' for details.")
-        
+
         if binary_log_path.exists() and binary_log_path.stat().st_size > 0:
             print(f"\n{YELLOW_FG}ℹ Matches were found in binary files.{RESET_STYLE}")
             print(f"  See '{binary_log_path.name}' for details.")
             print(f"  {DIM_STYLE}(Binary files were not modified){RESET_STYLE}")
-    
+
     return stats
