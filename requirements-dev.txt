@@ -5,3 +5,5 @@ pathspec
 striprtf
 pytest
 pytest-cov
+ruff
+mypy
