@@ -95,3 +95,7 @@ test_temp/
 # Development
 .python-version
 .history/
+
+# Documentation (private)
+CLAUDE.md
+CLAUDE2.md
