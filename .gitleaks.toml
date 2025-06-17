@@ -24,6 +24,7 @@ regex = '''[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'''
 [rules.allowlist]
 regexes = [
   '''713559\+Emasoft@users\.noreply\.github\.com''',
+  '''actions@github\.com''',
 ]
 
 [[rules]]
