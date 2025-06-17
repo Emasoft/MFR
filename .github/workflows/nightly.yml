@@ -1,0 +1,78 @@
+name: Nightly Tests
+
+on:
+  schedule:
+    # Run at 2 AM UTC every day
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  extended-tests:
+    name: Extended Tests - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+      fail-fast: false
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        enable-cache: true
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      run: uv python pin ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        uv venv
+        uv pip install -r requirements-dev.txt
+    
+    - name: Run full test suite
+      run: |
+        uv run pytest test_mass_find_replace.py -v --cov=. --cov-report=term-missing
+    
+    - name: Test with different encodings
+      run: |
+        uv run python -m pytest test_mass_find_replace.py::test_unicode_handling -v
+        uv run python -m pytest test_mass_find_replace.py::test_binary_file_detection -v
+    
+    - name: Performance benchmark
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+      run: |
+        echo "Running performance benchmarks..."
+        uv run python -c "
+        import time
+        import tempfile
+        import shutil
+        from pathlib import Path
+        from mass_find_replace import main_flow
+        
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create test structure
+            root = Path(tmpdir)
+            for i in range(100):
+                (root / f'dir_{i}').mkdir()
+                for j in range(10):
+                    (root / f'dir_{i}' / f'file_{j}.txt').write_text(f'atlasvibe content {i}-{j}')
+            
+            # Create mapping file
+            map_file = root / 'mapping.json'
+            map_file.write_text('{\"REPLACEMENT_MAPPING\": {\"atlasvibe\": \"flojoy\"}}')
+            
+            # Measure time
+            start = time.time()
+            main_flow(
+                str(root), str(map_file), None, ['.git'], [],
+                dry_run=True, skip_scan=False, resume=False, force_execution=True,
+                ignore_symlinks_arg=True, use_gitignore=False, custom_ignore_file_path=None,
+                skip_file_renaming=False, skip_folder_renaming=False, skip_content=False,
+                timeout_minutes=1, quiet_mode=True, verbose_mode=False, interactive_mode=False
+            )
+            elapsed = time.time() - start
+            print(f'Performance: Processed 1000 files in {elapsed:.2f} seconds')
+        "

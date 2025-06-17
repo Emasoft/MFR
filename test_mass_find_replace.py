@@ -16,21 +16,14 @@ Tests cover:
 from mass_find_replace import MAIN_TRANSACTION_FILE_NAME
 from pathlib import Path
 import os
-import shutil
-import time
-from typing import Optional, Dict, List
+from typing import List
 import logging
-import json
 from unittest.mock import patch
 import sys
-import subprocess
-import builtins
-import importlib.util
 
-from mass_find_replace import main_flow, main_cli, YELLOW, RESET, _run_subprocess_command
-from file_system_operations import load_transactions, save_transactions, TransactionStatus, TransactionType, BINARY_MATCHES_LOG_FILE, COLLISIONS_ERRORS_LOG_FILE
+from mass_find_replace import main_flow, main_cli
+from file_system_operations import load_transactions, TransactionStatus, TransactionType, BINARY_MATCHES_LOG_FILE, COLLISIONS_ERRORS_LOG_FILE
 import replace_logic
-import file_system_operations
 
 import pytest
 

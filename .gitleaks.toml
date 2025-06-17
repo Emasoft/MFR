@@ -1,0 +1,39 @@
+title = "Gitleaks Configuration for MFR"
+
+[allowlist]
+description = "Allowlist for MFR project"
+paths = [
+  '''.gitleaks.toml''',
+  '''CLAUDE.md''',
+  '''CLAUDE2.md''',
+  '''.venv/.*''',
+  '''venv/.*''',
+  '''__pycache__/.*''',
+  '''dist/.*''',
+]
+
+commits = [
+  '''Emasoft''',
+]
+
+[[rules]]
+id = "email-address"
+description = "Email Address"
+regex = '''[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'''
+
+[rules.allowlist]
+regexes = [
+  '''713559\+Emasoft@users\.noreply\.github\.com''',
+]
+
+[[rules]]
+id = "generic-api-key"
+description = "Generic API Key"
+regex = '''(?i)(api_key|apikey|api-key|api key)\s*[:=]\s*[a-zA-Z0-9_\-]{20,}'''
+tags = ["key", "API", "generic"]
+
+[rules.allowlist]
+paths = [
+  '''test_.*\.py''',
+  '''conftest\.py''',
+]

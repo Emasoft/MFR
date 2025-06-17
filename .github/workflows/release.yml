@@ -1,0 +1,84 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g., 1.0.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Is this a pre-release?'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        enable-cache: true
+    
+    - name: Set up Python
+      run: uv python pin 3.11
+    
+    - name: Validate version
+      run: |
+        if [[ ! "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
+          echo "Error: Invalid version format. Use semantic versioning (e.g., 1.0.0 or 1.0.0-beta1)"
+          exit 1
+        fi
+    
+    - name: Update version in pyproject.toml
+      run: |
+        sed -i 's/^version = .*/version = "${{ inputs.version }}"/' pyproject.toml
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add pyproject.toml
+        git commit -m "chore: bump version to ${{ inputs.version }}"
+    
+    - name: Create and push tag
+      run: |
+        git tag -a "v${{ inputs.version }}" -m "Release v${{ inputs.version }}"
+        git push origin "v${{ inputs.version }}"
+    
+    - name: Build package
+      run: uv build
+    
+    - name: Generate changelog
+      id: changelog
+      run: |
+        echo "## What's Changed" > CHANGELOG_TEMP.md
+        git log --pretty=format:"* %s by @%an" $(git describe --tags --abbrev=0 HEAD^)..HEAD >> CHANGELOG_TEMP.md
+        echo "" >> CHANGELOG_TEMP.md
+        echo "**Full Changelog**: https://github.com/Emasoft/MFR/compare/$(git describe --tags --abbrev=0 HEAD^)...v${{ inputs.version }}" >> CHANGELOG_TEMP.md
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: "v${{ inputs.version }}"
+        name: "Release v${{ inputs.version }}"
+        body_path: CHANGELOG_TEMP.md
+        draft: false
+        prerelease: ${{ inputs.prerelease }}
+        files: dist/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Publish to PyPI
+      if: ${{ !inputs.prerelease }}
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        skip-existing: true

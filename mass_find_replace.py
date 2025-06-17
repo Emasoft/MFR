@@ -13,9 +13,8 @@
 
 import logging
 import sys
-import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import replace_logic
 from file_system_operations import (
@@ -151,10 +150,8 @@ def main_flow(
     verbose_mode: bool,
     interactive_mode: bool
 ):
-    import logging
     from pathlib import Path
     import pathspec
-    from typing import Any
 
     logger = _get_logger(verbose_mode)
 
@@ -464,7 +461,6 @@ def _run_subprocess_command(command: list[str], description: str) -> bool:
 
 def main_cli() -> None:
     import sys
-    import traceback
     import importlib.util
     import argparse
     # Imports moved to top of file

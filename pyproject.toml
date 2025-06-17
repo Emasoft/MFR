@@ -31,6 +31,11 @@ classifiers = [
     "Topic :: Utilities",
 ]
 
+[project.urls]
+Homepage = "https://github.com/Emasoft/MFR"
+Repository = "https://github.com/Emasoft/MFR"
+Issues = "https://github.com/Emasoft/MFR/issues"
+
 [project.scripts]
 mfr = "mass_find_replace:main_cli"
 mass-find-replace = "mass_find_replace:main_cli"

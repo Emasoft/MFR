@@ -17,12 +17,10 @@
 # Refer to the LICENSE file for more details.
 
 import os
-import shutil
 import json
 import uuid
 from pathlib import Path
-from typing import Any, cast, Optional, Iterator # Keep Any if specifically needed for dynamic parts
-import collections.abc # For Iterator, Callable
+from typing import Any, Optional, Iterator # Keep Any if specifically needed for dynamic parts
 from enum import Enum
 import chardet
 import unicodedata # For NFC normalization
@@ -32,8 +30,8 @@ import errno
 from striprtf.striprtf import rtf_to_text
 from isbinary import is_binary_file
 import logging
-import sys # For direct stderr prints
-import re # For highlighting in interactive mode
+
+from prefect import flow
 
 import replace_logic
 
@@ -997,8 +995,6 @@ def group_and_process_file_transactions(
 
     # Return nothing - transactions modified in-place
 
-from prefect import flow
-
 @flow(name="execute-all-transactions")
 def execute_all_transactions(
     transactions_file_path: Path, root_dir: Path,
@@ -1012,7 +1008,6 @@ def execute_all_transactions(
     Returns statistics dictionary.
     """
     import time
-    import collections
 
     # Use timeout_minutes to control retry duration
     MAX_RETRY_PASSES = 1000000  # Large number to allow timeout control
