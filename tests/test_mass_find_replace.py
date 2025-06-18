@@ -337,7 +337,9 @@ def test_self_test_option(monkeypatch):
     """Test the --self-test CLI option integration"""
     with monkeypatch.context() as m:
         m.setattr(sys, "argv", ["test_mass_find_replace.py", "--self-test"])
-        with patch("mass_find_replace._run_subprocess_command") as mock_run:
+        with patch(
+            "mass_find_replace.mass_find_replace._run_subprocess_command"
+        ) as mock_run:
             mock_run.return_value = True
             with pytest.raises(SystemExit) as exc_info:
                 main_cli()

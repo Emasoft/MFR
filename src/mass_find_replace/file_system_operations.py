@@ -87,7 +87,7 @@ class TransactionStatus(str, Enum):
     RETRY_LATER = "RETRY_LATER"
 
 
-def _log_fs_op_message(level: int, message: str, logger: logging.Logger | None = None):
+def _log_fs_op_message(level: int, message: str, logger: logging.Logger | None = None) -> None:
     """Helper to log messages using provided logger or print as fallback for fs_operations."""
     if logger:
         logger.log(level, message)
@@ -108,10 +108,10 @@ def _log_collision_error(
     root_dir: Path,
     tx: dict[str, Any],
     source_path: Path,
-    collision_path: Path,
-    collision_type: str,
+    collision_path: Path | None,
+    collision_type: str | None,
     logger: logging.Logger | None = None,
-):
+) -> None:
     """Log collision errors to a dedicated file."""
     collision_log_path = root_dir / COLLISIONS_ERRORS_LOG_FILE
 
@@ -1062,7 +1062,7 @@ def _execute_content_line_transaction(
 
 
 def _execute_file_content_batch(
-    abs_filepath: Path, transactions: list[dict], logger: logging.Logger | None = None
+    abs_filepath: Path, transactions: list[dict[str, Any]], logger: logging.Logger | None = None
 ) -> tuple[int, int, int]:
     """
     Execute content line transactions for a single file in batch.
@@ -1137,7 +1137,7 @@ def _execute_file_content_batch(
 
 # New function for streaming large file content
 def process_large_file_content(
-    txns_for_file: list[dict],
+    txns_for_file: list[dict[str, Any]],
     abs_filepath: Path,
     file_encoding: str,
     is_rtf: bool,
@@ -1300,7 +1300,7 @@ def process_large_file_content(
 
 
 def group_and_process_file_transactions(
-    transactions: list[dict],
+    transactions: list[dict[str, Any]],
     root_dir: Path,
     path_translation_map: dict[str, str],
     path_cache: dict[str, Path],

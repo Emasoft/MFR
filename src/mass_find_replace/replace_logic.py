@@ -23,17 +23,17 @@ import sys  # For sys.stdout/stderr in fallback logger
 _RAW_REPLACEMENT_MAPPING: dict[
     str, str
 ] = {}  # Stores (normalized stripped key) -> (stripped value) from JSON.
-_COMPILED_PATTERN_FOR_SCAN: re.Pattern | None = (
+_COMPILED_PATTERN_FOR_SCAN: re.Pattern[str] | None = (
     None  # For initial scan. Now case-sensitive.
 )
 _MAPPING_LOADED: bool = False
 _SORTED_RAW_KEYS_FOR_REPLACE: list[
     str
 ] = []  # Normalized stripped keys, sorted by length desc.
-_COMPILED_PATTERN_FOR_ACTUAL_REPLACE: re.Pattern | None = (
+_COMPILED_PATTERN_FOR_ACTUAL_REPLACE: re.Pattern[str] | None = (
     None  # For actual replacement. Now case-sensitive.
 )
-_MODULE_LOGGER: logging.Logger | None = None  # Module-level logger instance
+_MODULE_LOGGER: logging.Logger | logging.LoggerAdapter[logging.Logger] | None = None  # Module-level logger instance
 _KEY_CHARACTER_SET: set[str] = set()
 
 # --- START DEBUG CONFIG ---
@@ -42,7 +42,7 @@ _DEBUG_REPLACE_LOGIC = False
 # --- END DEBUG CONFIG ---
 
 
-def reset_module_state():
+def reset_module_state() -> None:
     """
     Resets all global module-level variables to their initial states.
     This is crucial for ensuring a clean state when the module's functions
@@ -67,7 +67,7 @@ def reset_module_state():
     _KEY_CHARACTER_SET.clear()
 
 
-def _log_message(level: int, message: str, logger: logging.Logger | None = None):
+def _log_message(level: int, message: str, logger: logging.Logger | logging.LoggerAdapter[logging.Logger] | None = None) -> None:
     """Helper to log messages using provided logger or print as fallback."""
     effective_logger = logger if logger else _MODULE_LOGGER
 
@@ -131,7 +131,7 @@ def strip_control_characters(text: str) -> str:
 
 
 def load_replacement_map(
-    mapping_file_path: Path, logger: logging.Logger | None = None
+    mapping_file_path: Path, logger: logging.Logger | logging.LoggerAdapter[logging.Logger] | None = None
 ) -> bool:
     """
     Loads and processes the replacement mapping from the given JSON file.
@@ -326,7 +326,7 @@ def load_replacement_map(
     return True
 
 
-def get_scan_pattern() -> re.Pattern | None:
+def get_scan_pattern() -> re.Pattern[str] | None:
     """Get the compiled regex pattern for scanning.
 
     Returns:

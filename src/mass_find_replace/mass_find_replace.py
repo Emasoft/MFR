@@ -40,7 +40,9 @@ BLUE = "\033[94m"
 DIM = "\033[2m"
 
 
-def _get_logger(verbose_mode: bool = False) -> logging.Logger | logging.LoggerAdapter[logging.Logger]:
+def _get_logger(
+    verbose_mode: bool = False,
+) -> logging.Logger | logging.LoggerAdapter[logging.Logger]:
     """Get logger with appropriate configuration."""
     import logging
 
@@ -70,7 +72,7 @@ def _get_logger(verbose_mode: bool = False) -> logging.Logger | logging.LoggerAd
     return logger
 
 
-def _print_mapping_table(mapping: dict[str, str], logger: logging.Logger) -> None:
+def _print_mapping_table(mapping: dict[str, str], logger: logging.Logger | logging.LoggerAdapter[logging.Logger]) -> None:
     """Print the replacement mapping as a formatted table."""
     if not mapping:
         logger.info("Replacement mapping is empty.")
@@ -137,7 +139,7 @@ def _get_operation_description(
 
 
 def _check_existing_transactions(
-    directory: Path, logger: logging.Logger
+    directory: Path, logger: logging.Logger | logging.LoggerAdapter[logging.Logger]
 ) -> tuple[bool, int]:
     """Check for existing transaction file and calculate progress."""
     txn_file = directory / MAIN_TRANSACTION_FILE_NAME
@@ -166,6 +168,7 @@ def _check_existing_transactions(
         return False, 0
 
 
+@flow(name="Mass Find Replace")
 def main_flow(
     directory: str,
     mapping_file: str,
@@ -192,7 +195,7 @@ def main_flow(
 
     logger = _get_logger(verbose_mode)
 
-    from file_system_operations import (
+    from .file_system_operations import (
         scan_directory_for_occurrences,
         execute_all_transactions,
     )
@@ -417,7 +420,7 @@ def main_flow(
         if final_ignore_spec:
             print(
                 f"Effective ignore patterns: {len(final_ignore_spec.patterns)} compiled from ignore files."
-            )  # type: ignore
+            )
 
         symlink_processing_message = (
             "Symlinks will be ignored (names not renamed, targets not processed for content)."
