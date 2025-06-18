@@ -87,7 +87,9 @@ class TransactionStatus(str, Enum):
     RETRY_LATER = "RETRY_LATER"
 
 
-def _log_fs_op_message(level: int, message: str, logger: logging.Logger | None = None) -> None:
+def _log_fs_op_message(
+    level: int, message: str, logger: logging.Logger | None = None
+) -> None:
     """Helper to log messages using provided logger or print as fallback for fs_operations."""
     if logger:
         logger.log(level, message)
@@ -1062,7 +1064,9 @@ def _execute_content_line_transaction(
 
 
 def _execute_file_content_batch(
-    abs_filepath: Path, transactions: list[dict[str, Any]], logger: logging.Logger | None = None
+    abs_filepath: Path,
+    transactions: list[dict[str, Any]],
+    logger: logging.Logger | None = None,
 ) -> tuple[int, int, int]:
     """
     Execute content line transactions for a single file in batch.

@@ -37,8 +37,8 @@ Repository = "https://github.com/Emasoft/MFR"
 Issues = "https://github.com/Emasoft/MFR/issues"
 
 [project.scripts]
-mfr = "mass_find_replace:main"
-mass-find-replace = "mass_find_replace:main"
+mfr = "mass_find_replace.mass_find_replace:main_cli"
+mass-find-replace = "mass_find_replace.mass_find_replace:main_cli"
 
 [project.optional-dependencies]
 dev = [

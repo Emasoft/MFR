@@ -33,7 +33,9 @@ _SORTED_RAW_KEYS_FOR_REPLACE: list[
 _COMPILED_PATTERN_FOR_ACTUAL_REPLACE: re.Pattern[str] | None = (
     None  # For actual replacement. Now case-sensitive.
 )
-_MODULE_LOGGER: logging.Logger | logging.LoggerAdapter[logging.Logger] | None = None  # Module-level logger instance
+_MODULE_LOGGER: logging.Logger | logging.LoggerAdapter[logging.Logger] | None = (
+    None  # Module-level logger instance
+)
 _KEY_CHARACTER_SET: set[str] = set()
 
 # --- START DEBUG CONFIG ---
@@ -67,7 +69,11 @@ def reset_module_state() -> None:
     _KEY_CHARACTER_SET.clear()
 
 
-def _log_message(level: int, message: str, logger: logging.Logger | logging.LoggerAdapter[logging.Logger] | None = None) -> None:
+def _log_message(
+    level: int,
+    message: str,
+    logger: logging.Logger | logging.LoggerAdapter[logging.Logger] | None = None,
+) -> None:
     """Helper to log messages using provided logger or print as fallback."""
     effective_logger = logger if logger else _MODULE_LOGGER
 
@@ -131,7 +137,8 @@ def strip_control_characters(text: str) -> str:
 
 
 def load_replacement_map(
-    mapping_file_path: Path, logger: logging.Logger | logging.LoggerAdapter[logging.Logger] | None = None
+    mapping_file_path: Path,
+    logger: logging.Logger | logging.LoggerAdapter[logging.Logger] | None = None,
 ) -> bool:
     """
     Loads and processes the replacement mapping from the given JSON file.

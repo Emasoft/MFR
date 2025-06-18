@@ -16,6 +16,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from prefect import flow
+
 from . import replace_logic
 from .file_system_operations import (
     load_transactions,
@@ -72,7 +74,10 @@ def _get_logger(
     return logger
 
 
-def _print_mapping_table(mapping: dict[str, str], logger: logging.Logger | logging.LoggerAdapter[logging.Logger]) -> None:
+def _print_mapping_table(
+    mapping: dict[str, str],
+    logger: logging.Logger | logging.LoggerAdapter[logging.Logger],
+) -> None:
     """Print the replacement mapping as a formatted table."""
     if not mapping:
         logger.info("Replacement mapping is empty.")
