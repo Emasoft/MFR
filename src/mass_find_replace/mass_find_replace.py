@@ -194,7 +194,7 @@ def main_flow(
     quiet_mode: bool,
     verbose_mode: bool,
     interactive_mode: bool,
-):
+) -> None:
     from pathlib import Path
     import pathspec
 
