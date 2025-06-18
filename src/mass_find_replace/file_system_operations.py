@@ -50,7 +50,7 @@ class MockableRetriableError(OSError):
 
 DEFAULT_ENCODING_FALLBACK = "utf-8"
 TRANSACTION_FILE_BACKUP_EXT = ".bak"
-SELF_TEST_ERROR_FILE_BASENAME = "error_file_atlasvibe.txt"
+SELF_TEST_ERROR_FILE_BASENAME = "error_file_test.txt"
 BINARY_MATCHES_LOG_FILE = "binary_files_matches.log"
 COLLISIONS_ERRORS_LOG_FILE = "collisions_errors.log"
 
@@ -88,7 +88,7 @@ class TransactionStatus(str, Enum):
 
 
 def _log_fs_op_message(
-    level: int, message: str, logger: logging.Logger | None = None
+    level: int, message: str, logger: logging.Logger | logging.LoggerAdapter | None = None
 ) -> None:
     """Helper to log messages using provided logger or print as fallback for fs_operations."""
     if logger:
@@ -112,7 +112,7 @@ def _log_collision_error(
     source_path: Path,
     collision_path: Path | None,
     collision_type: str | None,
-    logger: logging.Logger | None = None,
+    logger: logging.Logger | logging.LoggerAdapter | None = None,
 ) -> None:
     """Log collision errors to a dedicated file."""
     collision_log_path = root_dir / COLLISIONS_ERRORS_LOG_FILE
@@ -271,7 +271,7 @@ def _walk_for_scan(
     excluded_dirs_abs: list[Path],
     ignore_symlinks: bool,
     ignore_spec: Optional[pathspec.PathSpec],
-    logger: logging.Logger | None = None,
+    logger: logging.Logger | logging.LoggerAdapter | None = None,
 ) -> Iterator[Path]:
     for item_path_from_rglob in root_dir.rglob("*"):
         try:
@@ -393,7 +393,7 @@ def scan_directory_for_occurrences(
     skip_file_renaming: bool = False,
     skip_folder_renaming: bool = False,
     skip_content: bool = False,
-    logger: logging.Logger | None = None,
+    logger: logging.Logger | logging.LoggerAdapter | None = None,
 ) -> list[dict[str, Any]]:
     processed_transactions: list[dict[str, Any]] = []
     existing_transaction_ids: set[tuple[str, str, int]] = set()
@@ -804,7 +804,7 @@ def scan_directory_for_occurrences(
 def save_transactions(
     transactions: list[dict[str, Any]],
     transactions_file_path: Path,
-    logger: logging.Logger | None = None,
+    logger: logging.Logger | logging.LoggerAdapter | None = None,
 ) -> None:
     """
     Save the list of transactions to a JSON file atomically.
@@ -883,7 +883,7 @@ def update_transaction_status_in_list(
     transaction_id: str,
     new_status: TransactionStatus,
     error_message: str | None = None,
-    logger: logging.Logger | None = None,
+    logger: logging.Logger | logging.LoggerAdapter | None = None,
 ) -> bool:
     """
     Update the status and optional error message of a transaction in the list by id.
@@ -910,7 +910,7 @@ def _execute_rename_transaction(
     path_translation_map: dict[str, str],
     path_cache: dict[str, Path],
     dry_run: bool,
-    logger: logging.Logger | None = None,
+    logger: logging.Logger | logging.LoggerAdapter | None = None,
 ) -> tuple[TransactionStatus, str, bool]:
     """
     Execute a rename transaction (file or folder).
@@ -1004,7 +1004,7 @@ def _execute_content_line_transaction(
     root_dir: Path,
     path_translation_map: dict[str, str],
     path_cache: dict[str, Path],
-    logger: logging.Logger | None = None,
+    logger: logging.Logger | logging.LoggerAdapter | None = None,
 ) -> tuple[TransactionStatus, str, bool]:
     """
     Execute a content line transaction.
@@ -1066,7 +1066,7 @@ def _execute_content_line_transaction(
 def _execute_file_content_batch(
     abs_filepath: Path,
     transactions: list[dict[str, Any]],
-    logger: logging.Logger | None = None,
+    logger: logging.Logger | logging.LoggerAdapter | None = None,
 ) -> tuple[int, int, int]:
     """
     Execute content line transactions for a single file in batch.
@@ -1145,7 +1145,7 @@ def process_large_file_content(
     abs_filepath: Path,
     file_encoding: str,
     is_rtf: bool,
-    logger: logging.Logger | None = None,
+    logger: logging.Logger | logging.LoggerAdapter | None = None,
 ) -> None:
     """Process content replacements for large files using streaming approach.
 
@@ -1310,7 +1310,7 @@ def group_and_process_file_transactions(
     path_cache: dict[str, Path],
     dry_run: bool,
     skip_content: bool,
-    logger: logging.Logger | None = None,
+    logger: logging.Logger | logging.LoggerAdapter | None = None,
 ) -> None:
     """Group transactions by file and process them efficiently"""
     # Group transactions by file path
@@ -1387,7 +1387,7 @@ def execute_all_transactions(
     skip_folder_renaming: bool,
     skip_content: bool,
     interactive_mode: bool,
-    logger: logging.Logger | None = None,
+    logger: logging.Logger | logging.LoggerAdapter | None = None,
 ) -> dict[str, int]:
     """
     Execute all transactions in the transaction file.

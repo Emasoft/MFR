@@ -1,9 +1,9 @@
 {
     "REPLACEMENT_MAPPING": {
-        "flojoy": "atlasvibe",
-        "Flojoy": "Atlasvibe",
-        "floJoy": "atlasVibe",
-        "FloJoy": "AtlasVibe",
-        "FLOJOY": "ATLASVIBE"
+        "oldname": "newname",
+        "Oldname": "Newname",
+        "oldName": "newName",
+        "OldName": "NewName",
+        "OLDNAME": "NEWNAME"
     }
 }

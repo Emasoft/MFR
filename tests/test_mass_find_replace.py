@@ -124,8 +124,7 @@ def test_dry_run_behavior(
     original_content = orig_deep_file_path.read_text(encoding="utf-8")
 
     assert (
-        original_content
-        == "This file contains OLDNAME multiple times: Oldname oldName"
+        original_content == "This file contains OLDNAME multiple times: Oldname oldName"
     )
     # Run the dry run operation
     run_main_flow_for_test(context_dir, default_map_file, dry_run=True)
@@ -270,8 +269,7 @@ def test_folder_nesting(temp_test_dir: dict, default_map_file: Path):
     test_folders = [
         tx["PATH"]
         for tx in transactions
-        if tx["TYPE"] == TransactionType.FOLDER_NAME.value
-        and "oldname_a" in tx["PATH"]
+        if tx["TYPE"] == TransactionType.FOLDER_NAME.value and "oldname_a" in tx["PATH"]
     ]
 
     assert test_folders == ["oldname_a", "oldname_a/oldname_b"], (

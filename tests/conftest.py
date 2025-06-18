@@ -17,36 +17,29 @@ def temp_test_dir(tmp_path: Path):
     runtime_dir.mkdir(exist_ok=True)
 
     # Create sample directories and files in runtime directory
-    (runtime_dir / "atlasvibe_root").mkdir()
-    (runtime_dir / "atlasvibe_root" / "sub_atlasvibe_folder").mkdir()
+    (runtime_dir / "oldname_root").mkdir()
+    (runtime_dir / "oldname_root" / "sub_oldname_folder").mkdir()
     (
-        runtime_dir
-        / "atlasvibe_root"
-        / "sub_atlasvibe_folder"
-        / "another_ATLASVIBE_dir"
+        runtime_dir / "oldname_root" / "sub_oldname_folder" / "another_OLDNAME_dir"
     ).mkdir()
     deep_file = (
         runtime_dir
-        / "atlasvibe_root"
-        / "sub_atlasvibe_folder"
-        / "another_ATLASVIBE_dir"
-        / "deep_atlasvibe_file.txt"
+        / "oldname_root"
+        / "sub_oldname_folder"
+        / "another_OLDNAME_dir"
+        / "deep_oldname_file.txt"
     )
-    deep_file.write_text(
-        "This file contains ATLASVIBE multiple times: Atlasvibe atlasVibe"
-    )
+    deep_file.write_text("This file contains OLDNAME multiple times: Oldname oldName")
 
     # Create excluded items in runtime directory
-    (runtime_dir / "excluded_atlasvibe_dir").mkdir()
-    (runtime_dir / "excluded_atlasvibe_dir" / "excluded_file.txt").write_text(
-        "ATLASVIBE content"
+    (runtime_dir / "excluded_oldname_dir").mkdir()
+    (runtime_dir / "excluded_oldname_dir" / "excluded_file.txt").write_text(
+        "OLDNAME content"
     )
-    (runtime_dir / "exclude_this_atlasvibe_file.txt").write_text(
-        "Atlasvibe exclusion test"
-    )
+    (runtime_dir / "exclude_this_oldname_file.txt").write_text("Oldname exclusion test")
 
     # Verify structure
-    assert (runtime_dir / "atlasvibe_root").exists(), (
+    assert (runtime_dir / "oldname_root").exists(), (
         "Required dir not created in fixture"
     )
     context = {"runtime": runtime_dir, "config": config_dir}
@@ -66,11 +59,11 @@ def default_map_file(temp_test_dir: dict) -> Path:
     # Create and populate replacement mapping file
     map_data = {
         "REPLACEMENT_MAPPING": {
-            "atlasvibe": "flojoy",
-            "Atlasvibe": "Flojoy",
-            "atlasVibe": "floJoy",
-            "AtlasVibe": "FloJoy",
-            "ATLASVIBE": "FLOJOY",
+            "oldname": "newname",
+            "Oldname": "Newname",
+            "oldName": "newName",
+            "OldName": "NewName",
+            "OLDNAME": "NEWNAME",
         }
     }
     map_file.write_text(
