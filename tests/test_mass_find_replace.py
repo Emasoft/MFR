@@ -35,8 +35,8 @@ import pytest
 
 # Constants for test configuration
 DEFAULT_EXTENSIONS = [".txt", ".py", ".md", ".bin", ".log", ".data", ".rtf", ".xml"]
-DEFAULT_EXCLUDE_DIRS_REL = ["excluded_atlasvibe_dir", "symlink_targets_outside"]
-DEFAULT_EXCLUDE_FILES_REL = ["exclude_this_atlasvibe_file.txt"]
+DEFAULT_EXCLUDE_DIRS_REL = ["excluded_oldname_dir", "symlink_targets_outside"]
+DEFAULT_EXCLUDE_FILES_REL = ["exclude_this_oldname_file.txt"]
 
 
 @pytest.fixture(autouse=True)
@@ -116,16 +116,16 @@ def test_dry_run_behavior(
     context_dir = temp_test_dir["runtime"]
     orig_deep_file_path = (
         context_dir
-        / "atlasvibe_root"
-        / "sub_atlasvibe_folder"
-        / "another_ATLASVIBE_dir"
-        / "deep_atlasvibe_file.txt"
+        / "oldname_root"
+        / "sub_oldname_folder"
+        / "another_OLDNAME_dir"
+        / "deep_oldname_file.txt"
     )
     original_content = orig_deep_file_path.read_text(encoding="utf-8")
 
     assert (
         original_content
-        == "This file contains ATLASVIBE multiple times: Atlasvibe atlasVibe"
+        == "This file contains OLDNAME multiple times: Oldname oldName"
     )
     # Run the dry run operation
     run_main_flow_for_test(context_dir, default_map_file, dry_run=True)
@@ -135,7 +135,7 @@ def test_dry_run_behavior(
     assert_file_content(orig_deep_file_path, original_content)
 
     # Verify no actual renaming occurred - original directories should still exist
-    assert (context_dir / "atlasvibe_root").exists()
+    assert (context_dir / "oldname_root").exists()
 
     print(f"Transaction file: {context_dir / MAIN_TRANSACTION_FILE_NAME}")
     transactions = load_transactions(context_dir / MAIN_TRANSACTION_FILE_NAME)
@@ -197,7 +197,7 @@ def test_dry_run_behavior(
 def test_dry_run_virtual_paths(temp_test_dir: dict, default_map_file: Path):
     context_dir = temp_test_dir["runtime"]
     (context_dir / "folder1" / "folder2").mkdir(parents=True)
-    (context_dir / "folder1" / "folder2" / "deep.txt").write_text("ATLASVIBE")
+    (context_dir / "folder1" / "folder2" / "deep.txt").write_text("OLDNAME")
 
     run_main_flow_for_test(context_dir, default_map_file, dry_run=True)
 
@@ -226,16 +226,16 @@ def test_path_resolution_after_rename(temp_test_dir: dict, default_map_file: Pat
         if tx["TYPE"] == TransactionType.FOLDER_NAME.value:
             path_map[tx["PATH"]] = (
                 tx["PATH"]
-                .replace("atlasvibe", "flojoy")
-                .replace("ATLASVIBE", "FLOJOY")
-                .replace("Atlasvibe", "Flojoy")
+                .replace("oldname", "newname")
+                .replace("OLDNAME", "NEWNAME")
+                .replace("Oldname", "Newname")
             )
 
     # Fix 3: Validate with actual paths from fixture
     expected_path_map = {
-        "atlasvibe_root": "flojoy_root",
-        "atlasvibe_root/sub_atlasvibe_folder": "flojoy_root/sub_flojoy_folder",
-        "atlasvibe_root/sub_atlasvibe_folder/another_ATLASVIBE_dir": "flojoy_root/sub_flojoy_folder/another_FLOJOY_dir",
+        "oldname_root": "newname_root",
+        "oldname_root/sub_oldname_folder": "newname_root/sub_newname_folder",
+        "oldname_root/sub_oldname_folder/another_OLDNAME_dir": "newname_root/sub_newname_folder/another_NEWNAME_dir",
     }
 
     for original, expected in expected_path_map.items():
@@ -250,14 +250,14 @@ def test_folder_nesting(temp_test_dir: dict, default_map_file: Path):
     context_dir = temp_test_dir["runtime"]
 
     # Create nested structure: root > a > b > c (file)
-    a_path = context_dir / "atlasvibe_a"
-    b_path = a_path / "atlasvibe_b"
-    c_file = b_path / "atlasvibe_c.txt"
+    a_path = context_dir / "oldname_a"
+    b_path = a_path / "oldname_b"
+    c_file = b_path / "oldname_c.txt"
 
     # Create paths
     a_path.mkdir()
     b_path.mkdir()
-    c_file.write_text("ATLASVIBE")
+    c_file.write_text("OLDNAME")
 
     # Run dry run
     run_main_flow_for_test(context_dir, default_map_file, dry_run=True)
@@ -271,10 +271,10 @@ def test_folder_nesting(temp_test_dir: dict, default_map_file: Path):
         tx["PATH"]
         for tx in transactions
         if tx["TYPE"] == TransactionType.FOLDER_NAME.value
-        and "atlasvibe_a" in tx["PATH"]
+        and "oldname_a" in tx["PATH"]
     ]
 
-    assert test_folders == ["atlasvibe_a", "atlasvibe_a/atlasvibe_b"], (
+    assert test_folders == ["oldname_a", "oldname_a/oldname_b"], (
         "Folders not processed from shallow to deep"
     )
 
@@ -287,22 +287,22 @@ def test_unicode_combining_chars(temp_test_dir, default_map_file):
     context_dir = temp_test_dir["runtime"]
 
     # Create file with combining character (e + combining acute accent)
-    file_path = context_dir / "cafe\u0301_atlasvibe.txt"
+    file_path = context_dir / "cafe\u0301_oldname.txt"
     file_path.touch()
 
     run_main_flow_for_test(context_dir, default_map_file, dry_run=True)
 
     transactions = load_transactions(context_dir / MAIN_TRANSACTION_FILE_NAME)
     # We expect a transaction for the renamed file with replacement applied
-    # The original name is "café_atlasvibe.txt" (with combining accent)
-    # The replacement should produce "café_atlasvibe.txt" (same combining accent, replaced atlasvibe)
+    # The original name is "café_oldname.txt" (with combining accent)
+    # The replacement should produce "café_oldname.txt" (same combining accent, replaced oldname)
     found = False
     for tx in transactions:
         if tx["TYPE"] == TransactionType.FILE_NAME.value:
             original_name = tx.get("ORIGINAL_NAME", "")
             new_name = replace_logic.replace_occurrences(original_name)
-            # We'll check if the new name contains "atlasvibe" and the accent preserving by seeing if the original accent is present
-            if "flojoy" in new_name and "café" in original_name:
+            # We'll check if the new name contains "oldname" and the accent preserving by seeing if the original accent is present
+            if "newname" in new_name and "café" in original_name:
                 found = True
                 break
     assert found, "Expected replacement for filename with combining characters"
@@ -349,7 +349,7 @@ def test_self_test_option(monkeypatch):
 def test_symlink_name_processing(temp_test_dir, default_map_file):
     """Test symlink names are processed correctly"""
     context_dir = temp_test_dir["runtime"]
-    symlink_path = context_dir / "atlasvibe_symlink"
+    symlink_path = context_dir / "oldname_symlink"
     target_path = context_dir / "target"
     target_path.mkdir()
     symlink_path.symlink_to(target_path, target_is_directory=True)
@@ -361,7 +361,7 @@ def test_symlink_name_processing(temp_test_dir, default_map_file):
     transactions = load_transactions(context_dir / MAIN_TRANSACTION_FILE_NAME)
     symlink_renamed = any(
         tx["TYPE"] == TransactionType.FILE_NAME.value
-        and "atlasvibe_symlink" in tx["PATH"]
+        and "oldname_symlink" in tx["PATH"]
         for tx in transactions
     )
     assert symlink_renamed, "Expected symlink name to be processed"
@@ -370,8 +370,8 @@ def test_symlink_name_processing(temp_test_dir, default_map_file):
 def test_extension_filtering(temp_test_dir, default_map_file):
     """Test file extension filtering"""
     context_dir = temp_test_dir["runtime"]
-    (context_dir / "include.txt").write_text("ATLASVIBE")
-    (context_dir / "exclude.log").write_text("ATLASVIBE")
+    (context_dir / "include.txt").write_text("OLDNAME")
+    (context_dir / "exclude.log").write_text("OLDNAME")
 
     run_main_flow_for_test(
         context_dir, default_map_file, extensions=[".txt"], dry_run=True
@@ -388,7 +388,7 @@ def test_rtf_processing(temp_test_dir, default_map_file):
     """Test RTF files are processed correctly"""
     context_dir = temp_test_dir["runtime"]
     rtf_path = context_dir / "test.rtf"
-    rtf_path.write_bytes(b"{\\rtf1 ATLASVIBE}")
+    rtf_path.write_bytes(b"{\\rtf1 OLDNAME}")
 
     run_main_flow_for_test(context_dir, default_map_file, dry_run=True)
 
@@ -415,11 +415,11 @@ def test_binary_files_logging(temp_test_dir, default_map_file):
     # Create binary file with multiple search strings embedded
     bin_content = (
         b"Header"
-        + b"ATLASVIBE"
+        + b"OLDNAME"
         + b"\x00\x01"
-        + b"atlasVibe"
+        + b"oldName"
         + b"\x02"
-        + b"Atlasvibe"
+        + b"Oldname"
         + b"Footer"
     )
     bin_path.write_bytes(bin_content)
@@ -432,7 +432,7 @@ def test_binary_files_logging(temp_test_dir, default_map_file):
     log_content = log_path.read_text(encoding="utf-8")
 
     # Verify all patterns are logged
-    for key in ["ATLASVIBE", "atlasVibe", "Atlasvibe"]:
+    for key in ["OLDNAME", "oldName", "Oldname"]:
         assert key in log_content
         assert f"File: {bin_path.relative_to(context_dir)}" in log_content
         assert "Offset:" in log_content
@@ -447,9 +447,9 @@ def test_recursive_path_resolution(temp_test_dir, default_map_file):
     context_dir = temp_test_dir["runtime"]
 
     # Create nested structure: A > B > C
-    (context_dir / "Atlasvibe_A").mkdir()
-    (context_dir / "Atlasvibe_A" / "Atlasvibe_B").mkdir()
-    (context_dir / "Atlasvibe_A" / "Atlasvibe_B" / "file.txt").touch()
+    (context_dir / "Oldname_A").mkdir()
+    (context_dir / "Oldname_A" / "Oldname_B").mkdir()
+    (context_dir / "Oldname_A" / "Oldname_B" / "file.txt").touch()
 
     # Run dry run to simulate changes
     run_main_flow_for_test(context_dir, default_map_file, dry_run=True)
@@ -475,14 +475,14 @@ def test_recursive_path_resolution(temp_test_dir, default_map_file):
                 )
 
     # Check each path component is present as a transaction original name
-    for component in ["Atlasvibe_A", "Atlasvibe_B"]:
+    for component in ["Oldname_A", "Oldname_B"]:
         assert any(tx["ORIGINAL_NAME"] == component for tx in txn_json), (
             f"Missing transaction for folder {component}"
         )
 
     # Check the deep path translation in the folder mapping
-    assert "Flojoy_A" in path_map.get("Atlasvibe_A").rsplit("/", 1)[-1]
-    assert "Flojoy_B" in path_map.get("Atlasvibe_A/Atlasvibe_B").rsplit("/", 1)[-1]
+    assert "Newname_A" in path_map.get("Oldname_A").rsplit("/", 1)[-1]
+    assert "Newname_B" in path_map.get("Oldname_A/Oldname_B").rsplit("/", 1)[-1]
 
 
 # =============== NEW TEST: GB18030 ENCODING SUPPORT =================
@@ -495,8 +495,8 @@ def test_gb18030_encoding(temp_test_dir: dict, default_map_file: Path):
     context_dir = temp_test_dir["runtime"]
 
     # Test config
-    test_string = "Atlasvibe"
-    replacement_string = "Flojoy"
+    test_string = "Oldname"
+    replacement_string = "Newname"
     encoding = "gb18030"
     small_file = context_dir / "small_gb18030.txt"
     large_file = context_dir / "large_gb18030.txt"
@@ -540,7 +540,7 @@ def test_gb18030_encoding(temp_test_dir: dict, default_map_file: Path):
             large_file_processed = True
             # Verify transaction contains expected fields
             assert "NEW_LINE_CONTENT" in tx, "Missing NEW_LINE_CONTENT field"
-            assert "Flojoy" in tx["NEW_LINE_CONTENT"], "Replacement not in new content"
+            assert "Newname" in tx["NEW_LINE_CONTENT"], "Replacement not in new content"
             encoding_in_tx = tx.get("ORIGINAL_ENCODING", "").lower().replace("-", "")
             assert encoding_in_tx == "gb18030", (
                 f"Wrong encoding: {tx.get('ORIGINAL_ENCODING')}"
@@ -579,21 +579,21 @@ def test_collision_error_logging(temp_test_dir: dict, default_map_file: Path):
     test_dir.mkdir()
 
     # Test 1: File that will rename to collide with existing file
-    # This file will be renamed from atlasvibe_config.py to flojoy_config.py
-    source_file = test_dir / "atlasvibe_config.py"
+    # This file will be renamed from oldname_config.py to newname_config.py
+    source_file = test_dir / "oldname_config.py"
     source_file.write_text("# Config file")
 
     # Existing file that will cause collision
-    exact_collision = test_dir / "flojoy_config.py"
+    exact_collision = test_dir / "newname_config.py"
     exact_collision.write_text("# Existing config")
 
     # Test 2: File with different case that will collide after rename
-    # AtlasvibeTheme.ts will be renamed to FlojoyTheme.ts
-    case_test_file = test_dir / "AtlasvibeTheme.ts"
+    # OldnameTheme.ts will be renamed to NewnameTheme.ts
+    case_test_file = test_dir / "OldnameTheme.ts"
     case_test_file.write_text("export const theme = 'test';")
 
     # Existing file with different case that will cause collision
-    case_collision = test_dir / "FLOJOYTHEME.ts"
+    case_collision = test_dir / "NEWNAMETHEME.ts"
     case_collision.write_text("export const theme = 'existing';")
 
     # Debug: List all files before running
@@ -618,15 +618,15 @@ def test_collision_error_logging(temp_test_dir: dict, default_map_file: Path):
     print(f"\n=== Collision Log Content ===\n{log_content}\n=== End Log ===\n")
 
     # Verify exact match collision is logged
-    assert "AtlasvibeTheme.ts" in log_content, "AtlasvibeTheme.ts collision not logged"
-    assert "AtlasvibeTheme.ts" in log_content, "Target collision file not mentioned"
+    assert "OldnameTheme.ts" in log_content, "OldnameTheme.ts collision not logged"
+    assert "OldnameTheme.ts" in log_content, "Target collision file not mentioned"
     assert "exact match" in log_content, "Exact match collision type not specified"
 
     # Verify collision is logged (on case-insensitive filesystems like macOS,
-    # ATLASVIBE_CONFIG.py and atlasvibe_config.py are the same, so it's an exact match)
-    assert "atlasvibe_config.py" in log_content, "Case-insensitive source not logged"
+    # OLDNAME_CONFIG.py and oldname_config.py are the same, so it's an exact match)
+    assert "oldname_config.py" in log_content, "Case-insensitive source not logged"
     # The collision should be logged with the attempted target name
-    assert "atlasvibe_config.py" in log_content, "Collision target not mentioned"
+    assert "oldname_config.py" in log_content, "Collision target not mentioned"
 
     # Verify transaction details are included
     assert "Transaction ID:" in log_content
@@ -663,15 +663,15 @@ def test_interactive_mode_collision_skip(
     test_dir.mkdir()
 
     # Create collision scenario - file that will collide after rename
-    source_file = test_dir / "atlasvibe_config.py"
+    source_file = test_dir / "oldname_config.py"
     source_file.write_text("# Config")
 
     # Existing file that will cause collision when source_file is renamed
-    collision_file = test_dir / "flojoy_config.py"
+    collision_file = test_dir / "newname_config.py"
     collision_file.write_text("# Existing")
 
     # Create non-collision file for comparison
-    normal_file = test_dir / "atlasvibe_utils.py"
+    normal_file = test_dir / "oldname_utils.py"
     normal_file.write_text("# Utils")
 
     # Mock input to approve the non-collision transaction
@@ -708,8 +708,8 @@ def test_interactive_mode_collision_skip(
     )
 
     # Verify both files were processed
-    assert "atlasvibe_config.py" in output_text
-    assert "atlasvibe_utils.py" in output_text
+    assert "oldname_config.py" in output_text
+    assert "oldname_utils.py" in output_text
     assert "✓ SUCCESS" in output_text  # For the non-collision file
 
     # Verify summary shows collisions
@@ -723,7 +723,7 @@ def test_interactive_mode_collision_skip(
     # Verify files state
     assert source_file.exists(), "Collision file should not be renamed"
     assert collision_file.exists(), "Existing collision file should remain"
-    assert normal_file.exists() or (test_dir / "flojoy_utils.py").exists(), (
+    assert normal_file.exists() or (test_dir / "newname_utils.py").exists(), (
         "Non-collision file should be processed"
     )
 
