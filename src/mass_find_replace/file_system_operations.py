@@ -37,7 +37,7 @@ import logging
 
 from prefect import flow
 
-import replace_logic
+from . import replace_logic
 
 
 class SandboxViolationError(Exception):

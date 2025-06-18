@@ -16,8 +16,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
-import replace_logic
-from file_system_operations import (
+from . import replace_logic
+from .file_system_operations import (
     load_transactions,
     save_transactions,
     TransactionStatus,
@@ -40,7 +40,7 @@ BLUE = "\033[94m"
 DIM = "\033[2m"
 
 
-def _get_logger(verbose_mode: bool = False) -> logging.Logger:
+def _get_logger(verbose_mode: bool = False) -> logging.Logger | logging.LoggerAdapter[logging.Logger]:
     """Get logger with appropriate configuration."""
     import logging
 
@@ -820,7 +820,7 @@ def main_cli() -> None:
             )
             sys.exit(1)
 
-        pytest_cmd = ["pytest", "test_mass_find_replace.py"]  # Use system pytest
+        pytest_cmd = ["pytest", "tests/test_mass_find_replace.py"]  # Use system pytest
         print(f"{BLUE}Running pytest...{RESET}")
         test_passed = _run_subprocess_command(pytest_cmd, "pytest execution")
         sys.exit(0 if test_passed else 1)

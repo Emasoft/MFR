@@ -40,7 +40,7 @@ jobs:
     
     - name: Run tests with coverage
       run: |
-        uv run pytest test_mass_find_replace.py -v --cov=. --cov-report=xml --cov-report=html
+        uv run pytest tests/test_mass_find_replace.py -v --cov=src/mass_find_replace --cov-report=xml --cov-report=html
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5
@@ -80,7 +80,7 @@ jobs:
     
     - name: Run mypy type checking
       run: |
-        uv run python -m mypy mass_find_replace.py file_system_operations.py replace_logic.py \
+        uv run python -m mypy src/mass_find_replace/ \
           --explicit-package-bases \
           --ignore-missing-imports \
           --no-strict-optional \

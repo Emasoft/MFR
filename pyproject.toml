@@ -37,8 +37,8 @@ Repository = "https://github.com/Emasoft/MFR"
 Issues = "https://github.com/Emasoft/MFR/issues"
 
 [project.scripts]
-mfr = "mass_find_replace:main_cli"
-mass-find-replace = "mass_find_replace:main_cli"
+mfr = "mass_find_replace:main"
+mass-find-replace = "mass_find_replace:main"
 
 [project.optional-dependencies]
 dev = [
@@ -53,12 +53,30 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
+packages = ["src/mass_find_replace"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mass_find_replace"]
+
+[tool.hatch.build.targets.sdist]
 include = [
-    "*.py",
+    "src/mass_find_replace/**/*.py",
+    "tests/**/*.py",
     "replacement_mapping.json",
+    "requirements.txt",
+    "requirements-dev.txt",
+    "README.md",
+    "LICENSE",
 ]
-exclude = [
-    "test_*.py",
-    "conftest.py",
-    "setup_dev_tools.sh",
-]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+explicit_package_bases = true

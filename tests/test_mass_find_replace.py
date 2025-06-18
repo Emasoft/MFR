@@ -13,7 +13,7 @@ Tests cover:
 - Interactive mode
 """
 
-from mass_find_replace import MAIN_TRANSACTION_FILE_NAME
+from mass_find_replace.mass_find_replace import MAIN_TRANSACTION_FILE_NAME
 from pathlib import Path
 import os
 from typing import List
@@ -21,15 +21,15 @@ import logging
 from unittest.mock import patch
 import sys
 
-from mass_find_replace import main_flow, main_cli
-from file_system_operations import (
+from mass_find_replace.mass_find_replace import main_flow, main_cli
+from mass_find_replace.file_system_operations import (
     load_transactions,
     TransactionStatus,
     TransactionType,
     BINARY_MATCHES_LOG_FILE,
     COLLISIONS_ERRORS_LOG_FILE,
 )
-import replace_logic
+from mass_find_replace import replace_logic
 
 import pytest
 
