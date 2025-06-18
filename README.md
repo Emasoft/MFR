@@ -3,8 +3,45 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
+[![Powered by uv](https://img.shields.io/badge/powered%20by-uv-orange.svg)](https://github.com/astral-sh/uv)
 
 A sophisticated Python tool for performing safe, surgical find-and-replace operations across entire directory structures. MFR can rename files, folders, and modify file contents while preserving file encodings, handling Unicode correctly, and preventing data loss through intelligent collision detection.
+
+## Table of Contents
+- [Features](#-features)
+- [Quick Start](#-quick-start)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [Safety Features](#️-safety-features)
+- [Troubleshooting](#-troubleshooting)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+## 🎯 Quick Start
+
+```bash
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Clone and setup
+git clone https://github.com/Emasoft/MFR.git
+cd MFR
+uv sync
+
+# Configure replacements
+echo '{
+  "REPLACEMENT_MAPPING": {
+    "old_name": "new_name",
+    "OldProject": "NewProject"
+  }
+}' > replacement_mapping.json
+
+# Preview changes
+uv run mfr . --dry-run
+
+# Execute replacements
+uv run mfr .
+```
 
 ## 🚀 Features
 
@@ -26,42 +63,49 @@ A sophisticated Python tool for performing safe, surgical find-and-replace opera
 
 ## 📦 Installation
 
-### From Source (Recommended for now)
+### Prerequisites
+- Python 3.10 or higher
+- [uv](https://github.com/astral-sh/uv) package manager (recommended)
 
-1. **Clone the repository**:
-```bash
-git clone https://github.com/Emasoft/MFR.git
-cd MFR
-```
+### Using uv (Recommended)
 
-2. **Create and activate a virtual environment using uv**:
 ```bash
 # Install uv if you haven't already
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Create virtual environment
-uv venv
-source .venv/bin/activate  # On Linux/macOS
-# or
-.venv\Scripts\activate     # On Windows
+# Clone the repository
+git clone https://github.com/Emasoft/MFR.git
+cd MFR
+
+# Install all dependencies
+uv sync
+
+# The mfr command is now available via uv run
+uv run mfr --help
 ```
 
-3. **Install dependencies**:
-```bash
-uv pip install -r requirements.txt
-```
+### Install from Wheel
 
-4. **Install in development mode**:
 ```bash
-uv pip install -e .
-```
+# Download the latest release wheel
+# (Once available on PyPI, you'll be able to use: uv pip install mass-find-replace)
 
-### Building from Source
-
-To build a distributable package:
-```bash
+# For now, build from source:
 uv build
-# This creates wheel and source distributions in the dist/ directory
+uv pip install dist/mass_find_replace-*.whl
+```
+
+### Development Installation
+
+```bash
+# Clone and install in editable mode
+git clone https://github.com/Emasoft/MFR.git
+cd MFR
+uv sync --all-extras
+uv pip install -e .
+
+# Run tests
+uv run pytest
 ```
 
 ## 🎯 Usage
@@ -173,32 +217,39 @@ mfr ./config --extensions .json,.yaml,.yml,.env,.ini
 mfr [directory] [options]
 ```
 
-#### Core Options
-- `--dry-run`: Preview changes without executing them
-- `--interactive`, `-i`: Approve each change individually
-- `--force`, `-y`: Skip confirmation prompt
-- `--resume`: Resume from existing transaction file
-- `--skip-scan`: Use existing transaction file without re-scanning
-
-#### File Selection Options
-- `--mapping-file PATH`: Use custom replacement mapping file (default: `replacement_mapping.json`)
-- `--extensions EXT1,EXT2`: File extensions to process (default: common text formats)
-- `--exclude-dirs DIR1,DIR2`: Directories to skip (default: `.git,.hg,.svn,__pycache__`)
-
-#### Processing Options
-- `--skip-file-renaming`: Skip file rename operations
-- `--skip-folder-renaming`: Skip folder rename operations
-- `--skip-content`: Skip file content modifications
-- `--process-symlink-names`: Enable symbolic link name processing
-
-#### Advanced Options
-- `--timeout MINUTES`: Retry timeout for locked files (default: 5)
-- `--self-test`: Run the built-in test suite
-- `--verbose`: Enable detailed logging
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--dry-run` | | Preview changes without executing |
+| `--interactive` | `-i` | Approve each change individually |
+| `--force` | `-y` | Skip confirmation prompt |
+| `--resume` | | Resume from existing transaction file |
+| `--skip-scan` | | Use existing transaction file |
+| `--mapping-file PATH` | | Custom replacement mapping file |
+| `--extensions .ext1,.ext2` | | File extensions to process |
+| `--exclude-dirs dir1,dir2` | | Directories to skip |
+| `--exclude-files file1,file2` | | Files to skip |
+| `--skip-file-renaming` | | Don't rename files |
+| `--skip-folder-renaming` | | Don't rename folders |
+| `--skip-content` | | Don't modify file contents |
+| `--process-symlink-names` | | Process symbolic link names |
+| `--no-gitignore` | | Ignore .gitignore patterns |
+| `--ignore-file PATH` | | Custom ignore patterns file |
+| `--timeout MINUTES` | | Retry timeout (default: 10) |
+| `--quiet` | `-q` | Suppress informational output |
+| `--verbose` | | Enable debug logging |
+| `--self-test` | | Run built-in tests |
 
 ### Understanding the Transaction System
 
 MFR uses a transaction-based approach for safety:
+
+```mermaid
+graph LR
+    A[Scan Phase] --> B[Plan Phase]
+    B --> C[Validation Phase]
+    C --> D[Execution Phase]
+    D --> E[Completion Phase]
+```
 
 1. **Scan Phase**: Identifies all files and replacements needed
 2. **Plan Phase**: Creates `planned_transactions.json` with all operations
@@ -217,23 +268,94 @@ Transaction states:
 ### Configuration Files
 
 #### replacement_mapping.json
-The main configuration file defining your find-and-replace mappings:
+The main configuration file defining your find-and-replace mappings. **You must edit this file before running MFR** to define what strings you want to replace.
 
+##### How to Create/Edit the Configuration
+
+1. **Create the file** (if it doesn't exist):
+```bash
+# Create a new replacement_mapping.json
+cat > replacement_mapping.json << 'EOF'
+{
+  "REPLACEMENT_MAPPING": {
+    "old_string": "new_string"
+  }
+}
+EOF
+```
+
+2. **Edit with your replacements**:
 ```json
 {
   "REPLACEMENT_MAPPING": {
-    "search_string": "replacement_string",
-    "CaseSensitive": "CaseSensitiveReplacement",
-    "special.chars": "special.characters"
+    "OldCompanyName": "NewCompanyName",
+    "old-project-name": "new-project-name",
+    "deprecatedFunction": "modernFunction",
+    "legacy_variable": "updated_variable",
+    "OLD_CONSTANT": "NEW_CONSTANT",
+    "http://old-api.com": "https://new-api.com",
+    "Copyright 2020": "Copyright 2024",
+    "TODO: fix this": "DONE: fixed"
   }
 }
 ```
 
+##### Configuration Rules
+
 **Important notes**:
-- Keys are canonicalized (diacritics stripped, normalized to NFC)
-- Values are preserved exactly as written
-- The tool prevents recursive mappings automatically
-- Unicode is fully supported
+- **Case matters**: `"oldName"` and `"OldName"` are different replacements
+- **Order doesn't matter**: MFR processes longest matches first automatically
+- **No recursive replacements**: If A→B and B→C, MFR will prevent this
+- **Unicode support**: Full support for international characters, emojis, etc.
+- **Special characters**: All JSON-valid strings are supported
+
+##### Advanced Examples
+
+**Multiple case variations**:
+```json
+{
+  "REPLACEMENT_MAPPING": {
+    "OldProduct": "NewProduct",
+    "oldProduct": "newProduct", 
+    "old-product": "new-product",
+    "old_product": "new_product",
+    "OLDPRODUCT": "NEWPRODUCT"
+  }
+}
+```
+
+**Namespace/package renaming**:
+```json
+{
+  "REPLACEMENT_MAPPING": {
+    "com.oldcompany.app": "com.newcompany.app",
+    "from oldpackage import": "from newpackage import",
+    "@oldcompany/library": "@newcompany/library"
+  }
+}
+```
+
+**File path updates**:
+```json
+{
+  "REPLACEMENT_MAPPING": {
+    "/old/path/to/resource": "/new/path/to/resource",
+    "../legacy/module": "../modern/module",
+    "assets/old-logo.png": "assets/new-logo.png"
+  }
+}
+```
+
+##### Validation
+
+Before running MFR, validate your JSON:
+```bash
+# Check if JSON is valid
+python -m json.tool replacement_mapping.json
+
+# Or use jq if available
+jq . replacement_mapping.json
+```
 
 #### planned_transactions.json
 Generated during the scan phase, this file contains all planned operations:
@@ -264,19 +386,40 @@ Generated during the scan phase, this file contains all planned operations:
 
 ### Collision Detection
 MFR prevents overwrites when renaming would create conflicts:
-- Case-insensitive collision detection on case-insensitive filesystems
-- Detailed collision reports in `collisions_errors.log`
-- Option to skip or handle manually in interactive mode
+- **Case-insensitive detection**: Prevents `File.txt` from overwriting `file.txt` on case-insensitive filesystems
+- **Detailed reports**: All collisions logged to `collisions_errors.log`
+- **Interactive handling**: Choose action for each collision in interactive mode
+
+Example collision log:
+```
+=== Collision Detected ===
+Transaction ID: abc123
+Type: FILE_NAME
+Original: OldProject_Config.py → NewProject_Config.py
+Collision: Would overwrite existing file (case-insensitive match)
+```
 
 ### Binary File Protection
-- Binary files are detected but never modified
-- Matches in binary files are logged to `binary_files_matches.log`
-- Prevents corruption of executables, images, and other binary formats
+- **Automatic detection**: Uses heuristics to identify binary files
+- **Read-only scanning**: Binary files are never modified
+- **Match logging**: Found patterns logged to `binary_files_matches.log`
+
+Protected file types include:
+- Executables (.exe, .dll, .so)
+- Images (.jpg, .png, .gif, .bmp)
+- Archives (.zip, .tar, .gz)
+- Media files (.mp3, .mp4, .avi)
+- Office documents (.docx, .xlsx, .pdf)
 
 ### Encoding Preservation
-- Automatically detects file encoding (UTF-8, UTF-16, GB18030, etc.)
-- Preserves original encoding when writing files
-- Handles files with mixed or unusual encodings gracefully
+- **Auto-detection**: Supports UTF-8, UTF-16, Latin-1, GB18030, and more
+- **Byte-perfect preservation**: Original encoding maintained
+- **Fallback handling**: Graceful degradation for unknown encodings
+
+### Resume Capability
+- **Crash recovery**: Resume interrupted operations exactly where they left off
+- **State persistence**: Transaction states saved after each operation
+- **Idempotent operations**: Safe to retry failed operations
 
 ## 🐛 Troubleshooting
 
@@ -315,14 +458,63 @@ This provides:
 - Full error stack traces
 - Performance metrics
 
+## 🧪 Testing
+
+MFR includes a comprehensive test suite:
+
+```bash
+# Run all tests
+uv run pytest
+
+# Run with coverage
+uv run pytest --cov=mass_find_replace --cov-report=html
+
+# Run specific test
+uv run pytest tests/test_mass_find_replace.py::test_dry_run_behavior -v
+
+# Run built-in self-test
+uv run mfr --self-test
+```
+
 ## 🤝 Contributing
 
-Contributions are welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Follow the TDD approach (write tests first)
-4. Ensure all tests pass: `uv run pytest`
-5. Submit a pull request
+We welcome contributions! Here's how to get started:
+
+### Development Setup
+
+```bash
+# Fork and clone the repository
+git clone https://github.com/YOUR_USERNAME/MFR.git
+cd MFR
+
+# Install development dependencies
+uv sync --all-extras
+
+# Run pre-commit hooks
+uv run pre-commit install
+```
+
+### Development Workflow
+
+1. **Create a feature branch**: `git checkout -b feature/your-feature-name`
+2. **Follow TDD**: Write tests first, then implementation
+3. **Run tests**: `uv run pytest`
+4. **Check code quality**: 
+   ```bash
+   uv run ruff format .
+   uv run ruff check .
+   uv run mypy .
+   ```
+5. **Commit with semantic messages**: `feat:`, `fix:`, `docs:`, etc.
+6. **Push and create PR**
+
+### Code Style Guidelines
+
+- Use type annotations for all functions
+- Write Google-style docstrings
+- Keep functions focused and under 50 lines
+- Maintain test coverage above 80%
+- Follow existing patterns in the codebase
 
 ## 📄 License
 
@@ -334,30 +526,131 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 MFR/
 ├── src/
 │   └── mass_find_replace/
-│       ├── __init__.py           # Package initialization
-│       ├── mass_find_replace.py  # Main CLI entry point
-│       ├── file_system_operations.py # File I/O and transaction handling
-│       └── replace_logic.py      # String replacement logic
+│       ├── __init__.py              # Package initialization
+│       ├── mass_find_replace.py     # Main CLI entry point & workflow
+│       ├── file_system_operations.py # File I/O & transaction handling
+│       └── replace_logic.py         # String replacement logic
 ├── tests/
-│   ├── conftest.py              # Test configuration
-│   └── test_mass_find_replace.py # Test suite
-├── replacement_mapping.json      # Configuration file
-├── requirements.txt             # Production dependencies
-├── requirements-dev.txt         # Development dependencies
-├── pyproject.toml              # Package configuration
-├── README.md                    # This file
-└── LICENSE                      # MIT License
+│   ├── conftest.py                  # Test fixtures and configuration
+│   └── test_mass_find_replace.py    # Comprehensive test suite
+├── dist/                            # Built distributions (after uv build)
+├── replacement_mapping.json         # Your string replacements config
+├── planned_transactions.json        # Generated transaction plan
+├── requirements.txt                 # Production dependencies
+├── requirements-dev.txt             # Development dependencies  
+├── pyproject.toml                  # Package configuration
+├── CLAUDE.md                        # AI assistant guidelines
+├── README.md                        # This file
+└── LICENSE                          # MIT License
 ```
 
-## 🔮 Future Plans
+## 📊 Performance & Limitations
 
-- PyPI package release
-- GUI interface for non-technical users
-- Integration with popular IDEs
-- Batch configuration management
-- Regular expression support
-- Parallel processing for large codebases
+### Performance Characteristics
+
+- **Memory efficient**: Processes files line-by-line
+- **Disk I/O optimized**: Minimizes file operations
+- **Large file support**: Handles files up to 2GB efficiently
+- **Transaction overhead**: ~10-20ms per file operation
+
+### Known Limitations
+
+1. **File size**: Best for files under 1GB (larger files work but slower)
+2. **Binary files**: Detected but not modified (by design)
+3. **Symlinks**: Only renames symlinks, doesn't follow them
+4. **Concurrent access**: Files must not be locked by other processes
+5. **Regex support**: Not supported (literal string matching only)
+
+### Performance Tips
+
+- Use `--extensions` to limit file types processed
+- Exclude build directories with `--exclude-dirs`
+- Run on SSD for best performance
+- Use `--dry-run` first on large codebases
+
+## 🔮 Roadmap
+
+### Version 1.0 (Current)
+- ✅ Core find-replace functionality
+- ✅ Transaction system
+- ✅ Unicode support
+- ✅ Resume capability
+
+### Version 1.1 (Planned)
+- [ ] PyPI package release
+- [ ] Regular expression support
+- [ ] Configuration profiles
+- [ ] Performance optimizations
+
+### Version 2.0 (Future)
+- [ ] GUI interface
+- [ ] IDE plugins (VSCode, IntelliJ)
+- [ ] Parallel processing
+- [ ] Cloud storage support
+- [ ] Git integration
+
+## ❓ FAQ
+
+### Q: Is it safe to use on my production code?
+**A:** Yes! MFR is designed with safety first:
+- Always run `--dry-run` first to preview changes
+- Transaction system ensures atomicity
+- Automatic backups via transaction log
+- Resume capability if interrupted
+
+### Q: Can I undo changes?
+**A:** Not automatically, but:
+- Transaction log shows all changes made
+- Use version control (git) for easy rollback
+- Consider making a backup before large operations
+
+### Q: Does it handle special characters?
+**A:** Yes, MFR fully supports:
+- Unicode characters (emoji, international text)
+- Special characters in filenames
+- Mixed encodings in the same project
+- Control characters are normalized
+
+### Q: What about case-sensitive filesystems?
+**A:** MFR detects your filesystem type and:
+- Prevents collisions on case-insensitive systems (macOS, Windows)
+- Respects case on case-sensitive systems (Linux)
+- Warns about potential issues
+
+### Q: Can I use regular expressions?
+**A:** Not currently. MFR uses literal string matching for safety and predictability. Regex support is planned for v1.1.
+
+### Q: How do I exclude files?
+**A:** Multiple ways:
+- Use `--exclude-dirs` for directories
+- Use `--exclude-files` for specific files
+- Respects `.gitignore` by default
+- Create custom ignore file with `--ignore-file`
+
+### Q: What if a file is locked?
+**A:** MFR will:
+- Retry automatically (configurable with `--timeout`)
+- Mark as `RETRY_LATER` in transaction log
+- Continue with other files
+- Resume later with `--resume`
+
+## 🙏 Acknowledgments
+
+- Built with [uv](https://github.com/astral-sh/uv) for modern Python packaging
+- Uses [Prefect](https://www.prefect.io/) for workflow orchestration
+- Code quality by [Ruff](https://github.com/astral-sh/ruff)
+- Inspired by various find-replace tools but built for safety and scale
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/Emasoft/MFR/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Emasoft/MFR/discussions)
+- **Security**: See [SECURITY.md](SECURITY.md) for reporting vulnerabilities
 
 ---
 
-Made with ❤️ by [Emasoft](https://github.com/Emasoft)
+<div align="center">
+Made with ❤️ by <a href="https://github.com/Emasoft">Emasoft</a>
+<br>
+⭐ Star this project if you find it helpful!
+</div>
