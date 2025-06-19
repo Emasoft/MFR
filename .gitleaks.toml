@@ -22,6 +22,7 @@ paths = [
     # Documentation
     '''CLAUDE.*\.md''',
     '''README\.md''',
+    '''SECURITY\.md''',
     '''docs/.*\.md''',
     # Test files may have test data
     '''tests/.*\.py''',
