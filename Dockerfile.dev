@@ -1,0 +1,62 @@
+# syntax=docker/dockerfile:1
+# Development Dockerfile for Mass Find Replace with uv
+# Includes dev dependencies and tools
+
+# Use a Python slim image as base
+ARG PYTHON_VERSION=3.11
+FROM python:${PYTHON_VERSION}-slim AS base
+
+# Prevents Python from writing pyc files
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Keeps Python from buffering stdout and stderr
+ENV PYTHONUNBUFFERED=1
+
+# Install system dependencies for development
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    make \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a non-root user
+RUN useradd -m -u 1000 appuser
+
+WORKDIR /app
+
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+# Enable uv to use system Python
+ENV UV_SYSTEM_PYTHON=1
+
+# Install actionlint for GitHub Actions linting
+RUN curl -L https://github.com/rhysd/actionlint/releases/download/v1.7.7/actionlint_1.7.7_linux_amd64.tar.gz | tar xz -C /usr/local/bin && \
+    chmod +x /usr/local/bin/actionlint
+
+# Copy dependency files
+COPY pyproject.toml uv.lock ./
+
+# Install all dependencies including dev
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-install-project
+
+# Copy source code and configs
+COPY . .
+
+# Install the project in editable mode
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen
+
+# Install pre-commit hooks
+RUN uv run pre-commit install
+
+# Change ownership to non-root user
+RUN chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
+
+# Default command for development
+CMD ["/bin/bash"]

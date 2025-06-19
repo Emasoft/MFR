@@ -43,7 +43,8 @@ from prefect import flow
 from . import replace_logic
 
 # Type alias for logger types to avoid repetition
-LoggerType = Union[logging.Logger, logging.LoggerAdapter[logging.Logger], None]
+# Note: LoggerAdapter is not generic in Python 3.10, so we use Any
+LoggerType = Union[logging.Logger, Any, None]
 
 
 class SandboxViolationError(Exception):

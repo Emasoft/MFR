@@ -8,83 +8,85 @@ jobs:
   check-commits:
     name: Check Commit Messages
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    
-    - name: Check commit messages
-      run: |
-        # Check that commit messages follow conventional commits format
-        commits=$(git log --format=%s origin/${{ github.base_ref }}..HEAD)
-        
-        valid_types="feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert"
-        pattern="^($valid_types)(\(.+\))?: .+$"
-        
-        invalid_commits=""
-        while IFS= read -r commit; do
-          if [[ ! "$commit" =~ $pattern ]]; then
-            invalid_commits="$invalid_commits\n  - $commit"
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check commit messages
+        run: |
+          # Check that commit messages follow conventional commits format
+          commits=$(git log --format=%s origin/${{ github.base_ref }}..HEAD)
+          
+          valid_types="feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert"
+          pattern="^($valid_types)(\(.+\))?: .+$"
+          
+          invalid_commits=""
+          while IFS= read -r commit; do
+            if [[ ! "$commit" =~ $pattern ]]; then
+              invalid_commits="$invalid_commits\n  - $commit"
+            fi
+          done <<< "$commits"
+          
+          if [ -n "$invalid_commits" ]; then
+            echo "❌ Invalid commit messages found:"
+            echo -e "$invalid_commits"
+            echo ""
+            echo "Please use conventional commit format: <type>(<scope>): <description>"
+            echo "Valid types: $valid_types"
+            exit 1
           fi
-        done <<< "$commits"
-        
-        if [ -n "$invalid_commits" ]; then
-          echo "❌ Invalid commit messages found:"
-          echo -e "$invalid_commits"
-          echo ""
-          echo "Please use conventional commit format: <type>(<scope>): <description>"
-          echo "Valid types: $valid_types"
-          exit 1
-        fi
-        
-        echo "✅ All commit messages follow conventional commits format"
-  
+          
+          echo "✅ All commit messages follow conventional commits format"
+
   check-files:
     name: Check File Changes
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Check for large files
-      run: |
-        # Check for files larger than 1MB
-        large_files=$(find . -type f -size +1M -not -path "./.git/*" -not -path "./dist/*" -not -path "./.venv/*" -not -path "./venv/*")
-        
-        if [ -n "$large_files" ]; then
-          echo "❌ Large files (>1MB) found:"
-          echo "$large_files"
-          echo ""
-          echo "Please use Git LFS for large files or exclude them from the repository"
-          exit 1
-        fi
-        
-        echo "✅ No large files found"
-    
-    - name: Check for merge conflicts
-      run: |
-        if grep -r "^<<<<<<< \|^======= \|^>>>>>>> " . --exclude-dir=.git; then
-          echo "❌ Merge conflict markers found"
-          exit 1
-        fi
-        
-        echo "✅ No merge conflict markers found"
-    
-    - name: Check Python file headers
-      run: |
-        # Check that all Python files have proper headers
-        missing_headers=""
-        
-        for file in $(find . -name "*.py" -not -path "./.venv/*" -not -path "./venv/*" -not -path "./.git/*"); do
-          if ! head -n 1 "$file" | grep -q "^#!/usr/bin/env python3$"; then
-            missing_headers="$missing_headers\n  - $file"
+      - uses: actions/checkout@v4
+
+      - name: Check for large files
+        run: |
+          # Check for files larger than 1MB
+          large_files=$(find . -type f -size +1M -not -path "./.git/*" \
+            -not -path "./dist/*" -not -path "./.venv/*" -not -path "./venv/*")
+          
+          if [ -n "$large_files" ]; then
+            echo "❌ Large files (>1MB) found:"
+            echo "$large_files"
+            echo ""
+            echo "Please use Git LFS for large files or exclude them from the repository"
+            exit 1
           fi
-        done
-        
-        if [ -n "$missing_headers" ]; then
-          echo "⚠️  Python files missing shebang:"
-          echo -e "$missing_headers"
-          echo ""
-          echo "Consider adding '#!/usr/bin/env python3' to the first line"
-        fi
+          
+          echo "✅ No large files found"
+
+      - name: Check for merge conflicts
+        run: |
+          if grep -r "^<<<<<<< \|^======= \|^>>>>>>> " . --exclude-dir=.git; then
+            echo "❌ Merge conflict markers found"
+            exit 1
+          fi
+          
+          echo "✅ No merge conflict markers found"
+
+      - name: Check Python file headers
+        run: |
+          # Check that all Python files have proper headers
+          missing_headers=""
+          
+          for file in $(find . -name "*.py" -not -path "./.venv/*" \
+            -not -path "./venv/*" -not -path "./.git/*"); do
+            if ! head -n 1 "$file" | grep -q "^#!/usr/bin/env python3$"; then
+              missing_headers="$missing_headers\n  - $file"
+            fi
+          done
+          
+          if [ -n "$missing_headers" ]; then
+            echo "⚠️  Python files missing shebang:"
+            echo -e "$missing_headers"
+            echo ""
+            echo "Consider adding '#!/usr/bin/env python3' to the first line"
+          fi

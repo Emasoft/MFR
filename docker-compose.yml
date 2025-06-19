@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  mfr:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_VERSION: "3.11"
+    image: mass-find-replace:latest
+    volumes:
+      - ./workspace:/workspace
+    working_dir: /workspace
+    environment:
+      - UV_SYSTEM_PYTHON=1
+    command: ["--dry-run"]
+
+  mfr-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        PYTHON_VERSION: "3.11"
+    image: mass-find-replace:dev
+    volumes:
+      - .:/app
+      - ./workspace:/workspace
+    working_dir: /app
+    environment:
+      - UV_SYSTEM_PYTHON=1
+    stdin_open: true
+    tty: true
+    command: /bin/bash
+
+  # Service for running tests
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: ["uv", "run", "pytest", "-v"]
+
+  # Service for running linters
+  lint:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: ["uv", "run", "pre-commit", "run", "--all-files"]
