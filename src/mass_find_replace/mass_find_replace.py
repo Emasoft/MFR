@@ -439,8 +439,6 @@ def main_flow(
         print(f"Skip Content Modification: {skip_content}")
         print(f"Retry Timeout: {timeout_minutes} minutes (0 for indefinite retries)")
         print(f"{BLUE}-------------------------{RESET}")
-        import sys
-
         sys.stdout.flush()
         if (
             not replace_logic._RAW_REPLACEMENT_MAPPING

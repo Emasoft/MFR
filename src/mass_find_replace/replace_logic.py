@@ -420,6 +420,14 @@ def _actual_replace_callback(match: re.Match[str]) -> str:
 
 
 def replace_occurrences(input_string: str) -> str:
+    """Replace all occurrences of mapped strings in the input.
+
+    Args:
+        input_string: String to process for replacements
+
+    Returns:
+        String with all replacements applied
+    """
     if _DEBUG_REPLACE_LOGIC:
         entry_debug_msg = (
             f"REPLACE_OCC_ENTRY: input='{input_string[:30] if isinstance(input_string, str) else str(input_string)[:30]}...', "

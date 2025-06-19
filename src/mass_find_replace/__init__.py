@@ -8,7 +8,7 @@
 
 """Mass Find Replace - Surgical find-and-replace operations."""
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __author__ = "Emasoft"
 __email__ = "713559+Emasoft@users.noreply.github.com"
 

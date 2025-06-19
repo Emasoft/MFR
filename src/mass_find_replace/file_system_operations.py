@@ -1037,7 +1037,11 @@ def _execute_content_line_transaction(
 
         # Read file with original encoding
         with open(
-            current_abs_path, "r", encoding=file_encoding, errors="surrogateescape"
+            current_abs_path,
+            "r",
+            encoding=file_encoding,
+            errors="surrogateescape",
+            newline="",
         ) as f:
             lines = f.readlines()  # Preserve line endings
 
@@ -1060,7 +1064,11 @@ def _execute_content_line_transaction(
 
         # Write back with same encoding
         with open(
-            current_abs_path, "w", encoding=file_encoding, errors="surrogateescape"
+            current_abs_path,
+            "w",
+            encoding=file_encoding,
+            errors="surrogateescape",
+            newline="",
         ) as f:
             f.writelines(lines)
 
@@ -1097,7 +1105,11 @@ def _execute_file_content_batch(
             return (0, 0, len(transactions))
 
         with open(
-            abs_filepath, "r", encoding=file_encoding, errors="surrogateescape"
+            abs_filepath,
+            "r",
+            encoding=file_encoding,
+            errors="surrogateescape",
+            newline="",
         ) as f:
             lines = f.readlines()
 
@@ -1118,7 +1130,11 @@ def _execute_file_content_batch(
 
         # Write back
         with open(
-            abs_filepath, "w", encoding=file_encoding, errors="surrogateescape"
+            abs_filepath,
+            "w",
+            encoding=file_encoding,
+            errors="surrogateescape",
+            newline="",
         ) as f:
             f.writelines(lines)
 
@@ -1186,10 +1202,18 @@ def process_large_file_content(
 
     try:
         with open(
-            abs_filepath, "r", encoding=file_encoding, errors="surrogateescape"
+            abs_filepath,
+            "r",
+            encoding=file_encoding,
+            errors="surrogateescape",
+            newline="",
         ) as src_file:
             with open(
-                temp_file, "w", encoding=file_encoding, errors="surrogateescape"
+                temp_file,
+                "w",
+                encoding=file_encoding,
+                errors="surrogateescape",
+                newline="",
             ) as dst_file:
                 # Track state between lines
                 current_line = 1
@@ -1239,8 +1263,7 @@ def process_large_file_content(
                             split_pos = end_idx
                             search_pos = min(end_idx - 1, len(current_line_content) - 1)
 
-                            # Get key characters from replace_logic module
-                            key_characters = replace_logic.get_key_characters()
+                            # Use key characters already obtained at the start of the function
 
                             while search_pos >= buffer_idx:
                                 if (
