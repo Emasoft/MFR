@@ -46,7 +46,7 @@ jobs:
 
           # Enable all by default, then disable what we don't need
           # This avoids the "mixed mode" error from super-linter
-          
+
           # Python - disable conflicting linters (we use ruff)
           VALIDATE_PYTHON_BLACK: false  # Using ruff format instead
           VALIDATE_PYTHON_FLAKE8: false  # Using ruff instead
