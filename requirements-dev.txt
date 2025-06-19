@@ -167,6 +167,7 @@ pathspec==0.12.1
     #   mass-find-replace (pyproject.toml)
     #   mypy
     #   prefect
+    #   yamllint
 pendulum==3.1.0
     # via prefect
 platformdirs==4.3.8
@@ -227,6 +228,7 @@ pyyaml==6.0.2
     #   apprise
     #   pre-commit
     #   prefect
+    #   yamllint
 readchar==4.2.1
     # via prefect
 referencing==0.36.2
@@ -333,5 +335,7 @@ virtualenv==20.31.2
     # via pre-commit
 websockets==15.0.1
     # via prefect
+yamllint==1.37.1
+    # via mass-find-replace (pyproject.toml)
 zipp==3.23.0
     # via importlib-metadata
