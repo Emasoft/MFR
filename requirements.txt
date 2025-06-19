@@ -227,7 +227,7 @@ sqlalchemy==2.0.41
     # via
     #   alembic
     #   prefect
-starlette==0.46.2
+starlette==0.47.0
     # via fastapi
 striprtf==0.0.29
     # via mass-find-replace (pyproject.toml)
