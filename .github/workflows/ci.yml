@@ -51,6 +51,9 @@ jobs:
           --pretty \
           --show-error-codes \
           --show-error-code-links
+    
+    - name: Run deptry dependency check
+      run: uv run deptry src
 
   test:
     name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}

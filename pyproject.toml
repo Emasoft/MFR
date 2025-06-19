@@ -46,6 +46,7 @@ dev = [
     "pytest-cov>=6.0.0",
     "mypy>=1.0.0",
     "ruff>=0.5.0",
+    "deptry>=0.23.0",
 ]
 
 [build-system]
@@ -80,3 +81,17 @@ python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 explicit_package_bases = true
+
+[tool.deptry]
+# Ignore development dependencies that are not imported in source code
+ignore = ["DEP001", "DEP003"]  # Missing and transitive dependencies
+extend_exclude = [
+    "tests",
+    "docs",
+    "build",
+    "dist",
+]
+known_first_party = ["mass_find_replace"]
+
+[tool.deptry.per_rule_ignores]
+DEP002 = ["pytest", "pytest-cov", "mypy", "ruff", "deptry"]  # Development tools not used in source

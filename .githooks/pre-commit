@@ -1,22 +1,84 @@
 #!/bin/bash
-# Gitleaks pre-commit hook
-# This hook runs gitleaks to detect secrets before committing
+# Pre-commit hook for Mass Find Replace
+# This hook runs security and dependency checks before committing
 
-echo "🔍 Running Gitleaks to check for secrets..."
+# Color codes for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m' # No Color
 
-# Run gitleaks on staged files
-gitleaks protect --staged --config .gitleaks.toml --verbose
+# Track overall status
+OVERALL_STATUS=0
 
-# Capture the exit code
-RESULT=$?
+# Function to run a check and handle the result
+run_check() {
+    local check_name=$1
+    local check_command=$2
+    local check_description=$3
+    
+    echo -e "\n🔍 Running ${check_name}..."
+    echo -e "   ${check_description}"
+    
+    # Run the command and capture output
+    output=$(eval "$check_command" 2>&1)
+    local result=$?
+    
+    if [ $result -ne 0 ]; then
+        echo -e "${RED}❌ ${check_name} failed!${NC}"
+        echo "$output"
+        OVERALL_STATUS=1
+    else
+        echo -e "${GREEN}✅ ${check_name} passed${NC}"
+    fi
+    
+    return $result
+}
 
-if [ $RESULT -ne 0 ]; then
-    echo "❌ Gitleaks detected secrets in your staged files!"
-    echo "   Please remove the secrets before committing."
-    echo "   Run 'gitleaks protect --staged --config .gitleaks.toml --verbose' to see details."
-    exit 1
+# 1. Run Gitleaks to check for secrets
+run_check "Gitleaks" \
+    "gitleaks protect --staged --config .gitleaks.toml --verbose" \
+    "Checking for secrets in staged files..."
+
+# 2. Run deptry to check dependencies
+# Check if we're in a virtual environment
+if [ -n "$VIRTUAL_ENV" ] || [ -d ".venv" ] || [ -d "venv" ]; then
+    # Check if deptry is installed
+    if uv run python -c "import deptry" 2>/dev/null; then
+        run_check "deptry" \
+            "uv run deptry src" \
+            "Checking for dependency issues (unused, missing, transitive)..."
+    else
+        echo -e "${YELLOW}⚠️  Skipping deptry check - not installed${NC}"
+        echo "   Install with: uv pip install deptry"
+    fi
 else
-    echo "✅ No secrets detected by Gitleaks"
+    echo -e "${YELLOW}⚠️  Skipping deptry check - no virtual environment detected${NC}"
+    echo "   Activate your virtual environment to enable dependency checking"
 fi
 
-exit 0
+# 3. Run ruff linting on staged Python files
+# Get list of staged Python files
+staged_py_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.py$' || true)
+
+if [ -n "$staged_py_files" ]; then
+    run_check "ruff" \
+        "uv run ruff check $staged_py_files" \
+        "Linting staged Python files..."
+    
+    # Also check formatting
+    run_check "ruff format" \
+        "uv run ruff format --check $staged_py_files" \
+        "Checking code formatting..."
+else
+    echo -e "\n📝 No Python files staged for commit"
+fi
+
+# Exit with overall status
+if [ $OVERALL_STATUS -ne 0 ]; then
+    echo -e "\n${RED}❌ Pre-commit checks failed! Please fix the issues above before committing.${NC}"
+    exit 1
+else
+    echo -e "\n${GREEN}✅ All pre-commit checks passed!${NC}"
+    exit 0
+fi
