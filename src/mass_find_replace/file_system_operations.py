@@ -16,6 +16,8 @@
 # This software is licensed under the MIT License.
 # Refer to the LICENSE file for more details.
 
+from __future__ import annotations
+
 import os
 import json
 import uuid
