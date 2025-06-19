@@ -48,6 +48,7 @@ dev = [
     "ruff>=0.5.0",
     "deptry>=0.23.0",
     "pre-commit>=4.0.0",
+    "yamllint>=1.35.0",
 ]
 
 [build-system]
@@ -95,4 +96,4 @@ extend_exclude = [
 known_first_party = ["mass_find_replace"]
 
 [tool.deptry.per_rule_ignores]
-DEP002 = ["pytest", "pytest-cov", "mypy", "ruff", "deptry", "pre-commit"]  # Development tools not used in source
+DEP002 = ["pytest", "pytest-cov", "mypy", "ruff", "deptry", "pre-commit", "yamllint"]  # Development tools not used in source

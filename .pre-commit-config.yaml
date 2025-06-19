@@ -51,12 +51,16 @@ repos:
           - types-chardet
           - prefect
 
-  # Deptry for dependency checking
-  - repo: https://github.com/fpgmaas/deptry
-    rev: 0.23.0
+  # Deptry for dependency checking (run with uv)
+  - repo: local
     hooks:
       - id: deptry
-        args: [--config, pyproject.toml]
+        name: deptry
+        entry: uv run deptry
+        language: system
+        pass_filenames: false
+        files: ^(src/|pyproject\.toml)$
+        args: [src]
 
   # Standard pre-commit hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -80,11 +84,14 @@ repos:
       - id: pretty-format-json
         args: [--autofix, --no-sort-keys]
 
-  # YAML linting
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.37.1
+  # YAML linting (run with uv)
+  - repo: local
     hooks:
       - id: yamllint
+        name: yamllint
+        entry: uv run yamllint
+        language: system
+        types: [yaml]
         args: [-c=.yamllint.yml]
 
   # Shell script linting
@@ -94,11 +101,14 @@ repos:
       - id: shellcheck
         args: [--severity=error]
 
-  # GitHub Actions linting
-  - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.7
+  # GitHub Actions linting (run with uv)
+  - repo: local
     hooks:
       - id: actionlint
+        name: actionlint
+        entry: uv run actionlint
+        language: system
+        files: ^\.github/workflows/.*\.(yml|yaml)$
 
 
 # Configuration for specific hooks

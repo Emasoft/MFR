@@ -107,3 +107,8 @@ gitleaks-report.sarif
 
 # Hook backups
 .githooks.backup/
+
+# act (GitHub Actions local testing)
+.act/
+.actrc.local
+.env.local

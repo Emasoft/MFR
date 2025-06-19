@@ -1,0 +1,22 @@
+# act configuration for running GitHub Actions locally
+# Use medium size Ubuntu runner image (has more tools pre-installed)
+--platform ubuntu-latest=catthehacker/ubuntu:act-latest
+--platform ubuntu-22.04=catthehacker/ubuntu:act-22.04
+--platform ubuntu-20.04=catthehacker/ubuntu:act-20.04
+
+# Use Docker to simulate GitHub Actions environment
+--container-architecture linux/amd64
+
+# Set default environment variables
+# GITHUB_TOKEN should be set in .env.local file
+--env UV_SYSTEM_PYTHON=true
+--env UV_CACHE_DIR=/tmp/.uv-cache
+
+# Bind mount the project directory
+--bind
+
+# Use local .env file if present
+--env-file .env.local
+
+# Reuse containers between runs for faster execution
+--reuse
