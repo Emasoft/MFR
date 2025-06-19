@@ -8,6 +8,25 @@ target-version = "py310"
 # Line length to match yamllint config
 line-length = 120
 
+# Exclude paths
+exclude = [
+    ".venv",
+    "venv",
+    "env",
+    ".env",
+    "node_modules",
+    "dist",
+    "build",
+    ".eggs",
+    ".pytest_cache",
+    ".mypy_cache", 
+    ".git",
+    ".act",
+    "__pycache__",
+    "*.egg-info",
+]
+
+[lint]
 # Select rules - using the defaults plus some additional ones
 select = [
     "E",   # pycodestyle errors
@@ -43,32 +62,57 @@ ignore = [
     "UP015", # Unnecessary open mode parameters
     "C901",  # Function too complex
     "W291",  # Trailing whitespace
+    # Additional project-specific ignores
+    "PLR0913", # Too many arguments in function definition
+    "PLR0912", # Too many branches
+    "PLR0915", # Too many statements
+    "PLR0911", # Too many return statements
+    "PLR2004", # Magic value used in comparison
+    "B007",    # Loop control variable not used within loop body
+    "PTH123",  # open() should be replaced by Path.open()
+    "TC003",   # Move standard library import into a type-checking block
+    "TC001",   # Move application import into a type-checking block
+    "TC002",   # Move third-party import into a type-checking block
+    "UP007",   # Use X | Y for type annotations (not supported in Python 3.10)
+    "UP035",   # typing.List is deprecated
+    "B011",    # Do not assert False
+    "S101",    # Use of assert detected
+    "S105",    # Possible hardcoded password
+    "S106",    # Possible hardcoded password
+    "S107",    # Possible hardcoded password
+    "S108",    # Probable insecure usage of temp file/directory
+    "S603",    # subprocess without shell equals true
+    "S607",    # Starting a process with a partial executable path
+    "T201",    # print found
+    "T203",    # pprint found
+    "N806",    # Variable in function should be lowercase
+    "SIM118",  # Use `key in dict` instead of `key in dict.keys()`
+    "RET504",  # Unnecessary assignment before return
+    "PTH100",  # os.path.abspath() should be replaced by Path.resolve()
+    "PTH118",  # os.path.join() should be replaced by / operator
+    "PTH119",  # os.path.basename() should be replaced by Path.name
+    "PTH120",  # os.path.dirname() should be replaced by Path.parent
+    "UP006",   # Use `list` instead of `List` for type annotation
+    "UP037",   # Remove quotes from type annotation
+    "SIM102",  # Use a single `if` statement instead of nested `if` statements
+    "SIM117",  # Use single `with` statement
+    "SIM108",  # Use ternary operator
+    "PLW0603", # Using global statement
+    "PLW0602", # Using global for but no assignment
+    "PLE0704", # Bare raise statement not inside exception handler
+    "C403",    # Unnecessary list comprehension
+    "PTH101",  # os.chmod() should be replaced
+    "PTH104",  # os.rename() should be replaced
+    "PTH105",  # os.replace() should be replaced
+    "PTH107",  # os.remove() should be replaced
+    "PLC0415", # import should be at the top-level of a file
 ]
 
-# Exclude paths
-exclude = [
-    ".venv",
-    "venv",
-    "env",
-    ".env",
-    "node_modules",
-    "dist",
-    "build",
-    ".eggs",
-    ".pytest_cache",
-    ".mypy_cache", 
-    ".git",
-    ".act",
-    "__pycache__",
-    "*.egg-info",
-]
+[lint.isort]
+known-first-party = ["mass_find_replace"]
 
 # Format settings
 [format]
 quote-style = "double"
 indent-style = "space"
 docstring-code-format = true
-
-# Import settings
-[isort]
-known-first-party = ["mass_find_replace"]

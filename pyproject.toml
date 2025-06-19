@@ -97,3 +97,8 @@ known_first_party = ["mass_find_replace"]
 
 [tool.deptry.per_rule_ignores]
 DEP002 = ["pytest", "pytest-cov", "mypy", "ruff", "deptry", "pre-commit", "yamllint"]  # Development tools not used in source
+
+[dependency-groups]
+dev = [
+    "types-chardet>=5.0.4.6",
+]

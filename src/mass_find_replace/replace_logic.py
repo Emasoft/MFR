@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # HERE IS THE CHANGELOG FOR THIS VERSION OF THE CODE:
 # - Fixed regex pattern compilation in load_replacement_map to properly escape keys containing regex special characters.
@@ -22,22 +21,12 @@ import logging
 import sys  # For sys.stdout/stderr in fallback logger
 
 # --- Module-level state ---
-_RAW_REPLACEMENT_MAPPING: dict[
-    str, str
-] = {}  # Stores (normalized stripped key) -> (stripped value) from JSON.
-_COMPILED_PATTERN_FOR_SCAN: re.Pattern[str] | None = (
-    None  # For initial scan. Now case-sensitive.
-)
+_RAW_REPLACEMENT_MAPPING: dict[str, str] = {}  # Stores (normalized stripped key) -> (stripped value) from JSON.
+_COMPILED_PATTERN_FOR_SCAN: re.Pattern[str] | None = None  # For initial scan. Now case-sensitive.
 _MAPPING_LOADED: bool = False
-_SORTED_RAW_KEYS_FOR_REPLACE: list[
-    str
-] = []  # Normalized stripped keys, sorted by length desc.
-_COMPILED_PATTERN_FOR_ACTUAL_REPLACE: re.Pattern[str] | None = (
-    None  # For actual replacement. Now case-sensitive.
-)
-_MODULE_LOGGER: logging.Logger | logging.LoggerAdapter[logging.Logger] | None = (
-    None  # Module-level logger instance
-)
+_SORTED_RAW_KEYS_FOR_REPLACE: list[str] = []  # Normalized stripped keys, sorted by length desc.
+_COMPILED_PATTERN_FOR_ACTUAL_REPLACE: re.Pattern[str] | None = None  # For actual replacement. Now case-sensitive.
+_MODULE_LOGGER: logging.Logger | logging.LoggerAdapter[logging.Logger] | None = None  # Module-level logger instance
 _KEY_CHARACTER_SET: set[str] = set()
 
 # --- START DEBUG CONFIG ---
@@ -170,9 +159,7 @@ def load_replacement_map(
         )
         return False
     except json.JSONDecodeError as e:
-        _log_message(
-            logging.ERROR, f"Invalid JSON in replacement mapping file: {e}", logger
-        )
+        _log_message(logging.ERROR, f"Invalid JSON in replacement mapping file: {e}", logger)
         return False
     except Exception as e:
         _log_message(
@@ -208,9 +195,7 @@ def load_replacement_map(
             continue
 
         temp_stripped_key_no_controls = strip_control_characters(k_orig_json)
-        temp_stripped_key_no_diacritics = strip_diacritics(
-            temp_stripped_key_no_controls
-        )
+        temp_stripped_key_no_diacritics = strip_diacritics(temp_stripped_key_no_controls)
         canonical_key = unicodedata.normalize("NFC", temp_stripped_key_no_diacritics)
 
         if not canonical_key:
@@ -275,16 +260,9 @@ def load_replacement_map(
 
     all_canonical_keys_for_recursion_check = set(_RAW_REPLACEMENT_MAPPING.keys())
     for key_canonical, value_original_from_map in _RAW_REPLACEMENT_MAPPING.items():
-        value_stripped_for_check = strip_control_characters(
-            strip_diacritics(value_original_from_map)
-        )
-        normalized_value_stripped_for_check = unicodedata.normalize(
-            "NFC", value_stripped_for_check
-        )
-        if (
-            normalized_value_stripped_for_check
-            in all_canonical_keys_for_recursion_check
-        ):
+        value_stripped_for_check = strip_control_characters(strip_diacritics(value_original_from_map))
+        normalized_value_stripped_for_check = unicodedata.normalize("NFC", value_stripped_for_check)
+        if normalized_value_stripped_for_check in all_canonical_keys_for_recursion_check:
             original_json_key_for_error_report = key_canonical
             for orig_k_json, orig_v_json in raw_mapping_from_json.items():
                 temp_s_k = strip_control_characters(strip_diacritics(orig_k_json))
@@ -301,14 +279,10 @@ def load_replacement_map(
             return False
 
     # STORE SORTED KEYS (by longest first) for binary scanning and in what order?
-    _SORTED_RAW_KEYS_FOR_REPLACE = sorted(
-        _RAW_REPLACEMENT_MAPPING.keys(), key=len, reverse=True
-    )
+    _SORTED_RAW_KEYS_FOR_REPLACE = sorted(_RAW_REPLACEMENT_MAPPING.keys(), key=len, reverse=True)
 
     # Fix: Properly escape keys for regex pattern compilation to handle special regex characters
-    pattern_keys_for_scan_and_replace: list[str] = [
-        re.escape(k) for k in _SORTED_RAW_KEYS_FOR_REPLACE
-    ]
+    pattern_keys_for_scan_and_replace: list[str] = [re.escape(k) for k in _SORTED_RAW_KEYS_FOR_REPLACE]
     # pattern_keys_for_scan_and_replace.sort(key=len, reverse=True)  -> No need to sort again
 
     combined_pattern_str = r"(" + r"|".join(pattern_keys_for_scan_and_replace) + r")"
@@ -403,22 +377,19 @@ def _actual_replace_callback(match: re.Match[str]) -> str:
             _MODULE_LOGGER,
         )
         return replacement_value
-    else:
-        warning_msg = (
-            f"REPLACE_LOGIC_WARN_CALLBACK_LOOKUP_FAILED: lookup_key '{lookup_key}' (ords={[ord(c) for c in lookup_key]}) "
-            f"derived from matched_text_from_input '{matched_text_from_input}' (ords={[ord(c) for c in matched_text_from_input]}) "
-            f"NOT FOUND in _RAW_REPLACEMENT_MAPPING (size: {len(_RAW_REPLACEMENT_MAPPING)}). "
-            f"Returning original matched text."
-        )
-        _log_message(
-            logging.WARNING, warning_msg, _MODULE_LOGGER
-        )  # Goes to main logger or print
-        _log_message(
-            logging.DEBUG,
-            f"  Full _RAW_REPLACEMENT_MAPPING keys (first 20): {list(_RAW_REPLACEMENT_MAPPING.keys())[:20]}...",
-            _MODULE_LOGGER,
-        )  # Goes to stderr if _DEBUG_REPLACE_LOGIC
-        return matched_text_from_input
+    warning_msg = (
+        f"REPLACE_LOGIC_WARN_CALLBACK_LOOKUP_FAILED: lookup_key '{lookup_key}' (ords={[ord(c) for c in lookup_key]}) "
+        f"derived from matched_text_from_input '{matched_text_from_input}' (ords={[ord(c) for c in matched_text_from_input]}) "
+        f"NOT FOUND in _RAW_REPLACEMENT_MAPPING (size: {len(_RAW_REPLACEMENT_MAPPING)}). "
+        f"Returning original matched text."
+    )
+    _log_message(logging.WARNING, warning_msg, _MODULE_LOGGER)  # Goes to main logger or print
+    _log_message(
+        logging.DEBUG,
+        f"  Full _RAW_REPLACEMENT_MAPPING keys (first 20): {list(_RAW_REPLACEMENT_MAPPING.keys())[:20]}...",
+        _MODULE_LOGGER,
+    )  # Goes to stderr if _DEBUG_REPLACE_LOGIC
+    return matched_text_from_input
 
 
 def replace_occurrences(input_string: str) -> str:
@@ -475,9 +446,7 @@ def replace_occurrences(input_string: str) -> str:
         )
 
     # Perform actual replacement using the normalized version
-    result = _COMPILED_PATTERN_FOR_ACTUAL_REPLACE.sub(
-        _actual_replace_callback, normalized_input
-    )
+    result = _COMPILED_PATTERN_FOR_ACTUAL_REPLACE.sub(_actual_replace_callback, normalized_input)
     _log_message(
         logging.DEBUG,
         f"DEBUG_REPLACE_OCCURRENCES: Result after replacement: {result!r}",

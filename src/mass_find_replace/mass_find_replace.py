@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # HERE IS THE CHANGELOG FOR THIS VERSION OF THE CODE:
 # - Consolidated redundant empty map checks into a single check in main_flow.
 # - Removed unused skip_scan parameter from execute_all_transactions call.
@@ -30,9 +29,7 @@ from .file_system_operations import (
     COLLISIONS_ERRORS_LOG_FILE,
 )
 
-SCRIPT_NAME = (
-    "MFR - Mass Find Replace - A script to safely rename things in your project"
-)
+SCRIPT_NAME = "MFR - Mass Find Replace - A script to safely rename things in your project"
 MAIN_TRANSACTION_FILE_NAME = "planned_transactions.json"
 DEFAULT_REPLACEMENT_MAPPING_FILE = "replacement_mapping.json"
 
@@ -59,7 +56,7 @@ def _get_logger(
             logger = get_run_logger()
             if verbose_mode:
                 logger.setLevel(logging.DEBUG)
-            return logger
+            return logger  # type: ignore[no-any-return]
         except MissingContextError:
             pass
     except ImportError:
@@ -86,7 +83,7 @@ def _print_mapping_table(
         return
 
     # Calculate column widths
-    max_key_len = max(len(k) for k in mapping.keys())
+    max_key_len = max(len(k) for k in mapping)
     max_val_len = max(len(v) for v in mapping.values())
     col1_width = max(max_key_len, 15)
     col2_width = max(max_val_len, 15)
@@ -103,29 +100,17 @@ def _print_mapping_table(
     t_up = "┻"
 
     # Print table
-    print(
-        f"\n{top_left}{horizontal * (col1_width + 2)}{t_down}{horizontal * (col2_width + 2)}{top_right}"
-    )
-    print(
-        f"{vertical} {'Search'.center(col1_width)} {vertical} {'Replace'.center(col2_width)} {vertical}"
-    )
-    print(
-        f"{vertical}{horizontal * (col1_width + 2)}{cross}{horizontal * (col2_width + 2)}{vertical}"
-    )
+    print(f"\n{top_left}{horizontal * (col1_width + 2)}{t_down}{horizontal * (col2_width + 2)}{top_right}")
+    print(f"{vertical} {'Search'.center(col1_width)} {vertical} {'Replace'.center(col2_width)} {vertical}")
+    print(f"{vertical}{horizontal * (col1_width + 2)}{cross}{horizontal * (col2_width + 2)}{vertical}")
 
     for key, value in mapping.items():
-        print(
-            f"{vertical} {key.ljust(col1_width)} {vertical} {value.ljust(col2_width)} {vertical}"
-        )
+        print(f"{vertical} {key.ljust(col1_width)} {vertical} {value.ljust(col2_width)} {vertical}")
 
-    print(
-        f"{bottom_left}{horizontal * (col1_width + 2)}{t_up}{horizontal * (col2_width + 2)}{bottom_right}"
-    )
+    print(f"{bottom_left}{horizontal * (col1_width + 2)}{t_up}{horizontal * (col2_width + 2)}{bottom_right}")
 
 
-def _get_operation_description(
-    skip_file: bool, skip_folder: bool, skip_content: bool
-) -> str:
+def _get_operation_description(skip_file: bool, skip_folder: bool, skip_content: bool) -> str:
     """Get human-readable description of operations to be performed."""
     operations = []
     if not skip_folder:
@@ -137,12 +122,11 @@ def _get_operation_description(
 
     if not operations:
         return "nothing (all operations skipped)"
-    elif len(operations) == 1:
+    if len(operations) == 1:
         return operations[0]
-    elif len(operations) == 2:
+    if len(operations) == 2:
         return f"{operations[0]} and {operations[1]}"
-    else:
-        return f"{', '.join(operations[:-1])}, and {operations[-1]}"
+    return f"{', '.join(operations[:-1])}, and {operations[-1]}"
 
 
 def _check_existing_transactions(
@@ -159,11 +143,7 @@ def _check_existing_transactions(
             return False, 0
 
         total = len(transactions)
-        completed = sum(
-            1
-            for tx in transactions
-            if tx.get("STATUS") == TransactionStatus.COMPLETED.value
-        )
+        completed = sum(1 for tx in transactions if tx.get("STATUS") == TransactionStatus.COMPLETED.value)
         progress = int((completed / total) * 100) if total > 0 else 0
 
         # Check if all are completed
@@ -175,7 +155,7 @@ def _check_existing_transactions(
         return False, 0
 
 
-@flow(name="Mass Find Replace")
+@flow(name="Mass Find Replace")  # type: ignore[misc]
 def main_flow(
     directory: str,
     mapping_file: str,
@@ -231,9 +211,7 @@ def main_flow(
     if not quiet_mode and not resume and not skip_scan:
         has_existing, progress = _check_existing_transactions(abs_root_dir, logger)
         if has_existing:
-            print(
-                f"\n{YELLOW}An incomplete previous run was detected ({progress}% completed).{RESET}"
-            )
+            print(f"\n{YELLOW}An incomplete previous run was detected ({progress}% completed).{RESET}")
             choice = input("Do you want to resume it? (y/n): ").strip().lower()
             if choice == "y":
                 resume = True
@@ -250,9 +228,7 @@ def main_flow(
                     return
 
     if skip_file_renaming and skip_folder_renaming and skip_content:
-        logger.info(
-            "All processing types (file rename, folder rename, content) are skipped. Nothing to do."
-        )
+        logger.info("All processing types (file rename, folder rename, content) are skipped. Nothing to do.")
         return
 
     try:
@@ -260,9 +236,7 @@ def main_flow(
             logger.info(f"Target directory '{abs_root_dir}' is empty. Nothing to do.")
             return
     except FileNotFoundError:
-        logger.error(
-            f"Error: Root directory '{abs_root_dir}' disappeared before empty check."
-        )
+        logger.error(f"Error: Root directory '{abs_root_dir}' disappeared before empty check.")
         return
     except OSError as e:
         logger.error(f"Error accessing directory '{abs_root_dir}' for empty check: {e}")
@@ -276,15 +250,11 @@ def main_flow(
         return
 
     if not map_file_path.is_file():
-        logger.error(
-            f"Error: Mapping file '{map_file_path}' not found or is not a file."
-        )
+        logger.error(f"Error: Mapping file '{map_file_path}' not found or is not a file.")
         return
 
     if not replace_logic.load_replacement_map(map_file_path, logger=logger):
-        logger.error(
-            f"Aborting due to issues with replacement mapping file: {map_file_path}"
-        )
+        logger.error(f"Aborting due to issues with replacement mapping file: {map_file_path}")
         return
 
     # Type-safety reinforcement
@@ -293,22 +263,14 @@ def main_flow(
         return
 
     if not replace_logic._MAPPING_LOADED:
-        logger.error(
-            f"Critical Error: Map {map_file_path} not loaded by replace_logic."
-        )
+        logger.error(f"Critical Error: Map {map_file_path} not loaded by replace_logic.")
         return
 
     # Display mapping table and get confirmation (unless in quiet mode or force mode)
-    if (
-        not quiet_mode
-        and not force_execution
-        and replace_logic._RAW_REPLACEMENT_MAPPING
-    ):
+    if not quiet_mode and not force_execution and replace_logic._RAW_REPLACEMENT_MAPPING:
         _print_mapping_table(replace_logic._RAW_REPLACEMENT_MAPPING, logger)
 
-        operations_desc = _get_operation_description(
-            skip_file_renaming, skip_folder_renaming, skip_content
-        )
+        operations_desc = _get_operation_description(skip_file_renaming, skip_folder_renaming, skip_content)
         print(
             f"\n{BLUE}This will replace the strings in the 'Search' column with those in the 'Replace' column.{RESET}"
         )
@@ -329,15 +291,10 @@ def main_flow(
                 "Map is empty and no operations are configured that would proceed without map rules. Nothing to execute."
             )
             return
-        else:
-            logger.info("Map is empty. No string-based replacements will occur.")
+        logger.info("Map is empty. No string-based replacements will occur.")
 
-    elif (
-        not replace_logic.get_scan_pattern() and replace_logic._RAW_REPLACEMENT_MAPPING
-    ):
-        logger.error(
-            "Critical Error: Map loaded but scan regex pattern compilation failed or resulted in no patterns."
-        )
+    elif not replace_logic.get_scan_pattern() and replace_logic._RAW_REPLACEMENT_MAPPING:
+        logger.error("Critical Error: Map loaded but scan regex pattern compilation failed or resulted in no patterns.")
         return
 
     txn_json_path: Path = abs_root_dir / MAIN_TRANSACTION_FILE_NAME
@@ -347,23 +304,13 @@ def main_flow(
         gitignore_path = abs_root_dir / ".gitignore"
         if gitignore_path.is_file():
             if not quiet_mode:
-                print(
-                    f"{GREEN}✓ Found .gitignore file - exclusion patterns will be applied{RESET}"
-                )
+                print(f"{GREEN}✓ Found .gitignore file - exclusion patterns will be applied{RESET}")
             logger.info(f"Using .gitignore file: {gitignore_path}")
             try:
-                with open(
-                    gitignore_path, "r", encoding="utf-8", errors="ignore"
-                ) as f_git:
-                    raw_patterns_list.extend(
-                        p
-                        for p in (line.strip() for line in f_git)
-                        if p and not p.startswith("#")
-                    )
+                with open(gitignore_path, "r", encoding="utf-8", errors="ignore") as f_git:
+                    raw_patterns_list.extend(p for p in (line.strip() for line in f_git) if p and not p.startswith("#"))
             except Exception as e:
-                logger.warning(
-                    f"{YELLOW}Warning: Could not read .gitignore file {gitignore_path}: {e}{RESET}"
-                )
+                logger.warning(f"{YELLOW}Warning: Could not read .gitignore file {gitignore_path}: {e}{RESET}")
         elif not quiet_mode:
             logger.info(".gitignore not found in root, skipping.")
     if custom_ignore_file_path and use_gitignore:
@@ -371,13 +318,9 @@ def main_flow(
         if custom_ignore_abs_path.is_file():
             logger.info(f"Using custom ignore file: {custom_ignore_abs_path}")
             try:
-                with open(
-                    custom_ignore_abs_path, "r", encoding="utf-8", errors="ignore"
-                ) as f_custom:
+                with open(custom_ignore_abs_path, "r", encoding="utf-8", errors="ignore") as f_custom:
                     raw_patterns_list.extend(
-                        p
-                        for p in (line.strip() for line in f_custom)
-                        if p and not p.startswith("#")
+                        p for p in (line.strip() for line in f_custom) if p and not p.startswith("#")
                     )
             except Exception as e:
                 logger.warning(
@@ -388,36 +331,22 @@ def main_flow(
             return
     if raw_patterns_list:
         try:
-            final_ignore_spec = pathspec.PathSpec.from_lines(
-                "gitwildmatch", raw_patterns_list
-            )
-            logger.info(
-                f"Loaded {len(raw_patterns_list)} ignore patterns rules from specified files."
-            )
+            final_ignore_spec = pathspec.PathSpec.from_lines("gitwildmatch", raw_patterns_list)
+            logger.info(f"Loaded {len(raw_patterns_list)} ignore patterns rules from specified files.")
         except Exception as e:
             logger.error(f"Error compiling combined ignore patterns: {e}")
             final_ignore_spec = None
 
     # Confirmation prompt. Suppressed by dry_run, force_execution, resume, quiet_mode, or interactive_mode.
-    if (
-        not dry_run
-        and not force_execution
-        and not resume
-        and not quiet_mode
-        and not interactive_mode
-    ):
+    if not dry_run and not force_execution and not resume and not quiet_mode and not interactive_mode:
         print(f"{BLUE}--- Proposed Operation ---{RESET}")
         print(f"Root Directory: {abs_root_dir}")
         print(f"Replacement Map File: {map_file_path}")
         if replace_logic._RAW_REPLACEMENT_MAPPING:
-            print(
-                f"Loaded {len(replace_logic._RAW_REPLACEMENT_MAPPING)} replacement rules."
-            )
+            print(f"Loaded {len(replace_logic._RAW_REPLACEMENT_MAPPING)} replacement rules.")
         else:
             print("Replacement map is empty. No string replacements will occur.")
-        print(
-            f"File Extensions for content scan: {extensions if extensions else 'All non-binary (heuristic)'}"
-        )
+        print(f"File Extensions for content scan: {extensions if extensions else 'All non-binary (heuristic)'}")
         print(f"Exclude Dirs (explicit): {exclude_dirs}")
         print(f"Exclude Files (explicit): {exclude_files}")
         if use_gitignore:
@@ -425,9 +354,7 @@ def main_flow(
         if custom_ignore_file_path:
             print(f"Custom Ignore File: {custom_ignore_file_path}")
         if final_ignore_spec:
-            print(
-                f"Effective ignore patterns: {len(final_ignore_spec.patterns)} compiled from ignore files."
-            )
+            print(f"Effective ignore patterns: {len(final_ignore_spec.patterns)} compiled from ignore files.")
 
         symlink_processing_message = (
             "Symlinks will be ignored (names not renamed, targets not processed for content)."
@@ -486,37 +413,24 @@ def main_flow(
                         ]
                         and tx_ts > 0
                     ):
-                        path_last_processed_time[tx["PATH"]] = max(
-                            path_last_processed_time.get(tx["PATH"], 0.0), tx_ts
-                        )
+                        path_last_processed_time[tx["PATH"]] = max(path_last_processed_time.get(tx["PATH"], 0.0), tx_ts)
 
                 for item_fs in abs_root_dir.rglob("*"):
                     try:
                         if item_fs.is_file() and not item_fs.is_symlink():
-                            rel_p = str(item_fs.relative_to(abs_root_dir)).replace(
-                                "\\", "/"
-                            )
-                            if final_ignore_spec and final_ignore_spec.match_file(
-                                rel_p
-                            ):
+                            rel_p = str(item_fs.relative_to(abs_root_dir)).replace("\\", "/")
+                            if final_ignore_spec and final_ignore_spec.match_file(rel_p):
                                 continue
                             mtime = item_fs.stat().st_mtime
-                            if (
-                                rel_p in path_last_processed_time
-                                and mtime > path_last_processed_time[rel_p]
-                            ):
+                            if rel_p in path_last_processed_time and mtime > path_last_processed_time[rel_p]:
                                 logger.info(
                                     f"File '{rel_p}' (mtime:{mtime:.0f}) modified after last process (ts:{path_last_processed_time[rel_p]:.0f}). Re-scan."
                                 )
                                 paths_to_force_rescan.add(rel_p)
                     except OSError as e:
-                        logger.warning(
-                            f"Could not access or stat {item_fs} during resume check: {e}"
-                        )
+                        logger.warning(f"Could not access or stat {item_fs} during resume check: {e}")
                     except Exception as e:
-                        logger.warning(
-                            f"Unexpected error processing {item_fs} during resume check: {e}"
-                        )
+                        logger.warning(f"Unexpected error processing {item_fs} during resume check: {e}")
 
         found_txns = scan_directory_for_occurrences(
             root_dir=abs_root_dir,
@@ -534,9 +448,7 @@ def main_flow(
         )
 
         save_transactions(found_txns or [], txn_json_path, logger=logger)
-        logger.info(
-            f"Scan complete. {len(found_txns or [])} transactions planned in '{txn_json_path}'"
-        )
+        logger.info(f"Scan complete. {len(found_txns or [])} transactions planned in '{txn_json_path}'")
         if not found_txns:
             logger.info(
                 "No actionable occurrences found by scan."
@@ -567,19 +479,12 @@ def main_flow(
 
     # Reset DRY_RUN completed transactions to PENDING for resume
     for tx in txns_for_exec:
-        if (
-            tx["STATUS"] == TransactionStatus.COMPLETED.value
-            and tx.get("ERROR_MESSAGE") == "DRY_RUN"
-        ):
+        if tx["STATUS"] == TransactionStatus.COMPLETED.value and tx.get("ERROR_MESSAGE") == "DRY_RUN":
             tx["STATUS"] = TransactionStatus.PENDING.value
             tx.pop("ERROR_MESSAGE", None)
 
     op_type = "Dry run" if dry_run else "Execution"
-    logger.info(
-        f"{op_type}: Simulating execution of transactions..."
-        if dry_run
-        else "Starting execution phase..."
-    )
+    logger.info(f"{op_type}: Simulating execution of transactions..." if dry_run else "Starting execution phase...")
     stats = execute_all_transactions(
         txn_json_path,
         abs_root_dir,
@@ -593,9 +498,7 @@ def main_flow(
         logger=logger,
     )
     logger.info(f"{op_type} phase complete. Stats: {stats}")
-    logger.info(
-        f"Review '{txn_json_path}' for a detailed log of changes and their statuses."
-    )
+    logger.info(f"Review '{txn_json_path}' for a detailed log of changes and their statuses.")
 
     binary_log = abs_root_dir / BINARY_MATCHES_LOG_FILE
     if binary_log.exists() and binary_log.stat().st_size > 0:
@@ -620,25 +523,17 @@ def _run_subprocess_command(command: list[str], description: str) -> bool:
         if process.stdout:
             print(f"{GREEN}Output from {description}:{RESET}\n{process.stdout}")
         if process.stderr:
-            print(
-                f"{YELLOW}Errors/Warnings from {description}:{RESET}\n{process.stderr}"
-            )
+            print(f"{YELLOW}Errors/Warnings from {description}:{RESET}\n{process.stderr}")
         if process.returncode != 0:
-            print(
-                f"{RED}Error: {description} failed with return code {process.returncode}.{RESET}"
-            )
+            print(f"{RED}Error: {description} failed with return code {process.returncode}.{RESET}")
             return False
         print(f"{GREEN}{description} completed successfully.{RESET}")
         return True
     except FileNotFoundError:
-        print(
-            f"{RED}Error: Command for {description} not found. Is it installed and in PATH? ({command[0]}){RESET}"
-        )
+        print(f"{RED}Error: Command for {description} not found. Is it installed and in PATH? ({command[0]}){RESET}")
         return False
     except Exception as e:
-        print(
-            f"{RED}An unexpected error occurred while running {description}: {e}{RESET}"
-        )
+        print(f"{RED}An unexpected error occurred while running {description}: {e}{RESET}")
         return False
 
 
@@ -794,9 +689,7 @@ def main_cli() -> None:
     )
 
     dev_group = parser.add_argument_group("Developer Options")
-    dev_group.add_argument(
-        "--self-test", action="store_true", help="Run automated tests for this script."
-    )
+    dev_group.add_argument("--self-test", action="store_true", help="Run automated tests for this script.")
 
     args = parser.parse_args()
 
@@ -807,25 +700,15 @@ def main_cli() -> None:
         install_cmd_uv = [sys.executable, "-m", "uv", "pip", "install", "-e", ".[dev]"]
         install_cmd_pip = [sys.executable, "-m", "pip", "install", "-e", ".[dev]"]
 
-        print(
-            f"{BLUE}Attempting to install/update dev dependencies using 'uv'...{RESET}"
-        )
-        install_success = _run_subprocess_command(
-            install_cmd_uv, "uv dev dependency installation"
-        )
+        print(f"{BLUE}Attempting to install/update dev dependencies using 'uv'...{RESET}")
+        install_success = _run_subprocess_command(install_cmd_uv, "uv dev dependency installation")
 
         if not install_success:
-            print(
-                f"{YELLOW}'uv' command failed or not found. Attempting with 'pip'...{RESET}"
-            )
-            install_success = _run_subprocess_command(
-                install_cmd_pip, "pip dev dependency installation"
-            )
+            print(f"{YELLOW}'uv' command failed or not found. Attempting with 'pip'...{RESET}")
+            install_success = _run_subprocess_command(install_cmd_pip, "pip dev dependency installation")
 
         if not install_success:
-            print(
-                f"{RED}Failed to install dev dependencies. Aborting self-tests.{RESET}"
-            )
+            print(f"{RED}Failed to install dev dependencies. Aborting self-tests.{RESET}")
             sys.exit(1)
 
         pytest_cmd = ["pytest", "tests/test_mass_find_replace.py"]  # Use system pytest
@@ -843,9 +726,7 @@ def main_cli() -> None:
         timeout_val_for_flow = 0
     elif args.timeout < 1.0:
         if not args.quiet:
-            print(
-                f"{YELLOW}Warning: --timeout value {args.timeout} increased to minimum 1 minute.{RESET}"
-            )
+            print(f"{YELLOW}Warning: --timeout value {args.timeout} increased to minimum 1 minute.{RESET}")
         timeout_val_for_flow = 1
     else:
         timeout_val_for_flow = int(args.timeout)
@@ -854,9 +735,7 @@ def main_cli() -> None:
     if args.custom_ignore_file and args.use_gitignore:
         ignore_path = Path(args.custom_ignore_file)
         if not ignore_path.exists() or not ignore_path.is_file():
-            sys.stderr.write(
-                f"{RED}Error: Ignore file not found: {args.custom_ignore_file}{RESET}\n"
-            )
+            sys.stderr.write(f"{RED}Error: Ignore file not found: {args.custom_ignore_file}{RESET}\n")
             sys.exit(1)
 
     auto_exclude_basenames = [
@@ -875,9 +754,7 @@ def main_cli() -> None:
             final_exclude_files.append(item)
 
     if args.verbose and not args.quiet:
-        print(
-            "Verbose mode requested. Prefect log level will be set to DEBUG if flow runs."
-        )
+        print("Verbose mode requested. Prefect log level will be set to DEBUG if flow runs.")
 
     ignore_symlinks_param = not args.process_symlink_names
 
@@ -911,8 +788,6 @@ if __name__ == "__main__":
     try:
         main_cli()
     except Exception as e:
-        sys.stderr.write(
-            RED + f"An unexpected error occurred in __main__: {e}" + RESET + "\n"
-        )
+        sys.stderr.write(RED + f"An unexpected error occurred in __main__: {e}" + RESET + "\n")
         traceback.print_exc(file=sys.stderr)
         sys.exit(1)

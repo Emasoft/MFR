@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Comprehensive test suite for Mass Find Replace tool.
 
@@ -80,12 +79,8 @@ def run_main_flow_for_test(
     interactive_mode: bool = False,
     process_symlink_names: bool = False,
 ):
-    final_exclude_dirs = (
-        exclude_dirs if exclude_dirs is not None else DEFAULT_EXCLUDE_DIRS_REL
-    )
-    base_exclude_files = (
-        exclude_files if exclude_files is not None else DEFAULT_EXCLUDE_FILES_REL
-    )
+    final_exclude_dirs = exclude_dirs if exclude_dirs is not None else DEFAULT_EXCLUDE_DIRS_REL
+    base_exclude_files = exclude_files if exclude_files is not None else DEFAULT_EXCLUDE_FILES_REL
     additional_excludes = [map_file.name, BINARY_MATCHES_LOG_FILE]
     final_exclude_files = list(set(base_exclude_files + additional_excludes))
     main_flow(
@@ -112,22 +107,14 @@ def run_main_flow_for_test(
 
 
 # ================ MODIFIED TEST: test_dry_run_behavior =================
-def test_dry_run_behavior(
-    temp_test_dir: dict, default_map_file: Path, assert_file_content
-):
+def test_dry_run_behavior(temp_test_dir: dict, default_map_file: Path, assert_file_content):
     context_dir = temp_test_dir["runtime"]
     orig_deep_file_path = (
-        context_dir
-        / "oldname_root"
-        / "sub_oldname_folder"
-        / "another_OLDNAME_dir"
-        / "deep_oldname_file.txt"
+        context_dir / "oldname_root" / "sub_oldname_folder" / "another_OLDNAME_dir" / "deep_oldname_file.txt"
     )
     original_content = orig_deep_file_path.read_text(encoding="utf-8")
 
-    assert (
-        original_content == "This file contains OLDNAME multiple times: Oldname oldName"
-    )
+    assert original_content == "This file contains OLDNAME multiple times: Oldname oldName"
     # Run the dry run operation
     run_main_flow_for_test(context_dir, default_map_file, dry_run=True)
 
@@ -147,28 +134,17 @@ def test_dry_run_behavior(
         assert False, "No transactions were generated in dry run"
 
     name_txs = [
-        tx
-        for tx in transactions
-        if tx["TYPE"]
-        in (TransactionType.FILE_NAME.value, TransactionType.FOLDER_NAME.value)
+        tx for tx in transactions if tx["TYPE"] in (TransactionType.FILE_NAME.value, TransactionType.FOLDER_NAME.value)
     ]
-    content_txs = [
-        tx
-        for tx in transactions
-        if tx["TYPE"] == TransactionType.FILE_CONTENT_LINE.value
-    ]
+    content_txs = [tx for tx in transactions if tx["TYPE"] == TransactionType.FILE_CONTENT_LINE.value]
 
     # 3 folders + 1 file = 4 name transactions
     assert len(name_txs) == 4, f"Expected 4 name transactions, found {len(name_txs)}"
     assert len(content_txs) >= 1  # Could be 1 or more based on actual content
 
-    completed_txs = [
-        tx for tx in transactions if tx["STATUS"] == TransactionStatus.COMPLETED.value
-    ]
+    completed_txs = [tx for tx in transactions if tx["STATUS"] == TransactionStatus.COMPLETED.value]
     # Fix 1: Updated expected completed transactions to 5
-    assert len(completed_txs) == 5, (
-        f"Expected 5 completed transactions, found {len(completed_txs)}"
-    )
+    assert len(completed_txs) == 5, f"Expected 5 completed transactions, found {len(completed_txs)}"
 
     for tx in completed_txs:
         assert tx.get("ERROR_MESSAGE") == "DRY_RUN"
@@ -180,18 +156,12 @@ def test_dry_run_behavior(
             TransactionType.FOLDER_NAME.value,
         ]:
             print(f"  Original: {tx.get('ORIGINAL_NAME')}")
-            print(
-                f"  Proposed: {replace_logic.replace_occurrences(tx.get('ORIGINAL_NAME'))}"
-            )
+            print(f"  Proposed: {replace_logic.replace_occurrences(tx.get('ORIGINAL_NAME'))}")
         elif tx["TYPE"] == TransactionType.FILE_CONTENT_LINE.value:
             content = tx.get("ORIGINAL_LINE_CONTENT", "")
             print(f"  Line: {tx.get('LINE_NUMBER')}")
-            print(
-                f"  Original: {content[:50] + '...' if len(content) > 50 else content}"
-            )
-            print(
-                f"  Proposed: {replace_logic.replace_occurrences(content)[:50] + '...'}"
-            )
+            print(f"  Original: {content[:50] + '...' if len(content) > 50 else content}")
+            print(f"  Proposed: {replace_logic.replace_occurrences(content)[:50] + '...'}")
 
 
 # ================ MODIFIED TEST: test_dry_run_virtual_paths =================
@@ -226,10 +196,7 @@ def test_path_resolution_after_rename(temp_test_dir: dict, default_map_file: Pat
     for tx in txn_json:
         if tx["TYPE"] == TransactionType.FOLDER_NAME.value:
             path_map[tx["PATH"]] = (
-                tx["PATH"]
-                .replace("oldname", "newname")
-                .replace("OLDNAME", "NEWNAME")
-                .replace("Oldname", "Newname")
+                tx["PATH"].replace("oldname", "newname").replace("OLDNAME", "NEWNAME").replace("Oldname", "Newname")
             )
 
     # Fix 3: Validate with actual paths from fixture
@@ -240,9 +207,7 @@ def test_path_resolution_after_rename(temp_test_dir: dict, default_map_file: Pat
     }
 
     for original, expected in expected_path_map.items():
-        assert path_map.get(original) == expected, (
-            f"Path resolution failed for {original}"
-        )
+        assert path_map.get(original) == expected, f"Path resolution failed for {original}"
 
 
 # ================ MODIFIED TEST: test_folder_nesting =================
@@ -274,9 +239,7 @@ def test_folder_nesting(temp_test_dir: dict, default_map_file: Path):
         if tx["TYPE"] == TransactionType.FOLDER_NAME.value and "oldname_a" in tx["PATH"]
     ]
 
-    assert test_folders == ["oldname_a", "oldname_a/oldname_b"], (
-        "Folders not processed from shallow to deep"
-    )
+    assert test_folders == ["oldname_a", "oldname_a/oldname_b"], "Folders not processed from shallow to deep"
 
 
 # ================ NEW TESTS FOR ADDITIONAL COVERAGE =================
@@ -339,9 +302,7 @@ def test_self_test_option(monkeypatch):
     """Test the --self-test CLI option integration"""
     with monkeypatch.context() as m:
         m.setattr(sys, "argv", ["test_mass_find_replace.py", "--self-test"])
-        with patch(
-            "mass_find_replace.mass_find_replace._run_subprocess_command"
-        ) as mock_run:
+        with patch("mass_find_replace.mass_find_replace._run_subprocess_command") as mock_run:
             mock_run.return_value = True
             with pytest.raises(SystemExit) as exc_info:
                 main_cli()
@@ -356,15 +317,11 @@ def test_symlink_name_processing(temp_test_dir, default_map_file):
     target_path.mkdir()
     symlink_path.symlink_to(target_path, target_is_directory=True)
 
-    run_main_flow_for_test(
-        context_dir, default_map_file, process_symlink_names=True, dry_run=True
-    )
+    run_main_flow_for_test(context_dir, default_map_file, process_symlink_names=True, dry_run=True)
 
     transactions = load_transactions(context_dir / MAIN_TRANSACTION_FILE_NAME)
     symlink_renamed = any(
-        tx["TYPE"] == TransactionType.FILE_NAME.value
-        and "oldname_symlink" in tx["PATH"]
-        for tx in transactions
+        tx["TYPE"] == TransactionType.FILE_NAME.value and "oldname_symlink" in tx["PATH"] for tx in transactions
     )
     assert symlink_renamed, "Expected symlink name to be processed"
 
@@ -375,9 +332,7 @@ def test_extension_filtering(temp_test_dir, default_map_file):
     (context_dir / "include.txt").write_text("OLDNAME")
     (context_dir / "exclude.log").write_text("OLDNAME")
 
-    run_main_flow_for_test(
-        context_dir, default_map_file, extensions=[".txt"], dry_run=True
-    )
+    run_main_flow_for_test(context_dir, default_map_file, extensions=[".txt"], dry_run=True)
 
     transactions = load_transactions(context_dir / MAIN_TRANSACTION_FILE_NAME)
     include_found = any("include.txt" in tx["PATH"] for tx in transactions)
@@ -396,9 +351,7 @@ def test_rtf_processing(temp_test_dir, default_map_file):
 
     transactions = load_transactions(context_dir / MAIN_TRANSACTION_FILE_NAME)
     rtf_processed = any(
-        tx["TYPE"] == TransactionType.FILE_CONTENT_LINE.value
-        and "test.rtf" in tx["PATH"]
-        for tx in transactions
+        tx["TYPE"] == TransactionType.FILE_CONTENT_LINE.value and "test.rtf" in tx["PATH"] for tx in transactions
     )
     assert rtf_processed, "RTF file should be processed"
 
@@ -415,15 +368,7 @@ def test_binary_files_logging(temp_test_dir, default_map_file):
     bin_path = context_dir / "binary.bin"
 
     # Create binary file with multiple search strings embedded
-    bin_content = (
-        b"Header"
-        + b"OLDNAME"
-        + b"\x00\x01"
-        + b"oldName"
-        + b"\x02"
-        + b"Oldname"
-        + b"Footer"
-    )
+    bin_content = b"HeaderOLDNAME\x00\x01oldName\x02OldnameFooter"
     bin_path.write_bytes(bin_content)
 
     run_main_flow_for_test(context_dir, default_map_file, dry_run=False)
@@ -472,15 +417,11 @@ def test_recursive_path_resolution(temp_test_dir, default_map_file):
             # Build the new path by replacing each canonical segment:
             # Since ORIGINAL_NAME is the last segment, we replace the last segment with its new_name
             if tx["TYPE"] == TransactionType.FOLDER_NAME.value:
-                path_map[original_path] = replace_logic.replace_occurrences(
-                    original_path
-                )
+                path_map[original_path] = replace_logic.replace_occurrences(original_path)
 
     # Check each path component is present as a transaction original name
     for component in ["Oldname_A", "Oldname_B"]:
-        assert any(tx["ORIGINAL_NAME"] == component for tx in txn_json), (
-            f"Missing transaction for folder {component}"
-        )
+        assert any(tx["ORIGINAL_NAME"] == component for tx in txn_json), f"Missing transaction for folder {component}"
 
     # Check the deep path translation in the folder mapping
     assert "Newname_A" in path_map.get("Oldname_A").rsplit("/", 1)[-1]
@@ -509,7 +450,7 @@ def test_gb18030_encoding(temp_test_dir: dict, default_map_file: Path):
         f.write(small_content)
 
     # Create 300KB large file with GB18030 encoding
-    large_content: List[str] = []
+    large_content: list[str] = []
     base_line = f"{test_string} GB18030编码测试 " + "中文" * 10 + "\n"
     target_size = 300 * 1024  # 300KB
     current_size = 0
@@ -527,9 +468,7 @@ def test_gb18030_encoding(temp_test_dir: dict, default_map_file: Path):
     )
 
     # Run the replacement process
-    run_main_flow_for_test(
-        context_dir, default_map_file, dry_run=False, extensions=[".txt"]
-    )
+    run_main_flow_for_test(context_dir, default_map_file, dry_run=False, extensions=[".txt"])
 
     # Verify small file replacements
     # Check that transactions were created for the large file
@@ -544,9 +483,7 @@ def test_gb18030_encoding(temp_test_dir: dict, default_map_file: Path):
             assert "NEW_LINE_CONTENT" in tx, "Missing NEW_LINE_CONTENT field"
             assert "Newname" in tx["NEW_LINE_CONTENT"], "Replacement not in new content"
             encoding_in_tx = tx.get("ORIGINAL_ENCODING", "").lower().replace("-", "")
-            assert encoding_in_tx == "gb18030", (
-                f"Wrong encoding: {tx.get('ORIGINAL_ENCODING')}"
-            )
+            assert encoding_in_tx == "gb18030", f"Wrong encoding: {tx.get('ORIGINAL_ENCODING')}"
             break
     assert large_file_processed, "Large file not processed"
 
@@ -557,9 +494,7 @@ def test_gb18030_encoding(temp_test_dir: dict, default_map_file: Path):
             f"Small file replacement failed:\nExpected: {expected_small}\nActual: {updated_small}"
         )
         # Verify occurrence count
-        assert updated_small.count(replacement_string) == 3, (
-            "Unexpected replacement count in small file"
-        )
+        assert updated_small.count(replacement_string) == 3, "Unexpected replacement count in small file"
 
     # Verify large file replacements
     with open(large_file, "r", encoding=encoding) as f:
@@ -605,9 +540,7 @@ def test_collision_error_logging(temp_test_dir: dict, default_map_file: Path):
     print("=== End files list ===")
 
     # Run the replacement on the test subdirectory
-    run_main_flow_for_test(
-        test_dir, default_map_file, dry_run=False, extensions=[".ts", ".py"]
-    )
+    run_main_flow_for_test(test_dir, default_map_file, dry_run=False, extensions=[".ts", ".py"])
 
     # Check that collision log was created
     collision_log = test_dir / COLLISIONS_ERRORS_LOG_FILE
@@ -645,21 +578,13 @@ def test_collision_error_logging(temp_test_dir: dict, default_map_file: Path):
     transactions = load_transactions(txn_file)
 
     # Find the failed transactions
-    failed_txs = [
-        tx for tx in transactions if tx["STATUS"] == TransactionStatus.FAILED.value
-    ]
-    collision_txs = [
-        tx for tx in failed_txs if "collision" in tx.get("ERROR_MESSAGE", "").lower()
-    ]
+    failed_txs = [tx for tx in transactions if tx["STATUS"] == TransactionStatus.FAILED.value]
+    collision_txs = [tx for tx in failed_txs if "collision" in tx.get("ERROR_MESSAGE", "").lower()]
 
-    assert len(collision_txs) >= 2, (
-        f"Expected at least 2 collision transactions, found {len(collision_txs)}"
-    )
+    assert len(collision_txs) >= 2, f"Expected at least 2 collision transactions, found {len(collision_txs)}"
 
 
-def test_interactive_mode_collision_skip(
-    temp_test_dir: dict, default_map_file: Path, monkeypatch, capsys
-):
+def test_interactive_mode_collision_skip(temp_test_dir: dict, default_map_file: Path, monkeypatch, capsys):
     """Test that collisions are skipped in interactive mode without prompting user"""
     test_dir = temp_test_dir["runtime"] / "interactive_test"
     test_dir.mkdir()
@@ -705,9 +630,7 @@ def test_interactive_mode_collision_skip(
     assert "Collision with existing file/folder" in output_text
 
     # Verify that only non-collision transaction prompted for input
-    assert input_count == 1, (
-        f"Expected 1 input prompt for non-collision, got {input_count}"
-    )
+    assert input_count == 1, f"Expected 1 input prompt for non-collision, got {input_count}"
 
     # Verify both files were processed
     assert "oldname_config.py" in output_text
@@ -725,9 +648,7 @@ def test_interactive_mode_collision_skip(
     # Verify files state
     assert source_file.exists(), "Collision file should not be renamed"
     assert collision_file.exists(), "Existing collision file should remain"
-    assert normal_file.exists() or (test_dir / "newname_utils.py").exists(), (
-        "Non-collision file should be processed"
-    )
+    assert normal_file.exists() or (test_dir / "newname_utils.py").exists(), "Non-collision file should be processed"
 
 
 def test_malformed_json_handling(temp_test_dir: dict):
@@ -737,15 +658,11 @@ def test_malformed_json_handling(temp_test_dir: dict):
 
     # Create malformed mapping file
     bad_map_file = test_dir / "bad_mapping.json"
-    bad_map_file.write_text(
-        '{"REPLACEMENT_MAPPING": {"key": "value"'
-    )  # Missing closing braces
+    bad_map_file.write_text('{"REPLACEMENT_MAPPING": {"key": "value"')  # Missing closing braces
 
     # Should not crash
     run_main_flow_for_test(test_dir, bad_map_file, dry_run=True, quiet_mode=True)
 
     # Verify no transactions were created
     txn_file = test_dir / "planned_transactions.json"
-    assert not txn_file.exists(), (
-        "Transaction file should not be created with malformed mapping file"
-    )
+    assert not txn_file.exists(), "Transaction file should not be created with malformed mapping file"
