@@ -52,7 +52,7 @@ jobs:
           import shutil
           from pathlib import Path
           from mass_find_replace import main_flow
-          
+
           with tempfile.TemporaryDirectory() as tmpdir:
               # Create test structure
               root = Path(tmpdir)
@@ -60,11 +60,11 @@ jobs:
                   (root / f'dir_{i}').mkdir()
                   for j in range(10):
                       (root / f'dir_{i}' / f'file_{j}.txt').write_text(f'atlasvibe content {i}-{j}')
-              
+
               # Create mapping file
               map_file = root / 'mapping.json'
               map_file.write_text('{\"REPLACEMENT_MAPPING\": {\"atlasvibe\": \"flojoy\"}}')
-              
+
               # Measure time
               start = time.time()
               main_flow(

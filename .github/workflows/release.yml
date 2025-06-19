@@ -62,9 +62,11 @@ jobs:
         id: changelog
         run: |
           echo "## What's Changed" > CHANGELOG_TEMP.md
-          git log --pretty=format:"* %s by @%an" $(git describe --tags --abbrev=0 HEAD^)..HEAD >> CHANGELOG_TEMP.md
+          git log --pretty=format:"* %s by @%an" "$(git describe --tags --abbrev=0 HEAD^)"..HEAD >> CHANGELOG_TEMP.md
           echo "" >> CHANGELOG_TEMP.md
-          echo "**Full Changelog**: https://github.com/Emasoft/MFR/compare/$(git describe --tags --abbrev=0 HEAD^)...v${{ inputs.version }}" >> CHANGELOG_TEMP.md
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^)
+          REPO_URL="https://github.com/Emasoft/MFR"
+          echo "**Full Changelog**: ${REPO_URL}/compare/${PREV_TAG}...v${{ inputs.version }}" >> CHANGELOG_TEMP.md
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
