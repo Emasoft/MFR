@@ -8,49 +8,11 @@ on:
   pull_request:
     branches: [ main ]
 
-jobs:
-  test:
-    name: Test Python ${{ matrix.python-version }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.10', '3.11', '3.12']
-        exclude:
-          # Skip some combinations to reduce CI time
-          - os: windows-latest
-            python-version: '3.10'
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Install uv
-      uses: astral-sh/setup-uv@v6
-      with:
-        enable-cache: true
-        cache-dependency-glob: '**/requirements*.txt'
-    
-    - name: Set up Python ${{ matrix.python-version }}
-      run: uv python pin ${{ matrix.python-version }}
-    
-    - name: Install dependencies
-      run: |
-        uv venv
-        uv pip install -r requirements-dev.txt
-    
-    - name: Run tests with coverage
-      run: |
-        uv run pytest tests/test_mass_find_replace.py -v --cov=src/mass_find_replace --cov-report=xml --cov-report=html
-    
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v5
-      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        files: ./coverage.xml
-        flags: unittests
-        name: codecov-umbrella
+env:
+  UV_VERSION: "0.5.13"
+  DEFAULT_PYTHON: "3.11"
 
+jobs:
   lint:
     name: Lint and Format Check
     runs-on: ubuntu-latest
@@ -61,16 +23,19 @@ jobs:
     - name: Install uv
       uses: astral-sh/setup-uv@v6
       with:
+        version: ${{ env.UV_VERSION }}
         enable-cache: true
-        cache-dependency-glob: '**/requirements*.txt'
+        cache-dependency-glob: |
+          pyproject.toml
+          uv.lock
     
     - name: Set up Python
-      run: uv python pin 3.11
+      run: |
+        uv python install ${{ env.DEFAULT_PYTHON }}
+        uv python pin ${{ env.DEFAULT_PYTHON }}
     
     - name: Install dependencies
-      run: |
-        uv venv
-        uv pip install -r requirements-dev.txt
+      run: uv sync --all-extras
     
     - name: Run ruff format check
       run: uv run ruff format --check .
@@ -80,29 +45,27 @@ jobs:
     
     - name: Run mypy type checking
       run: |
-        uv run python -m mypy src/mass_find_replace/ \
-          --explicit-package-bases \
-          --ignore-missing-imports \
-          --no-strict-optional \
-          --warn-redundant-casts \
-          --warn-return-any
+        uv run mypy src/mass_find_replace/ \
+          --strict \
+          --show-error-context \
+          --pretty \
+          --show-error-codes \
+          --show-error-code-links
 
-  security:
-    name: Security Scan
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Run Gitleaks
-      uses: gitleaks/gitleaks-action@v2
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  build:
-    name: Build Distribution
-    runs-on: ubuntu-latest
-    needs: [test, lint]
+  test:
+    name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.10', '3.11', '3.12']
+        exclude:
+          # Skip some combinations to reduce CI time
+          - os: windows-latest
+            python-version: '3.10'
+          - os: macos-latest
+            python-version: '3.10'
     
     steps:
     - uses: actions/checkout@v4
@@ -110,26 +73,116 @@ jobs:
     - name: Install uv
       uses: astral-sh/setup-uv@v6
       with:
+        version: ${{ env.UV_VERSION }}
         enable-cache: true
-        cache-dependency-glob: '**/requirements*.txt'
+        cache-dependency-glob: |
+          pyproject.toml
+          uv.lock
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      run: |
+        uv python install ${{ matrix.python-version }}
+        uv python pin ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: uv sync --all-extras
+    
+    - name: Run tests with coverage
+      run: |
+        uv run pytest tests/ -v --cov=src/mass_find_replace --cov-report=xml --cov-report=term
+    
+    - name: Upload coverage to Codecov
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history for gitleaks
+    
+    - name: Run Gitleaks
+      uses: gitleaks/gitleaks-action@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITLEAKS_CONFIG: .gitleaks.toml
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        version: ${{ env.UV_VERSION }}
+        enable-cache: true
+        cache-dependency-glob: |
+          pyproject.toml
+          uv.lock
     
     - name: Set up Python
-      run: uv python pin 3.11
+      run: |
+        uv python install ${{ env.DEFAULT_PYTHON }}
+        uv python pin ${{ env.DEFAULT_PYTHON }}
+    
+    - name: Install dependencies
+      run: uv sync --all-extras
+    
+    - name: Run safety check
+      run: |
+        uv pip install safety
+        uv run safety check --json || true
+      continue-on-error: true
+
+  build:
+    name: Build Distribution
+    runs-on: ubuntu-latest
+    needs: [test, lint, security]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        version: ${{ env.UV_VERSION }}
+        enable-cache: true
+        cache-dependency-glob: |
+          pyproject.toml
+          uv.lock
+    
+    - name: Set up Python
+      run: |
+        uv python install ${{ env.DEFAULT_PYTHON }}
+        uv python pin ${{ env.DEFAULT_PYTHON }}
+    
+    - name: Install dependencies
+      run: uv sync
     
     - name: Build package
+      run: uv build
+    
+    - name: Check distribution
       run: |
-        uv build
+        uv pip install twine
+        uv run twine check dist/*
     
     - name: Store the distribution packages
       uses: actions/upload-artifact@v4
       with:
         name: python-package-distributions
         path: dist/
+        retention-days: 7
 
   release:
     name: Release to PyPI
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [build, security]
+    needs: [build]
     runs-on: ubuntu-latest
     permissions:
       id-token: write

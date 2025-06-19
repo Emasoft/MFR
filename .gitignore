@@ -99,3 +99,8 @@ test_temp/
 # Documentation (private)
 CLAUDE.md
 NOTES.md
+
+# Security scan reports
+gitleaks-report.json
+gitleaks-report.csv
+gitleaks-report.sarif

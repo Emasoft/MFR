@@ -1,0 +1,26 @@
+#!/bin/bash
+# Gitleaks pre-push hook
+# This hook runs gitleaks to detect secrets before pushing to remote
+
+echo "🔍 Running Gitleaks to check for secrets before push..."
+
+# Get the remote URL
+remote="$1"
+url="$2"
+
+# Run gitleaks on all commits being pushed
+gitleaks detect --source . --config .gitleaks.toml --log-opts="origin..HEAD" --verbose
+
+# Capture the exit code
+RESULT=$?
+
+if [ $RESULT -ne 0 ]; then
+    echo "❌ Gitleaks detected secrets in your commits!"
+    echo "   Please remove the secrets before pushing."
+    echo "   Run 'gitleaks detect --source . --config .gitleaks.toml --log-opts=\"origin..HEAD\" --verbose' for details."
+    exit 1
+else
+    echo "✅ No secrets detected by Gitleaks"
+fi
+
+exit 0

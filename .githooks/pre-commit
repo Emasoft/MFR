@@ -1,0 +1,22 @@
+#!/bin/bash
+# Gitleaks pre-commit hook
+# This hook runs gitleaks to detect secrets before committing
+
+echo "🔍 Running Gitleaks to check for secrets..."
+
+# Run gitleaks on staged files
+gitleaks protect --staged --config .gitleaks.toml --verbose
+
+# Capture the exit code
+RESULT=$?
+
+if [ $RESULT -ne 0 ]; then
+    echo "❌ Gitleaks detected secrets in your staged files!"
+    echo "   Please remove the secrets before committing."
+    echo "   Run 'gitleaks protect --staged --config .gitleaks.toml --verbose' to see details."
+    exit 1
+else
+    echo "✅ No secrets detected by Gitleaks"
+fi
+
+exit 0
