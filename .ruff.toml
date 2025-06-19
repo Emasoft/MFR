@@ -1,0 +1,74 @@
+# Ruff configuration for super-linter compatibility
+# Note: The project primarily uses ruff via command-line arguments in CLAUDE.md
+# This file provides defaults for super-linter integration
+
+# Python version target
+target-version = "py310"
+
+# Line length to match yamllint config
+line-length = 120
+
+# Select rules - using the defaults plus some additional ones
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings  
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "DTZ", # flake8-datetimez
+    "T10", # flake8-debugger
+    "ISC", # flake8-implicit-str-concat
+    "RET", # flake8-return
+    "SIM", # flake8-simplify
+    "TCH", # flake8-type-checking
+    "PTH", # flake8-use-pathlib
+    "PL",  # pylint
+]
+
+# Ignore rules that conflict with project standards or are mentioned in CLAUDE.md
+ignore = [
+    "E203",  # Whitespace before ':'
+    "E402",  # Module imports not at top
+    "E501",  # Line too long (handled by formatter)
+    "E266",  # Too many leading '#' for block comment
+    "W505",  # Doc line too long
+    "F841",  # Local variable assigned but never used
+    "F842",  # Local variable annotated but never used  
+    "F401",  # Module imported but unused
+    "W293",  # Blank line contains whitespace
+    "I001",  # Import block unsorted
+    "UP015", # Unnecessary open mode parameters
+    "C901",  # Function too complex
+    "W291",  # Trailing whitespace
+]
+
+# Exclude paths
+exclude = [
+    ".venv",
+    "venv",
+    "env",
+    ".env",
+    "node_modules",
+    "dist",
+    "build",
+    ".eggs",
+    ".pytest_cache",
+    ".mypy_cache", 
+    ".git",
+    ".act",
+    "__pycache__",
+    "*.egg-info",
+]
+
+# Format settings
+[format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+# Import settings
+[isort]
+known-first-party = ["mass_find_replace"]

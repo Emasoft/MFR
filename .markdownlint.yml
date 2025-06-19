@@ -1,0 +1,39 @@
+# Markdownlint configuration for super-linter
+# Reference: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+
+# Default state for rules
+default: true
+
+# Line length
+MD013:
+  line_length: 120
+  code_blocks: false
+  tables: false
+
+# Allow inline HTML
+MD033: false
+
+# Allow bare URLs
+MD034: false
+
+# First line in file should be a top level heading
+MD041: false
+
+# Allow duplicate headings (common in changelog)
+MD024: false
+
+# Allow trailing punctuation in headings  
+MD026: false
+
+# Lists should be surrounded by blank lines
+MD032: false
+
+# Allow hard tabs in code blocks
+MD010:
+  code_blocks: false
+
+# Allow multiple spaces after blockquote symbol
+MD027: false
+
+# Allow emphasis used instead of heading
+MD036: false

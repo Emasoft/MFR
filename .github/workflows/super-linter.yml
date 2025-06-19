@@ -1,0 +1,134 @@
+name: Super-Linter
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:  # Allow manual triggers
+
+# Cancel in-progress runs when a new run is triggered
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  super-linter:
+    name: Lint Code Base
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      # Needed for reporting GitHub Actions status checks
+      statuses: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          # Full git history is needed to get a proper list of changed files
+          fetch-depth: 0
+
+      - name: Run Super-Linter
+        uses: super-linter/super-linter@v7.2.0
+        env:
+          # Global settings
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          # Validation settings
+          VALIDATE_ALL_CODEBASE: false  # Only validate changed files in PRs
+          # Exclude directories that should not be linted
+          FILTER_REGEX_EXCLUDE: |
+            .*(\.venv|venv|env|\.env|node_modules|dist|build|\.eggs|
+            \.pytest_cache|\.mypy_cache|\.git|\.act|uv\.lock|
+            planned_transactions\.json).*
+
+          # Python settings
+          VALIDATE_PYTHON: true
+          VALIDATE_PYTHON_BLACK: false  # Using ruff format instead
+          VALIDATE_PYTHON_FLAKE8: false  # Using ruff instead
+          VALIDATE_PYTHON_ISORT: false  # Using ruff import sorting
+          VALIDATE_PYTHON_MYPY: true
+          VALIDATE_PYTHON_PYLINT: false  # Using ruff instead
+          VALIDATE_PYTHON_RUFF: true
+          PYTHON_RUFF_CONFIG_FILE: .ruff.toml
+
+          # YAML settings
+          VALIDATE_YAML: true
+          YAML_CONFIG_FILE: .yamllint.yml
+
+          # JSON settings
+          VALIDATE_JSON: true
+
+          # Markdown settings
+          VALIDATE_MARKDOWN: true
+          MARKDOWN_CONFIG_FILE: .markdownlint.yml
+
+          # Shell script settings
+          VALIDATE_BASH: true
+          VALIDATE_BASH_EXEC: true
+          VALIDATE_SHELL_SHFMT: true
+
+          # GitHub Actions settings
+          VALIDATE_GITHUB_ACTIONS: true
+
+          # Docker settings
+          VALIDATE_DOCKERFILE_HADOLINT: true
+
+          # Natural language settings
+          VALIDATE_NATURAL_LANGUAGE: false  # Can be noisy for technical docs
+
+          # Additional language settings
+          VALIDATE_JAVASCRIPT_ES: false  # Project uses TypeScript/JSX
+          VALIDATE_TYPESCRIPT_ES: false  # Not a TypeScript project
+          VALIDATE_CSS: false  # No CSS in this project
+          VALIDATE_HTML: false  # No HTML in this project
+
+          # Ansible, Terraform, CloudFormation not used
+          VALIDATE_ANSIBLE: false
+          VALIDATE_TERRAFORM: false
+          VALIDATE_TERRAFORM_FMT: false
+          VALIDATE_TERRAGRUNT: false
+          VALIDATE_CLOUDFORMATION: false
+
+          # Other formats not used in this project
+          VALIDATE_CLOJURE: false
+          VALIDATE_COFFEE: false
+          VALIDATE_DART: false
+          VALIDATE_GO: false
+          VALIDATE_GROOVY: false
+          VALIDATE_JAVA: false
+          VALIDATE_JSX: false
+          VALIDATE_KOTLIN: false
+          VALIDATE_LATEX: false
+          VALIDATE_LUA: false
+          VALIDATE_PERL: false
+          VALIDATE_PHP: false
+          VALIDATE_POWERSHELL: false
+          VALIDATE_PROTOBUF: false
+          VALIDATE_R: false
+          VALIDATE_RAKU: false
+          VALIDATE_RUBY: false
+          VALIDATE_RUST: false
+          VALIDATE_SCALA: false
+          VALIDATE_SQL: false
+          VALIDATE_TSX: false
+          VALIDATE_TYPESCRIPT_STANDARD: false
+          VALIDATE_XML: false
+
+          # Security
+          VALIDATE_GITLEAKS: true
+
+          # Disable linters that might conflict with project setup
+          VALIDATE_JSCPD: false  # Copy-paste detection can be noisy
+          VALIDATE_EDITORCONFIG: false  # Not using .editorconfig
+
+          # Output settings
+          LINTER_RULES_PATH: .
+          LOG_LEVEL: WARN  # Can be set to INFO or DEBUG for troubleshooting
+          CREATE_LOG_FILE: false
+
+          # Error handling
+          DISABLE_ERRORS: false  # Fail the workflow on linting errors
+          MULTI_STATUS: true  # Report individual linter status
