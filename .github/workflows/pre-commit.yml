@@ -42,9 +42,11 @@ jobs:
       - name: Install actionlint
         run: |
           # Install actionlint binary
-          VERSION=$(curl -s https://api.github.com/repos/rhysd/actionlint/releases/latest | grep -oP '"tag_name": "\K[^"]+')
+          VERSION=$(curl -s https://api.github.com/repos/rhysd/actionlint/releases/latest | \
+            grep -oP '"tag_name": "\K[^"]+')
           VERSION_NUM=${VERSION#v}
-          curl -L "https://github.com/rhysd/actionlint/releases/download/${VERSION}/actionlint_${VERSION_NUM}_linux_amd64.tar.gz" | tar xz -C /usr/local/bin
+          curl -L "https://github.com/rhysd/actionlint/releases/download/${VERSION}/actionlint_${VERSION_NUM}_linux_amd64.tar.gz" | \
+            tar xz -C /usr/local/bin
           chmod +x /usr/local/bin/actionlint
 
       - name: Cache pre-commit environments
