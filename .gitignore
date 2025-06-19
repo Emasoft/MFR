@@ -104,3 +104,6 @@ NOTES.md
 gitleaks-report.json
 gitleaks-report.csv
 gitleaks-report.sarif
+
+# Hook backups
+.githooks.backup/

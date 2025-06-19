@@ -35,12 +35,12 @@ from striprtf.striprtf import rtf_to_text
 from isbinary import is_binary_file
 import logging
 
-# Type alias for logger types to avoid repetition
-LoggerType = logging.Logger | logging.LoggerAdapter[logging.Logger] | None
-
 from prefect import flow
 
 from . import replace_logic
+
+# Type alias for logger types to avoid repetition
+LoggerType = logging.Logger | logging.LoggerAdapter[logging.Logger] | None
 
 
 class SandboxViolationError(Exception):

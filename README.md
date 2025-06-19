@@ -490,8 +490,9 @@ cd MFR
 # Install development dependencies
 uv sync --all-extras
 
-# Run pre-commit hooks
+# Install pre-commit hooks
 uv run pre-commit install
+uv run pre-commit install --hook-type pre-push
 ```
 
 ### Development Workflow
@@ -501,9 +502,14 @@ uv run pre-commit install
 3. **Run tests**: `uv run pytest`
 4. **Check code quality**: 
    ```bash
+   # Run all pre-commit checks
+   uv run pre-commit run --all-files
+   
+   # Or run individual tools
    uv run ruff format .
    uv run ruff check .
    uv run mypy .
+   uv run deptry src
    ```
 5. **Commit with semantic messages**: `feat:`, `fix:`, `docs:`, etc.
 6. **Push and create PR**

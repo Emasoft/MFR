@@ -1,0 +1,123 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+default_language_version:
+  python: python3.11
+
+repos:
+  # UV for fast Python formatting
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.7.13
+    hooks:
+      # Compile requirements
+      - id: pip-compile
+        args: [pyproject.toml, -o, requirements.txt, --python-version=3.10]
+      # Compile dev requirements
+      - id: pip-compile
+        name: pip-compile dev-requirements
+        args: [pyproject.toml, --extra=dev, -o, requirements-dev.txt, --python-version=3.10]
+
+  # Gitleaks for secret scanning
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.27.2
+    hooks:
+      - id: gitleaks
+
+  # Ruff for linting and formatting
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.12.0
+    hooks:
+      # Run the linter
+      - id: ruff
+        args: [--fix]
+      # Run the formatter
+      - id: ruff-format
+
+  # Mypy for type checking
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.16.1
+    hooks:
+      - id: mypy
+        args:
+          [
+            --strict,
+            --show-error-codes,
+            --show-error-context,
+            --pretty,
+            --ignore-missing-imports,
+            --no-warn-unused-ignores,
+          ]
+        files: ^src/
+        additional_dependencies:
+          - types-chardet
+          - prefect
+
+  # Deptry for dependency checking
+  - repo: https://github.com/fpgmaas/deptry
+    rev: 0.23.0
+    hooks:
+      - id: deptry
+        args: [--config, pyproject.toml]
+
+  # Standard pre-commit hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-added-large-files
+        args: [--maxkb=1000]
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: debug-statements
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-json
+      - id: pretty-format-json
+        args: [--autofix, --no-sort-keys]
+
+  # YAML linting
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.37.1
+    hooks:
+      - id: yamllint
+        args: [-c=.yamllint.yml]
+
+  # Shell script linting
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        args: [--severity=error]
+
+  # GitHub Actions linting
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.7
+    hooks:
+      - id: actionlint
+
+
+# Configuration for specific hooks
+files: ^(src/|tests/|pyproject\.toml|requirements.*\.txt)
+exclude: |
+  (?x)^(
+    \.git/|
+    \.mypy_cache/|
+    \.pytest_cache/|
+    \.venv/|
+    venv/|
+    \.env|
+    build/|
+    dist/|
+    .*\.egg-info/|
+    __pycache__/|
+    \.coverage|
+    htmlcov/|
+    \.DS_Store|
+    planned_transactions\.json|
+    uv\.lock
+  )$
