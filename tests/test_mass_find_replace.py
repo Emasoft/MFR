@@ -13,6 +13,8 @@ Tests cover:
 - Interactive mode
 """
 
+from __future__ import annotations
+
 from mass_find_replace.mass_find_replace import MAIN_TRANSACTION_FILE_NAME
 from pathlib import Path
 import os
