@@ -26,6 +26,7 @@ from typing import (
     Any,
     Optional,
     Iterator,
+    Union,
 )  # Keep Any if specifically needed for dynamic parts
 from enum import Enum
 import chardet
@@ -42,7 +43,7 @@ from prefect import flow
 from . import replace_logic
 
 # Type alias for logger types to avoid repetition
-LoggerType = logging.Logger | logging.LoggerAdapter[logging.Logger] | None
+LoggerType = Union[logging.Logger, logging.LoggerAdapter[logging.Logger], None]
 
 
 class SandboxViolationError(Exception):
