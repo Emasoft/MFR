@@ -311,11 +311,13 @@ def test_unicode_combining_chars(temp_test_dir, default_map_file):
 def test_permission_error_handling(temp_test_dir, default_map_file, monkeypatch):
     """Test permission errors are handled gracefully"""
     import errno
+    import stat
 
     context_dir = temp_test_dir["runtime"]
     protected_file = context_dir / "protected.log"
     protected_file.touch()
-    protected_file.chmod(0o400)  # Read-only file
+    # Make file read-only - use stat constants for cross-platform compatibility
+    protected_file.chmod(stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
 
     # Simulate rename raising permission error
     def mock_rename(*args, **kwargs):

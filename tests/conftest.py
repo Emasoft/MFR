@@ -44,8 +44,20 @@ def temp_test_dir(tmp_path: Path):
     )
     context = {"runtime": runtime_dir, "config": config_dir}
     yield context
-    # Cleanup
-    shutil.rmtree(tmp_path)
+
+    # Cleanup - handle Windows read-only files
+    def handle_remove_readonly(func, path, exc):
+        """Error handler for Windows readonly files."""
+        import stat
+        import os
+
+        if os.name == "nt":  # Windows
+            os.chmod(path, stat.S_IWRITE)
+            func(path)
+        else:
+            raise
+
+    shutil.rmtree(tmp_path, onerror=handle_remove_readonly)
 
 
 @pytest.fixture
