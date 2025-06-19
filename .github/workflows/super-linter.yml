@@ -44,55 +44,31 @@ jobs:
             \.pytest_cache|\.mypy_cache|\.git|\.act|uv\.lock|
             planned_transactions\.json).*
 
-          # Python settings
-          VALIDATE_PYTHON: true
+          # Enable all by default, then disable what we don't need
+          # This avoids the "mixed mode" error from super-linter
+          
+          # Python - disable conflicting linters (we use ruff)
           VALIDATE_PYTHON_BLACK: false  # Using ruff format instead
           VALIDATE_PYTHON_FLAKE8: false  # Using ruff instead
           VALIDATE_PYTHON_ISORT: false  # Using ruff import sorting
-          VALIDATE_PYTHON_MYPY: true
           VALIDATE_PYTHON_PYLINT: false  # Using ruff instead
-          VALIDATE_PYTHON_RUFF: true
           PYTHON_RUFF_CONFIG_FILE: .ruff.toml
 
-          # YAML settings
-          VALIDATE_YAML: true
+          # Configuration files for enabled linters
           YAML_CONFIG_FILE: .yamllint.yml
-
-          # JSON settings
-          VALIDATE_JSON: true
-
-          # Markdown settings
-          VALIDATE_MARKDOWN: true
           MARKDOWN_CONFIG_FILE: .markdownlint.yml
 
-          # Shell script settings
-          VALIDATE_BASH: true
-          VALIDATE_BASH_EXEC: true
-          VALIDATE_SHELL_SHFMT: true
-
-          # GitHub Actions settings
-          VALIDATE_GITHUB_ACTIONS: true
-
-          # Docker settings
-          VALIDATE_DOCKERFILE_HADOLINT: true
-
-          # Natural language settings
+          # Disable languages not used in this project
           VALIDATE_NATURAL_LANGUAGE: false  # Can be noisy for technical docs
-
-          # Additional language settings
-          VALIDATE_JAVASCRIPT_ES: false  # Project uses TypeScript/JSX
-          VALIDATE_TYPESCRIPT_ES: false  # Not a TypeScript project
-          VALIDATE_CSS: false  # No CSS in this project
-          VALIDATE_HTML: false  # No HTML in this project
-
-          # Ansible, Terraform, CloudFormation not used
+          VALIDATE_JAVASCRIPT_ES: false
+          VALIDATE_TYPESCRIPT_ES: false
+          VALIDATE_CSS: false
+          VALIDATE_HTML: false
           VALIDATE_ANSIBLE: false
           VALIDATE_TERRAFORM: false
           VALIDATE_TERRAFORM_FMT: false
           VALIDATE_TERRAGRUNT: false
           VALIDATE_CLOUDFORMATION: false
-
-          # Other formats not used in this project
           VALIDATE_CLOJURE: false
           VALIDATE_COFFEE: false
           VALIDATE_DART: false
@@ -117,10 +93,7 @@ jobs:
           VALIDATE_TYPESCRIPT_STANDARD: false
           VALIDATE_XML: false
 
-          # Security
-          VALIDATE_GITLEAKS: true
-
-          # Disable linters that might conflict with project setup
+          # Disable other linters that might conflict
           VALIDATE_JSCPD: false  # Copy-paste detection can be noisy
           VALIDATE_EDITORCONFIG: false  # Not using .editorconfig
 

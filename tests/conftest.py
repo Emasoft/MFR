@@ -19,29 +19,17 @@ def temp_test_dir(tmp_path: Path):
     # Create sample directories and files in runtime directory
     (runtime_dir / "oldname_root").mkdir()
     (runtime_dir / "oldname_root" / "sub_oldname_folder").mkdir()
-    (
-        runtime_dir / "oldname_root" / "sub_oldname_folder" / "another_OLDNAME_dir"
-    ).mkdir()
-    deep_file = (
-        runtime_dir
-        / "oldname_root"
-        / "sub_oldname_folder"
-        / "another_OLDNAME_dir"
-        / "deep_oldname_file.txt"
-    )
+    (runtime_dir / "oldname_root" / "sub_oldname_folder" / "another_OLDNAME_dir").mkdir()
+    deep_file = runtime_dir / "oldname_root" / "sub_oldname_folder" / "another_OLDNAME_dir" / "deep_oldname_file.txt"
     deep_file.write_text("This file contains OLDNAME multiple times: Oldname oldName")
 
     # Create excluded items in runtime directory
     (runtime_dir / "excluded_oldname_dir").mkdir()
-    (runtime_dir / "excluded_oldname_dir" / "excluded_file.txt").write_text(
-        "OLDNAME content"
-    )
+    (runtime_dir / "excluded_oldname_dir" / "excluded_file.txt").write_text("OLDNAME content")
     (runtime_dir / "exclude_this_oldname_file.txt").write_text("Oldname exclusion test")
 
     # Verify structure
-    assert (runtime_dir / "oldname_root").exists(), (
-        "Required dir not created in fixture"
-    )
+    assert (runtime_dir / "oldname_root").exists(), "Required dir not created in fixture"
     context = {"runtime": runtime_dir, "config": config_dir}
     yield context
 
@@ -78,9 +66,7 @@ def default_map_file(temp_test_dir: dict) -> Path:
             "OLDNAME": "NEWNAME",
         }
     }
-    map_file.write_text(
-        json.dumps(map_data, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    map_file.write_text(json.dumps(map_data, ensure_ascii=False, indent=2), encoding="utf-8")
     return map_file
 
 
