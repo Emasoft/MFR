@@ -99,6 +99,7 @@ jobs:
           VALIDATE_CHECKOV: false  # Disable infrastructure security checks
           VALIDATE_PYTHON_PYINK: false  # Conflicts with ruff formatting
           VALIDATE_PYTHON_MYPY: false  # Already run in pre-commit and CI
+          VALIDATE_YAML_PRETTIER: false  # Using yamllint instead
 
           # Output settings
           LINTER_RULES_PATH: .
