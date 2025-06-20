@@ -177,6 +177,29 @@ def main_flow(
     verbose_mode: bool,
     interactive_mode: bool,
 ) -> None:
+    """Main workflow for mass find and replace operations.
+
+    Args:
+        directory: Root directory to process
+        mapping_file: Path to JSON file with replacement mappings
+        extensions: List of file extensions for content scan
+        exclude_dirs: Directory names to exclude
+        exclude_files: Files or relative paths to exclude
+        dry_run: Simulate changes without executing them
+        skip_scan: Use existing transaction file for execution
+        resume: Resume from existing transaction file
+        force_execution: Skip confirmation prompt
+        ignore_symlinks_arg: Whether to ignore symlinks
+        use_gitignore: Use .gitignore file for exclusions
+        custom_ignore_file_path: Path to custom ignore file
+        skip_file_renaming: Skip all file renaming operations
+        skip_folder_renaming: Skip all folder renaming operations
+        skip_content: Skip all file content modifications
+        timeout_minutes: Maximum minutes for retry phase
+        quiet_mode: Suppress informational messages
+        verbose_mode: Enable verbose output
+        interactive_mode: Prompt for approval before each change
+    """
     from pathlib import Path
     import pathspec
 
@@ -537,6 +560,7 @@ def _run_subprocess_command(command: list[str], description: str) -> bool:
 
 
 def main_cli() -> None:
+    """Main CLI entry point for mass find replace."""
     import sys
     import importlib.util
     import argparse

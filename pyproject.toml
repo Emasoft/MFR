@@ -1,6 +1,6 @@
 [project]
 name = "mass-find-replace"
-version = "0.2.0"
+version = "0.2.1"
 description = "A sophisticated Python tool for safe, surgical find-and-replace operations across directory structures"
 authors = [
     {name = "Emasoft", email = "713559+Emasoft@users.noreply.github.com"},

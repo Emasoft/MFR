@@ -45,6 +45,22 @@ from . import replace_logic
 # Note: LoggerAdapter is not generic in Python 3.10, so we use Any
 LoggerType = Union[logging.Logger, Any, None]
 
+# Constants for file size thresholds
+SMALL_FILE_SIZE_THRESHOLD = 1_048_576  # 1 MB - files smaller than this are read entirely
+LARGE_FILE_SIZE_THRESHOLD = 100_000_000  # 100 MB - files larger than this are skipped for content scan
+DEFAULT_ENCODING_SAMPLE_SIZE = 10240  # 10 KB - sample size for encoding detection
+
+# Constants for retry logic
+QUICK_RETRY_COUNT = 3  # Number of quick retries with short delay
+QUICK_RETRY_DELAY = 1  # Seconds between quick retries
+MAX_RETRY_WAIT_TIME = 30  # Maximum wait time between retries in seconds
+RETRY_BACKOFF_MULTIPLIER = 5  # Multiplier for exponential backoff
+
+# Constants for large file processing
+SAFE_LINE_LENGTH_THRESHOLD = 1000  # Characters - lines longer than this use chunked processing
+CHUNK_SIZE = 1000  # Characters - chunk size for processing long lines
+FALLBACK_CHUNK_SIZE = 1000  # Characters - fallback chunk size if no safe split found
+
 
 class SandboxViolationError(Exception):
     pass
@@ -155,14 +171,26 @@ def _log_collision_error(
         _log_fs_op_message(logging.WARNING, f"Could not write to collision log: {e}", logger)
 
 
-def get_file_encoding(file_path: Path, sample_size: int = 10240, logger: LoggerType = None) -> str:
+def get_file_encoding(
+    file_path: Path, sample_size: int = DEFAULT_ENCODING_SAMPLE_SIZE, logger: LoggerType = None
+) -> str:
+    """Detect file encoding using multiple strategies.
+
+    Args:
+        file_path: Path to the file
+        sample_size: Number of bytes to sample for detection
+        logger: Optional logger instance
+
+    Returns:
+        Detected encoding name
+    """
     if not file_path.is_file():
         return DEFAULT_ENCODING_FALLBACK
     try:
         file_size = file_path.stat().st_size
 
         # For small files, try reading the entire file with UTF-8 decoding first
-        if file_size <= 1_048_576:  # Increased threshold to 1MB
+        if file_size <= SMALL_FILE_SIZE_THRESHOLD:
             try:
                 raw_data = file_path.read_bytes()
                 raw_data.decode("utf-8", errors="strict")  # Try strict UTF-8
@@ -238,6 +266,15 @@ def get_file_encoding(file_path: Path, sample_size: int = 10240, logger: LoggerT
 
 
 def load_ignore_patterns(ignore_file_path: Path, logger: LoggerType = None) -> pathspec.PathSpec | None:
+    """Load ignore patterns from a gitignore-style file.
+
+    Args:
+        ignore_file_path: Path to the ignore file
+        logger: Optional logger instance
+
+    Returns:
+        PathSpec object or None if file doesn't exist
+    """
     if not ignore_file_path.is_file():
         return None
     try:
@@ -261,6 +298,18 @@ def _walk_for_scan(
     ignore_spec: pathspec.PathSpec | None,
     logger: LoggerType = None,
 ) -> Iterator[Path]:
+    """Walk directory tree yielding paths that should be scanned.
+
+    Args:
+        root_dir: Root directory to walk
+        excluded_dirs_abs: Absolute paths of directories to exclude
+        ignore_symlinks: Whether to ignore symlinks
+        ignore_spec: PathSpec for gitignore-style exclusions
+        logger: Optional logger instance
+
+    Yields:
+        Paths to process
+    """
     for item_path_from_rglob in root_dir.rglob("*"):
         try:
             if ignore_symlinks and item_path_from_rglob.is_symlink():
@@ -361,6 +410,25 @@ def scan_directory_for_occurrences(
     skip_content: bool = False,
     logger: LoggerType = None,
 ) -> list[dict[str, Any]]:
+    """Scan directory for all occurrences that need replacement.
+
+    Args:
+        root_dir: Root directory to scan
+        excluded_dirs: Directory names to exclude
+        excluded_files: Files or relative paths to exclude
+        file_extensions: List of file extensions for content scan
+        ignore_symlinks: Whether to ignore symlinks
+        ignore_spec: PathSpec for gitignore-style exclusions
+        resume_from_transactions: Existing transactions for resume
+        paths_to_force_rescan: Paths to force rescan or None for all
+        skip_file_renaming: Skip file renaming operations
+        skip_folder_renaming: Skip folder renaming operations
+        skip_content: Skip content modifications
+        logger: Optional logger instance
+
+    Returns:
+        List of transaction dictionaries
+    """
     processed_transactions: list[dict[str, Any]] = []
     existing_transaction_ids: set[tuple[str, str, int]] = set()
     # Handle None as "rescan everything"
@@ -530,7 +598,7 @@ def scan_directory_for_occurrences(
             try:
                 if item_abs_path.is_file():  # This resolves symlinks to files
                     # Skip large files early
-                    if item_abs_path.stat().st_size > 100_000_000:  # 100MB
+                    if item_abs_path.stat().st_size > LARGE_FILE_SIZE_THRESHOLD:
                         continue
 
                     is_rtf = item_abs_path.suffix.lower() == ".rtf"
@@ -1068,8 +1136,7 @@ def process_large_file_content(
         is_rtf: Whether file is RTF format
         logger: Optional logger instance
     """
-    SAFE_LINE_LENGTH_THRESHOLD = 1000  # Only split lines longer than this
-    CHUNK_SIZE = 1000
+    # Use constants defined at module level
 
     if is_rtf:
         for tx in txns_for_file:
@@ -1161,7 +1228,7 @@ def process_large_file_content(
                             # Special case: if we didn't find any non-key character
                             if split_pos == end_idx and search_pos < buffer_idx:
                                 # Backtrack further if necessary (shouldn't happen often)
-                                split_pos = min(buffer_idx + 1000, len(current_line_content))
+                                split_pos = min(buffer_idx + FALLBACK_CHUNK_SIZE, len(current_line_content))
 
                             # Process and write the chunk
                             dst_file.write(current_line_content[buffer_idx:split_pos])
@@ -1260,7 +1327,7 @@ def group_and_process_file_transactions(
             # Get file stats
             file_size = abs_path.stat().st_size
 
-            if file_size <= 1 * 1024 * 1024:
+            if file_size <= SMALL_FILE_SIZE_THRESHOLD:
                 # Small file - use existing method
                 _execute_file_content_batch(abs_path, file_data["txns"], logger)
             else:
@@ -1612,13 +1679,13 @@ def execute_all_transactions(
                         logger=logger,
                     )
 
-            if retryable_items and pass_count < 3:  # Retry up to 3 times quickly
+            if retryable_items and pass_count < QUICK_RETRY_COUNT:
                 if logger:
                     logger.info(f"Retrying {len(retryable_items)} transactions (pass {pass_count})...")
-                time.sleep(1)  # Brief pause between retries
+                time.sleep(QUICK_RETRY_DELAY)  # Brief pause between retries
             elif retryable_items:
                 # After quick retries, wait longer
-                wait_time = min(30, 5 * (pass_count - 2))  # 5s, 10s, 15s... up to 30s
+                wait_time = min(MAX_RETRY_WAIT_TIME, RETRY_BACKOFF_MULTIPLIER * (pass_count - 2))
                 if logger:
                     logger.info(f"Waiting {wait_time}s before retry (pass {pass_count})...")
                 time.sleep(wait_time)
