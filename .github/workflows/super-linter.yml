@@ -88,7 +88,6 @@ jobs:
           VALIDATE_RUBY: false
           VALIDATE_RUST: false
           VALIDATE_SCALA: false
-          VALIDATE_SQL: false
           VALIDATE_TSX: false
           VALIDATE_TYPESCRIPT_STANDARD: false
           VALIDATE_XML: false
