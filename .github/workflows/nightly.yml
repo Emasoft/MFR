@@ -30,17 +30,17 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv venv
-          uv pip install -r requirements-dev.txt
+          uv sync --all-extras
 
       - name: Run full test suite
         run: |
-          uv run pytest test_mass_find_replace.py -v --cov=. --cov-report=term-missing
+          uv run pytest tests/ -v --cov=src/mass_find_replace --cov-report=term-missing
 
       - name: Test with different encodings
         run: |
-          uv run python -m pytest test_mass_find_replace.py::test_unicode_handling -v
-          uv run python -m pytest test_mass_find_replace.py::test_binary_file_detection -v
+          uv run python -m pytest tests/test_mass_find_replace.py::test_unicode_combining_chars -v
+          uv run python -m pytest tests/test_mass_find_replace.py::test_gb18030_encoding -v
+          uv run python -m pytest tests/test_mass_find_replace.py::test_binary_files_logging -v
 
       - name: Performance benchmark
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
@@ -51,7 +51,7 @@ jobs:
           import tempfile
           import shutil
           from pathlib import Path
-          from mass_find_replace import main_flow
+          from mass_find_replace.mass_find_replace import main_flow
 
           with tempfile.TemporaryDirectory() as tmpdir:
               # Create test structure
