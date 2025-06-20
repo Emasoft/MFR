@@ -258,17 +258,14 @@ def main_flow(
         return
 
     # Type-safety reinforcement
-    if not isinstance(replace_logic._RAW_REPLACEMENT_MAPPING, dict):
-        logger.error("Critical Error: Replacement mapping has invalid type!")
-        return
-
-    if not replace_logic._MAPPING_LOADED:
+    if not replace_logic.is_mapping_loaded():
         logger.error(f"Critical Error: Map {map_file_path} not loaded by replace_logic.")
         return
 
     # Display mapping table and get confirmation (unless in quiet mode or force mode)
-    if not quiet_mode and not force_execution and replace_logic._RAW_REPLACEMENT_MAPPING:
-        _print_mapping_table(replace_logic._RAW_REPLACEMENT_MAPPING, logger)
+    replacement_mapping = replace_logic.get_replacement_mapping()
+    if not quiet_mode and not force_execution and replacement_mapping:
+        _print_mapping_table(replacement_mapping, logger)
 
         operations_desc = _get_operation_description(skip_file_renaming, skip_folder_renaming, skip_content)
         print(
@@ -285,7 +282,7 @@ def main_flow(
             return
 
     # Consolidated empty map check
-    if not replace_logic._RAW_REPLACEMENT_MAPPING:
+    if not replacement_mapping:
         if not (skip_file_renaming or skip_folder_renaming or skip_content):
             logger.info(
                 "Map is empty and no operations are configured that would proceed without map rules. Nothing to execute."
@@ -293,7 +290,7 @@ def main_flow(
             return
         logger.info("Map is empty. No string-based replacements will occur.")
 
-    elif not replace_logic.get_scan_pattern() and replace_logic._RAW_REPLACEMENT_MAPPING:
+    elif not replace_logic.get_scan_pattern() and replacement_mapping:
         logger.error("Critical Error: Map loaded but scan regex pattern compilation failed or resulted in no patterns.")
         return
 
@@ -342,8 +339,9 @@ def main_flow(
         print(f"{BLUE}--- Proposed Operation ---{RESET}")
         print(f"Root Directory: {abs_root_dir}")
         print(f"Replacement Map File: {map_file_path}")
-        if replace_logic._RAW_REPLACEMENT_MAPPING:
-            print(f"Loaded {len(replace_logic._RAW_REPLACEMENT_MAPPING)} replacement rules.")
+        mapping_size = replace_logic.get_mapping_size()
+        if mapping_size > 0:
+            print(f"Loaded {mapping_size} replacement rules.")
         else:
             print("Replacement map is empty. No string replacements will occur.")
         print(f"File Extensions for content scan: {extensions if extensions else 'All non-binary (heuristic)'}")
@@ -370,7 +368,7 @@ def main_flow(
         print(f"{BLUE}-------------------------{RESET}")
         sys.stdout.flush()
         if (
-            not replace_logic._RAW_REPLACEMENT_MAPPING
+            not replacement_mapping
             and (skip_file_renaming or not extensions)
             and (skip_folder_renaming or not extensions)
             and skip_content
@@ -388,14 +386,14 @@ def main_flow(
     if not skip_scan:
         logger.info(f"Scanning '{abs_root_dir}'...")
         current_txns_for_resume: list[dict[str, Any]] | None = None
-        paths_to_force_rescan: set[str] = set()
+        paths_to_force_rescan: set[str] | None = set()
         if resume and txn_json_path.exists():
             logger.info(f"Resume: Loading existing txns from {txn_json_path}...")
             current_txns_for_resume = load_transactions(txn_json_path, logger=logger)
             if not skip_scan and dry_run:
                 # Always force rescan when resuming dry run
                 logger.info("Resume+dry_run: Forcing full rescan of modified files")
-                paths_to_force_rescan = set("*")  # Rescan everything
+                paths_to_force_rescan = None  # None means rescan everything
             if current_txns_for_resume is None:
                 logger.warning(f"{YELLOW}Warn: Could not load txns. Fresh scan.{RESET}")
             elif not current_txns_for_resume:
@@ -426,7 +424,8 @@ def main_flow(
                                 logger.info(
                                     f"File '{rel_p}' (mtime:{mtime:.0f}) modified after last process (ts:{path_last_processed_time[rel_p]:.0f}). Re-scan."
                                 )
-                                paths_to_force_rescan.add(rel_p)
+                                if paths_to_force_rescan is not None:
+                                    paths_to_force_rescan.add(rel_p)
                     except OSError as e:
                         logger.warning(f"Could not access or stat {item_fs} during resume check: {e}")
                     except Exception as e:
@@ -452,7 +451,7 @@ def main_flow(
         if not found_txns:
             logger.info(
                 "No actionable occurrences found by scan."
-                if replace_logic._RAW_REPLACEMENT_MAPPING
+                if replacement_mapping
                 else "Map empty and no scannable items found, or all items ignored."
             )
             return

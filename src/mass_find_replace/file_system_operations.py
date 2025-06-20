@@ -363,7 +363,11 @@ def scan_directory_for_occurrences(
 ) -> list[dict[str, Any]]:
     processed_transactions: list[dict[str, Any]] = []
     existing_transaction_ids: set[tuple[str, str, int]] = set()
-    paths_to_force_rescan_internal: set[str] = paths_to_force_rescan if paths_to_force_rescan is not None else set()
+    # Handle None as "rescan everything"
+    rescan_all = paths_to_force_rescan is None
+    paths_to_force_rescan_internal: set[str] = (
+        set() if rescan_all else (paths_to_force_rescan if paths_to_force_rescan is not None else set())
+    )
     abs_root_dir = root_dir
 
     binary_log_path = root_dir / BINARY_MATCHES_LOG_FILE
@@ -382,10 +386,9 @@ def scan_directory_for_occurrences(
                 tx["NEW_NAME"] = replace_logic.replace_occurrences(tx["ORIGINAL_NAME"])
         for tx in resume_from_transactions:
             tx_rel_path = tx.get("PATH")
-            if (
-                tx_rel_path in paths_to_force_rescan_internal
-                and tx.get("TYPE") == TransactionType.FILE_CONTENT_LINE.value
-            ):
+            if (rescan_all or tx_rel_path in paths_to_force_rescan_internal) and tx.get(
+                "TYPE"
+            ) == TransactionType.FILE_CONTENT_LINE.value:
                 continue
             tx_type, tx_line = tx.get("TYPE"), tx.get("LINE_NUMBER", 0)
             if tx_type and tx_rel_path:
@@ -1593,7 +1596,35 @@ def execute_all_transactions(
             finished = True
             break
 
-        # Wait and retry logic here (omitted for brevity)
+        # Wait and retry logic
+        if items_still_requiring_retry:
+            # Check if any are retryable errors
+            retryable_items = []
+            for tx in items_still_requiring_retry:
+                error_msg = tx.get("ERROR_MESSAGE", "")
+                if any(err_str in error_msg.lower() for err_str in ["permission", "access", "busy", "locked"]):
+                    retryable_items.append(tx)
+                    update_transaction_status_in_list(
+                        transactions,
+                        tx["id"],
+                        TransactionStatus.RETRY_LATER,
+                        error_msg,
+                        logger=logger,
+                    )
+
+            if retryable_items and pass_count < 3:  # Retry up to 3 times quickly
+                if logger:
+                    logger.info(f"Retrying {len(retryable_items)} transactions (pass {pass_count})...")
+                time.sleep(1)  # Brief pause between retries
+            elif retryable_items:
+                # After quick retries, wait longer
+                wait_time = min(30, 5 * (pass_count - 2))  # 5s, 10s, 15s... up to 30s
+                if logger:
+                    logger.info(f"Waiting {wait_time}s before retry (pass {pass_count})...")
+                time.sleep(wait_time)
+            else:
+                # No retryable items, we're done
+                finished = True
 
     # After rename and individual transaction processing, process content transactions grouped by file
     content_txs = [

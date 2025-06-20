@@ -337,6 +337,33 @@ def get_key_characters() -> set[str]:
     return _KEY_CHARACTER_SET.copy()
 
 
+def get_replacement_mapping() -> dict[str, str]:
+    """Get the loaded replacement mapping.
+
+    Returns:
+        A copy of the replacement mapping dictionary
+    """
+    return _RAW_REPLACEMENT_MAPPING.copy() if _MAPPING_LOADED else {}
+
+
+def is_mapping_loaded() -> bool:
+    """Check if the replacement mapping has been loaded.
+
+    Returns:
+        True if mapping is loaded, False otherwise
+    """
+    return _MAPPING_LOADED
+
+
+def get_mapping_size() -> int:
+    """Get the number of replacement rules loaded.
+
+    Returns:
+        Number of replacement rules
+    """
+    return len(_RAW_REPLACEMENT_MAPPING) if _MAPPING_LOADED else 0
+
+
 def _actual_replace_callback(match: re.Match[str]) -> str:
     """Callback function for regex replacement.
 
