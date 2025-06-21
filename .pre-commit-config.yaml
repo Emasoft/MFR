@@ -22,21 +22,31 @@ repos:
     hooks:
       - id: gitleaks
 
-  # Ruff for linting and formatting
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.0
+  # Ruff for linting and formatting (run with uv)
+  - repo: local
     hooks:
-      # Run the linter
       - id: ruff
-        args: [--fix]
-      # Run the formatter
+        name: ruff (legacy alias)
+        entry: uv run ruff check --fix
+        language: system
+        types: [python]
+        require_serial: true
       - id: ruff-format
+        name: ruff format
+        entry: uv run ruff format
+        language: system
+        types: [python]
+        require_serial: true
 
-  # Mypy for type checking
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.16.1
+  # Mypy for type checking (run with uv)
+  - repo: local
     hooks:
       - id: mypy
+        name: mypy
+        entry: uv run mypy
+        language: system
+        types: [python]
+        files: ^(src/|tests/)
         args:
           [
             --strict,
@@ -46,10 +56,7 @@ repos:
             --ignore-missing-imports,
             --no-warn-unused-ignores,
           ]
-        files: ^src/
-        additional_dependencies:
-          - types-chardet
-          - prefect
+        require_serial: true
 
   # Deptry for dependency checking (run with uv)
   - repo: local
@@ -94,11 +101,14 @@ repos:
         types: [yaml]
         args: [-c=.yamllint.yml]
 
-  # Shell script linting
-  - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.10.0.1
+  # Shell script linting (run with uv)
+  - repo: local
     hooks:
       - id: shellcheck
+        name: shellcheck
+        entry: uv run shellcheck
+        language: system
+        types: [shell]
         args: [--severity=error]
 
   # GitHub Actions linting (run with uv)
@@ -110,9 +120,19 @@ repos:
         language: system
         files: ^\.github/workflows/.*\.(yml|yaml)$
 
+  # Run tests before committing
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: uv run pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+        args: [tests/, -v]
+
 
 # Configuration for specific hooks
-files: ^(src/|tests/|pyproject\.toml|requirements.*\.txt)
 exclude: |
   (?x)^(
     \.git/|
