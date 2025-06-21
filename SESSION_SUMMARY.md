@@ -101,21 +101,21 @@ resolved without adding new features or unnecessary improvements.
 
 ## Problems Encountered and Solutions
 
-• Problem: Direct access to private module variables _RAW_REPLACEMENT_MAPPING
-  Solution: Added get_replacement_mapping() public function
-  Motivation: Maintain proper encapsulation and prevent external code from modifying internal state
+• Problem: Direct access to private module variables \_RAW_REPLACEMENT_MAPPING
+Solution: Added get_replacement_mapping() public function
+Motivation: Maintain proper encapsulation and prevent external code from modifying internal state
 
 • Problem: Missing retry logic marked as "omitted for brevity"
-  Solution: Implemented full retry mechanism with exponential backoff
-  Motivation: Handle transient file system errors gracefully
+Solution: Implemented full retry mechanism with exponential backoff
+Motivation: Handle transient file system errors gracefully
 
 • Problem: Type checker errors with paths_to_force_rescan
-  Solution: Changed type annotation from set[str] to set[str] | None
-  Motivation: Variable could be None but type didn't reflect this
+Solution: Changed type annotation from set[str] to set[str] | None
+Motivation: Variable could be None but type didn't reflect this
 
 • Problem: Pre-commit hooks reformatted files during commit
-  Solution: Re-staged files after formatting and committed again
-  Motivation: Ensure code follows project style guidelines
+Solution: Re-staged files after formatting and committed again
+Motivation: Ensure code follows project style guidelines
 
 ---
 
@@ -137,22 +137,23 @@ resolved without adding new features or unnecessary improvements.
 ## Configuration Changes and Why
 
 • pyproject.toml:
+
 - version = "0.2.0"
 - version = "0.2.1"
-Motivation: Semantic versioning for bug fixes and improvements
+  Motivation: Semantic versioning for bug fixes and improvements
 
 ---
 
 ## Deployment Steps Taken and Avoided
 
 • IMPLEMENTED: Comprehensive testing with real projects
-  Motivation: Ensure changes work correctly with actual codebases
+Motivation: Ensure changes work correctly with actual codebases
 
 • IMPLEMENTED: Pre-commit hooks validation
-  Motivation: Maintain code quality standards
+Motivation: Maintain code quality standards
 
 • AVOIDED: Adding new dependencies
-  Motivation: Keep the tool lightweight and dependency-free
+Motivation: Keep the tool lightweight and dependency-free
 
 ---
 
@@ -160,6 +161,7 @@ Motivation: Semantic versioning for bug fixes and improvements
 
 • All 16 existing tests pass without modification
 • Tests cover the modified functions:
+
 - test_unicode_content_replacement
 - test_plan_file_renaming
 - test_execute_rename_file
@@ -171,6 +173,7 @@ Motivation: Semantic versioning for bug fixes and improvements
 
 • No new tests were added as existing tests provided adequate coverage
 • Real-world testing performed with:
+
 - setup.py project (mypackage → awesomepackage)
 - FastAPI project (fastapi → slowapi, including case variations)
 
