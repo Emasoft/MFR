@@ -1,0 +1,8 @@
+# Code owners for automatic review requests
+# These owners will be requested for review when someone opens a pull request
+
+* @Emasoft
+*.py @Emasoft
+*.yml @Emasoft
+*.yaml @Emasoft
+.github/ @Emasoft

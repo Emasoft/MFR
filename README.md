@@ -67,45 +67,98 @@ uv run mfr .
 - Python 3.10 or higher
 - [uv](https://github.com/astral-sh/uv) package manager (recommended)
 
-### Using uv (Recommended)
+### Installing uv
+
+UV is a fast Python package and project manager that replaces pip, pip-tools, virtualenv, and more.
+
+**macOS and Linux:**
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+**Windows:**
+```powershell
+winget install astral-sh.uv
+# or with installer:
+irm https://astral.sh/uv/install.ps1 | iex
+```
+
+**With pip (fallback):**
+```bash
+pip install uv
+```
+
+### Install from Source (Recommended)
 
 ```bash
-# Install uv if you haven't already
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
 # Clone the repository
 git clone https://github.com/Emasoft/MFR.git
 cd MFR
 
-# Install all dependencies
+# Create virtual environment and install dependencies
 uv sync
 
 # The mfr command is now available via uv run
 uv run mfr --help
 ```
 
-### Install from Wheel
+### Install as a Package
 
 ```bash
-# Download the latest release wheel
-# (Once available on PyPI, you'll be able to use: uv pip install mass-find-replace)
-
-# For now, build from source:
+# Build and install from source
+git clone https://github.com/Emasoft/MFR.git
+cd MFR
 uv build
 uv pip install dist/mass_find_replace-*.whl
+
+# Or install directly from GitHub
+uv pip install git+https://github.com/Emasoft/MFR.git
+```
+
+### Install from PyPI (Coming Soon)
+
+```bash
+# Once published to PyPI
+uv pip install mass-find-replace
 ```
 
 ### Development Installation
 
 ```bash
-# Clone and install in editable mode
+# Clone the repository
 git clone https://github.com/Emasoft/MFR.git
 cd MFR
+
+# Install with all development dependencies
 uv sync --all-extras
+
+# Install in editable mode
 uv pip install -e .
+
+# Install pre-commit hooks
+uv run pre-commit install
+uv run pre-commit install --hook-type pre-push
 
 # Run tests
 uv run pytest
+
+# Run linters
+uv run pre-commit run --all-files
+```
+
+### Docker Installation
+
+```bash
+# Using Docker Compose
+git clone https://github.com/Emasoft/MFR.git
+cd MFR
+
+# Run with Docker
+docker-compose run mfr /workspace --dry-run
+
+# Or build manually
+docker build -t mass-find-replace:latest .
+docker run -v $(pwd):/workspace mass-find-replace /workspace --dry-run
 ```
 
 ## 🎯 Usage
@@ -217,27 +270,94 @@ mfr ./config --extensions .json,.yaml,.yml,.env,.ini
 mfr [directory] [options]
 ```
 
-| Option | Short | Description |
-|--------|-------|-------------|
-| `--dry-run` | | Preview changes without executing |
-| `--interactive` | `-i` | Approve each change individually |
-| `--force` | `-y` | Skip confirmation prompt |
-| `--resume` | | Resume from existing transaction file |
-| `--skip-scan` | | Use existing transaction file |
-| `--mapping-file PATH` | | Custom replacement mapping file |
-| `--extensions .ext1,.ext2` | | File extensions to process |
-| `--exclude-dirs dir1,dir2` | | Directories to skip |
-| `--exclude-files file1,file2` | | Files to skip |
-| `--skip-file-renaming` | | Don't rename files |
-| `--skip-folder-renaming` | | Don't rename folders |
-| `--skip-content` | | Don't modify file contents |
-| `--process-symlink-names` | | Process symbolic link names |
-| `--no-gitignore` | | Ignore .gitignore patterns |
-| `--ignore-file PATH` | | Custom ignore patterns file |
-| `--timeout MINUTES` | | Retry timeout (default: 10) |
-| `--quiet` | `-q` | Suppress informational output |
-| `--verbose` | | Enable debug logging |
-| `--self-test` | | Run built-in tests |
+#### Complete Help Output
+
+```
+usage: mfr [-h] [--mapping-file MAPPING_FILE]
+           [--extensions EXTENSIONS [EXTENSIONS ...]]
+           [--exclude-dirs EXCLUDE_DIRS [EXCLUDE_DIRS ...]]
+           [--exclude-files EXCLUDE_FILES [EXCLUDE_FILES ...]]
+           [--no-gitignore] [--ignore-file PATH] [--process-symlink-names]
+           [--skip-file-renaming] [--skip-folder-renaming] [--skip-content]
+           [--dry-run] [--skip-scan] [--resume] [--force] [-i]
+           [--timeout MINUTES] [--quiet] [--verbose] [--self-test]
+           [directory]
+
+MFR - Mass Find Replace - A script to safely rename things in your project
+Find and replace strings in files and filenames/foldernames within a project
+directory. It operates in three phases: Scan, Plan (creating a transaction
+log), and Execute. The process is designed to be resumable and aims for
+surgical precision in replacements. Binary file content is NOT modified;
+matches within them are logged to 'binary_files_matches.log'.
+
+positional arguments:
+  directory             Root directory to process (default: current directory)
+
+options:
+  -h, --help            show this help message and exit
+  --mapping-file MAPPING_FILE
+                        Path to the JSON file with replacement mappings
+                        (default: ./replacement_mapping.json)
+  --extensions EXTENSIONS [EXTENSIONS ...]
+                        List of file extensions for content scan (e.g. .py
+                        .txt .rtf). Default: attempts to process recognized
+                        text-like files
+  --exclude-dirs EXCLUDE_DIRS [EXCLUDE_DIRS ...]
+                        Directory names to exclude (space-separated).
+                        Default: .git .venv etc.
+  --exclude-files EXCLUDE_FILES [EXCLUDE_FILES ...]
+                        Specific files or relative paths to exclude
+                        (space-separated)
+  --timeout MINUTES     Maximum minutes for the retry phase when files are
+                        locked/inaccessible. Set to 0 for indefinite retries
+                        (until CTRL-C). Minimum 1 minute if not 0.
+                        Default: 10 minutes
+
+Ignore File Options:
+  --no-gitignore        Disable using .gitignore file for exclusions. Custom
+                        ignore files will also be skipped
+  --ignore-file PATH    Path to a custom .gitignore-style file for additional
+                        exclusions
+
+Symlink Handling:
+  --process-symlink-names
+                        If set, symlink names WILL BE PROCESSED for renaming.
+                        Default: symlink names are NOT processed for renaming.
+                        Symlink targets are never followed for content
+                        modification by this script
+
+Skip Operation Options:
+  --skip-file-renaming  Skip all file renaming operations
+  --skip-folder-renaming
+                        Skip all folder renaming operations
+  --skip-content        Skip all file content modifications. If all three
+                        --skip-* options are used, the script will exit with
+                        'nothing to do'
+
+Execution Control:
+  --dry-run             Scan and plan changes, but do not execute them.
+                        Reports what would be changed
+  --skip-scan           Skip scan phase; use existing 'planned_transactions.json'
+                        in the root directory for execution
+  --resume              Resume operation from existing transaction file,
+                        attempting to complete pending/failed items and scan
+                        for new/modified ones
+  --force, --yes, -y    Force execution without confirmation prompt
+                        (use with caution)
+  -i, --interactive     Run in interactive mode, prompting for approval
+                        before each change
+
+Output Control:
+  --quiet, -q           Suppress initial script name print and some
+                        informational messages from direct print statements
+                        (Prefect logs are separate). Also suppresses the
+                        confirmation prompt, implying 'yes'
+  --verbose             Enable more verbose output, setting Prefect logger
+                        to DEBUG level
+
+Developer Options:
+  --self-test           Run automated tests for this script
+```
 
 ### Understanding the Transaction System
 
@@ -487,12 +607,19 @@ We welcome contributions! Here's how to get started:
 git clone https://github.com/YOUR_USERNAME/MFR.git
 cd MFR
 
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
 # Install development dependencies
 uv sync --all-extras
 
 # Install pre-commit hooks
 uv run pre-commit install
 uv run pre-commit install --hook-type pre-push
+
+# Set up Git configuration
+git config user.name "Your Name"
+git config user.email "your.email@example.com"
 ```
 
 ### Development Workflow
@@ -506,13 +633,35 @@ uv run pre-commit install --hook-type pre-push
    uv run pre-commit run --all-files
 
    # Or run individual tools
-   uv run ruff format .
-   uv run ruff check .
-   uv run mypy .
-   uv run deptry src
+   uv run ruff format .                      # Format code
+   uv run ruff check . --fix                 # Lint and fix issues
+   uv run mypy src/ tests/                   # Type checking
+   uv run deptry src                         # Dependency analysis
+   uv run yamllint -c .yamllint.yml .        # YAML linting
+   uv run bandit -r src                      # Security linting
+   uv run pip-audit                          # Vulnerability scan
+   gitleaks detect --source . --config .gitleaks.toml  # Secret scanning
    ```
-5. **Commit with semantic messages**: `feat:`, `fix:`, `docs:`, etc.
-6. **Push and create PR**
+5. **Update dependencies if needed**:
+   ```bash
+   # Add a new dependency
+   uv add package-name
+
+   # Add a dev dependency
+   uv add --dev package-name
+
+   # Update lock file
+   uv lock
+   ```
+6. **Commit with semantic messages**:
+   - `feat:` New feature
+   - `fix:` Bug fix
+   - `docs:` Documentation changes
+   - `style:` Code style changes
+   - `refactor:` Code refactoring
+   - `test:` Test changes
+   - `chore:` Maintenance tasks
+7. **Push and create PR**
 
 ### Code Style Guidelines
 
@@ -521,6 +670,8 @@ uv run pre-commit install --hook-type pre-push
 - Keep functions focused and under 50 lines
 - Maintain test coverage above 80%
 - Follow existing patterns in the codebase
+- Ensure all files pass pre-commit hooks
+- Add changelog entry in code files when making changes
 
 ## 📄 License
 
@@ -539,13 +690,28 @@ MFR/
 ├── tests/
 │   ├── conftest.py                  # Test fixtures and configuration
 │   └── test_mass_find_replace.py    # Comprehensive test suite
+├── scripts/
+│   ├── setup-github.sh              # GitHub repository setup with GH CLI
+│   ├── test-workflows.sh            # Test GitHub Actions locally
+│   └── test-with-act.sh             # Test with act (Docker required)
+├── .github/
+│   └── workflows/
+│       ├── ci.yml                   # Main CI/CD pipeline
+│       ├── pre-commit.yml           # Pre-commit checks
+│       ├── release.yml              # Release automation
+│       └── security.yml             # Security scanning
 ├── dist/                            # Built distributions (after uv build)
+├── .venv/                           # Virtual environment (created by uv)
 ├── replacement_mapping.json         # Your string replacements config
 ├── planned_transactions.json        # Generated transaction plan
-├── requirements.txt                 # Production dependencies
-├── requirements-dev.txt             # Development dependencies
-├── pyproject.toml                  # Package configuration
+├── requirements.txt                 # Production dependencies (auto-generated)
+├── requirements-dev.txt             # Development dependencies (auto-generated)
+├── pyproject.toml                   # Package configuration
+├── uv.lock                          # UV lock file (commit this)
+├── .pre-commit-config.yaml          # Pre-commit hooks configuration
+├── .gitleaks.toml                   # Gitleaks secret scanning config
 ├── CLAUDE.md                        # AI assistant guidelines
+├── SECURITY_SETUP.md                # Security configuration docs
 ├── README.md                        # This file
 └── LICENSE                          # MIT License
 ```
@@ -574,6 +740,96 @@ MFR/
 - Run on SSD for best performance
 - Use `--dry-run` first on large codebases
 
+## 🚀 CI/CD Pipeline
+
+### GitHub Actions Integration
+
+MFR uses GitHub Actions for continuous integration and deployment, fully integrated with UV for fast, reliable builds.
+
+#### Workflows
+
+1. **CI/CD Pipeline** (`ci.yml`):
+   - Multi-OS testing (Ubuntu, Windows, macOS)
+   - Python version matrix (3.10, 3.11, 3.12)
+   - Security scanning with Gitleaks
+   - Automated builds and distribution
+   - Release to PyPI (when tagged)
+
+2. **Pre-commit Checks** (`pre-commit.yml`):
+   - Runs all pre-commit hooks on every push
+   - Ensures code quality standards
+
+3. **Security Scanning** (`security.yml`):
+   - Gitleaks for secret detection
+   - pip-audit for vulnerability scanning
+   - bandit for security linting
+   - safety for known vulnerabilities
+
+#### Local CI Testing
+
+Test GitHub Actions locally using [act](https://github.com/nektos/act):
+
+```bash
+# Install act
+brew install act  # macOS
+# or see https://github.com/nektos/act for other platforms
+
+# Test workflows
+./scripts/test-workflows.sh
+
+# Test specific workflow
+act push -W .github/workflows/ci.yml
+
+# Interactive mode
+./scripts/test-with-act.sh
+```
+
+### UV Integration
+
+UV is deeply integrated into the development workflow:
+
+1. **Dependency Management**:
+   - `uv.lock` ensures reproducible builds
+   - `pyproject.toml` defines all dependencies
+   - Auto-generated `requirements*.txt` for compatibility
+
+2. **Pre-commit Hooks**:
+   - Uses [uv-pre-commit](https://github.com/astral-sh/uv-pre-commit)
+   - Compiles requirements on every commit
+   - Runs all tools through UV for consistency
+
+3. **GitHub Actions**:
+   - Uses `astral-sh/setup-uv@v6` action
+   - Caches dependencies for fast builds
+   - Manages Python versions automatically
+
+### Setting Up CI/CD
+
+1. **Initialize GitHub Repository**:
+```bash
+# Authenticate with GitHub CLI
+gh auth login
+
+# Run setup script
+./scripts/setup-github.sh
+```
+
+2. **Configure Secrets**:
+```bash
+# Add Codecov token (optional)
+gh secret set CODECOV_TOKEN
+
+# PyPI token (for releases)
+gh secret set PYPI_API_TOKEN
+```
+
+3. **Enable Branch Protection**:
+The setup script configures branch protection with:
+- Required status checks
+- Dismiss stale reviews
+- No force pushes
+- No deletions
+
 ## 🔮 Roadmap
 
 ### Version 1.0 (Current)
@@ -581,12 +837,15 @@ MFR/
 - ✅ Transaction system
 - ✅ Unicode support
 - ✅ Resume capability
+- ✅ Full UV integration
+- ✅ Comprehensive CI/CD
 
 ### Version 1.1 (Planned)
 - [ ] PyPI package release
 - [ ] Regular expression support
 - [ ] Configuration profiles
 - [ ] Performance optimizations
+- [ ] GitHub App integration
 
 ### Version 2.0 (Future)
 - [ ] GUI interface
@@ -594,6 +853,7 @@ MFR/
 - [ ] Parallel processing
 - [ ] Cloud storage support
 - [ ] Git integration
+- [ ] Real-time collaboration
 
 ## ❓ FAQ
 
@@ -640,11 +900,38 @@ MFR/
 - Continue with other files
 - Resume later with `--resume`
 
+## 🔒 Security
+
+### Security Features
+
+1. **Secret Scanning**:
+   - Pre-commit Gitleaks integration
+   - Pre-push hook prevents accidental secret commits
+   - GitHub Actions security workflow
+   - Custom rules for API keys, tokens, passwords
+
+2. **Dependency Security**:
+   - pip-audit for vulnerability scanning
+   - safety for known CVEs
+   - Automated dependency updates
+   - Lock file for reproducible builds
+
+3. **Code Security**:
+   - bandit for Python security issues
+   - Type checking with mypy
+   - Secure defaults (no shell=True, etc.)
+
+### Security Configuration
+
+See [SECURITY_SETUP.md](SECURITY_SETUP.md) for detailed security configuration.
+
 ## 🙏 Acknowledgments
 
 - Built with [uv](https://github.com/astral-sh/uv) for modern Python packaging
 - Uses [Prefect](https://www.prefect.io/) for workflow orchestration
 - Code quality by [Ruff](https://github.com/astral-sh/ruff)
+- Security by [Gitleaks](https://github.com/gitleaks/gitleaks) and [Bandit](https://github.com/PyCQA/bandit)
+- Pre-commit integration via [uv-pre-commit](https://github.com/astral-sh/uv-pre-commit)
 - Inspired by various find-replace tools but built for safety and scale
 
 ## 📞 Support
@@ -652,6 +939,7 @@ MFR/
 - **Issues**: [GitHub Issues](https://github.com/Emasoft/MFR/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/Emasoft/MFR/discussions)
 - **Security**: See [SECURITY.md](SECURITY.md) for reporting vulnerabilities
+- **Documentation**: This README and inline `--help`
 
 ---
 
