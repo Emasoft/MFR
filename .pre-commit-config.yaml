@@ -55,6 +55,7 @@ repos:
             --pretty,
             --ignore-missing-imports,
             --no-warn-unused-ignores,
+            --allow-untyped-decorators,  # For pytest fixtures
           ]
         require_serial: true
 

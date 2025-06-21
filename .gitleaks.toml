@@ -1,262 +1,66 @@
-# Gitleaks configuration for Mass Find Replace project
-# This config allows only specific information and blocks secrets
+# Gitleaks configuration for MFR project
+# This configuration allows only specific user information and blocks all other secrets
 
-title = "MFR Gitleaks Configuration"
+title = "MFR Gitleaks Config"
 
-# Allow list for this project
+# Extend the base configuration
+[extend]
+useDefault = true
+
+# Define allowed patterns that should NOT be flagged as secrets
 [allowlist]
-description = "Allowlist for MFR project"
+description = "Global allowlist"
 paths = [
-    # Config files
-    '''.gitleaks.toml''',
-    '''.gitignore''',
-    # Virtual environments
-    '''.venv/.*''',
-    '''venv/.*''',
-    '''env/.*''',
-    # Build artifacts
-    '''__pycache__/.*''',
-    '''dist/.*''',
-    '''build/.*''',
-    '''.*\.egg-info/.*''',
-    # Documentation
-    '''CLAUDE.*\.md''',
-    '''README\.md''',
-    '''SECURITY\.md''',
-    '''docs/.*\.md''',
-    # Test files may have test data
-    '''tests/.*\.py''',
-    '''.*test.*\.py''',
-    '''conftest\.py''',
-    # Lock files
-    '''uv\.lock''',
-    '''poetry\.lock''',
-    '''Pipfile\.lock''',
-    # GitHub Actions workflows often have URLs
-    '''.github/workflows/.*\.yml''',
-    '''.github/workflows/.*\.yaml''',
+    '''\.gitleaks\.toml$''',
+    '''\.env\.example$''',
+    '''\.env\.template$''',
 ]
-
-commits = [
+regexes = [
     '''Emasoft''',
-]
-
-# Allow specific patterns globally
-regexes = [
-    # Allow the specific GitHub noreply email
     '''713559\+Emasoft@users\.noreply\.github\.com''',
-    # Allow example/placeholder patterns
-    '''example\.com''',
-    '''placeholder''',
-    '''your-.*-here''',
-    '''<.*>''',
-    # Allow common test/example API keys
-    '''test[-_]?api[-_]?key''',
-    '''example[-_]?key''',
-    '''dummy[-_]?secret''',
-    # Common Python patterns
-    '''__author__\s*=''',
-    '''max_key_len''',
-    '''key_characters''',
-    '''lookup_key''',
-    '''canonical_key''',
-    '''json_key''',
-    '''key_bytes''',
-    '''\.sort\(key=''',
-    '''sorted\(.*key=''',
-    '''raw_keys''',
+    '''GIT_AUTHOR=Emasoft''',
+    '''GIT_AUTHOR_EMAIL=713559\+Emasoft@users\.noreply\.github\.com''',
+    '''GIT_COMMITTER=Emasoft''',
+    '''GIT_COMMITTER_EMAIL=713559\+Emasoft@users\.noreply\.github\.com''',
+    '''user\.name\s*=\s*"?Emasoft"?''',
+    '''user\.email\s*=\s*"?713559\+Emasoft@users\.noreply\.github\.com"?''',
+    '''<your-.*-here>''',
+    '''your-.*-key''',
+    '''example-.*''',
+    '''placeholder.*''',
+    '''https?://localhost(:[0-9]+)?''',
+    '''https?://127\.0\.0\.1(:[0-9]+)?''',
+    '''https?://0\.0\.0\.0(:[0-9]+)?''',
+    '''https?://\[::1\](:[0-9]+)?''',
 ]
 
-# Email addresses - only allow specific ones
+# Custom rules to catch common secret patterns
 [[rules]]
-id = "email-address"
-description = "Email Address"
-regex = '''[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'''
-tags = ["email", "pii"]
-[rules.allowlist]
-regexes = [
-    '''713559\+Emasoft@users\.noreply\.github\.com''',
-    '''noreply@.*''',
-    '''actions@github\.com''',
-    '''example@example\.com''',
-    '''test@test\.com''',
-]
-
-# AWS credentials
-[[rules]]
-description = "AWS Access Key"
-id = "aws-access-key"
-regex = '''(A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}'''
-tags = ["aws", "key"]
-
-[[rules]]
-description = "AWS Secret Key"
-id = "aws-secret-key"
-regex = '''(?i)aws(.{0,20})?(?-i)['\"]?(?:secret|access)(?:.{0,20})?(?:key|token)['\"]?\s*[:=]\s*['\"]?([0-9a-zA-Z/+=]{40})['\"]?'''
-tags = ["aws", "secret"]
-
-# GitHub tokens
-[[rules]]
-description = "GitHub Personal Access Token"
-id = "github-pat"
-regex = '''ghp_[0-9a-zA-Z]{36}'''
-tags = ["github", "token"]
-
-[[rules]]
-description = "GitHub OAuth Token"
-id = "github-oauth"
-regex = '''gho_[0-9a-zA-Z]{36}'''
-tags = ["github", "token"]
-
-[[rules]]
-description = "GitHub App Token"
-id = "github-app"
-regex = '''(ghu|ghs)_[0-9a-zA-Z]{36}'''
-tags = ["github", "token"]
-
-[[rules]]
-description = "GitHub Fine-grained PAT"
-id = "github-fine-grained-pat"
-regex = '''github_pat_[0-9a-zA-Z]{22}_[0-9a-zA-Z]{59}'''
-tags = ["github", "token"]
-
-# Generic patterns
-[[rules]]
-description = "Generic API Key"
 id = "generic-api-key"
-regex = '''(?i)(api[-_]?key|apikey|api[-_]?token|api[-_]?secret)\s*[:=]\s*['\"]?[0-9a-zA-Z\-_]{20,}['\"]?'''
-tags = ["api", "key"]
-[rules.allowlist]
-regexes = [
-    '''(?i)(test|example|dummy|placeholder|sample|demo)[-_]?(api[-_]?key|apikey|api[-_]?token)''',
-    '''api[-_]?key\s*[:=]\s*['\"]?(prompt|input|getpass|ask|env|environ|os\.environ)''',
-]
+description = "Generic API Key"
+regex = '''(?i)(api[_\-\s]?key|apikey)[_\-\s]?[:=]\s*['\"]?[a-zA-Z0-9]{16,}['\"]?'''
+tags = ["key", "API", "generic"]
 
 [[rules]]
-description = "Generic Secret"
 id = "generic-secret"
-regex = '''(?i)(secret|password|passwd|pwd|token|auth)\s*[:=]\s*['\"]?[^\s'"]{8,}['\"]?'''
-tags = ["secret", "password"]
-[rules.allowlist]
-regexes = [
-    '''(?i)(test|example|dummy|placeholder|sample|demo)[-_]?(secret|password|token)''',
-    '''(?i)(secret|password|token)\s*[:=]\s*['\"]?(prompt|input|getpass|ask|env|environ|os\.environ)''',
-    '''(?i)secret\s*[:=]\s*['\"]?(true|false|none|null)''',
-]
+description = "Generic Secret"
+regex = '''(?i)(secret|password|passwd|pwd)[_\-\s]?[:=]\s*['\"]?[a-zA-Z0-9]{8,}['\"]?'''
+tags = ["secret", "generic"]
 
-# Private keys
 [[rules]]
-description = "Private Key"
 id = "private-key"
-regex = '''-----BEGIN (RSA |EC |DSA |OPENSSH |PGP |SSH2 )?PRIVATE KEY( BLOCK)?-----'''
+description = "Private Key"
+regex = '''-----BEGIN (RSA|DSA|EC|OPENSSH|PGP) PRIVATE KEY-----'''
 tags = ["key", "private"]
 
-# Base64 potential secrets
 [[rules]]
-description = "Base64 Encoded Secret"
-id = "base64-secret"
-regex = '''(?i)(secret|key|token|password|auth)\s*[:=]\s*['\"]?[A-Za-z0-9+/]{40,}={0,2}['\"]?'''
-tags = ["secret", "base64"]
-[rules.allowlist]
-regexes = [
-    '''(?i)(test|example|dummy|placeholder|sample|demo)''',
-    '''(?i)(public[-_]?key|pubkey)''',
-]
-
-# Slack
-[[rules]]
-description = "Slack Token"
-id = "slack-token"
-regex = '''xox[baprs]-[0-9]{10,13}-[0-9]{10,13}-[0-9a-zA-Z]{24,34}'''
-tags = ["slack", "token"]
+id = "github-token"
+description = "GitHub Personal Access Token"
+regex = '''ghp_[0-9a-zA-Z]{36}'''
+tags = ["key", "GitHub"]
 
 [[rules]]
-description = "Slack Webhook"
-id = "slack-webhook"
-regex = '''https://hooks\.slack\.com/services/T[a-zA-Z0-9_]{8}/B[a-zA-Z0-9_]{8}/[a-zA-Z0-9_]{24}'''
-tags = ["slack", "webhook"]
-
-# Package managers
-[[rules]]
-description = "PyPI Token"
-id = "pypi-token"
-regex = '''pypi-[0-9a-zA-Z_-]{40,}'''
-tags = ["pypi", "token"]
-
-[[rules]]
-description = "NPM Token"
-id = "npm-token"
-regex = '''(?i)npm_[0-9a-zA-Z]{36}'''
-tags = ["npm", "token"]
-
-# Database URLs
-[[rules]]
-description = "Database Connection String"
-id = "database-connection-string"
-regex = '''(?i)(postgres|postgresql|mysql|mongodb|redis|amqp|sqlite)://[^:]+:[^@]+@[^\s]+'''
-tags = ["database", "credentials"]
-[rules.allowlist]
-regexes = [
-    '''(?i)(test|example|dummy|localhost|user|username):(test|example|dummy|password|pass)@''',
-    '''sqlite:///:memory:''',
-    '''sqlite:///.*\.db''',
-]
-
-# JWT tokens
-[[rules]]
-description = "JWT Token"
-id = "jwt-token"
-regex = '''eyJ[A-Za-z0-9-_]+\.eyJ[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+'''
-tags = ["jwt", "token"]
-[rules.allowlist]
-paths = [
-    '''.*test.*''',
-    '''.*spec.*''',
-]
-
-# SSH Keys
-[[rules]]
-description = "SSH DSA Private Key"
-id = "ssh-dsa"
-regex = '''-----BEGIN DSA PRIVATE KEY-----'''
-tags = ["ssh", "key"]
-
-[[rules]]
-description = "SSH EC Private Key"
-id = "ssh-ec"
-regex = '''-----BEGIN EC PRIVATE KEY-----'''
-tags = ["ssh", "key"]
-
-# URL with credentials
-[[rules]]
-description = "URL with embedded credentials"
-id = "url-credentials"
-regex = '''(?i)(https?|ftp|ssh|sftp|smb|git)://[^:]+:[^@]+@[^\s]+'''
-tags = ["url", "credentials"]
-[rules.allowlist]
-regexes = [
-    '''(?i)(test|example|dummy|user|username|admin):(test|example|dummy|password|pass|admin)@''',
-    '''git@github\.com:.*\.git''',
-]
-
-# Environment variables in code
-[[rules]]
-description = "Environment variable assignment"
-id = "env-var"
-regex = '''(?i)(export\s+)(SECRET|PASSWORD|TOKEN|KEY|AUTH|CREDENTIAL)[A-Z0-9_]*\s*=\s*['\"]?[^\s'"]+['\"]?'''
-tags = ["env", "secret"]
-[rules.allowlist]
-regexes = [
-    '''(?i)(export\s+)?(SECRET|PASSWORD|TOKEN|KEY|AUTH)[A-Z0-9_]*\s*=\s*['\"]?(prompt|input|getpass|ask|\$\{.*\}|\$[A-Z_]+)''',
-]
-
-# Hardcoded IPs (potential internal network exposure)
-[[rules]]
-description = "IPv4 Address"
-id = "ipv4"
-regex = '''\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b'''
-tags = ["network", "ip"]
-[rules.allowlist]
-regexes = [
-    '''(?:127\.0\.0\.1|0\.0\.0\.0|localhost|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(?:1[6-9]|2[0-9]|3[01])\.\d+\.\d+)''',
-]
+id = "aws-access-key"
+description = "AWS Access Key ID"
+regex = '''AKIA[0-9A-Z]{16}'''
+tags = ["key", "AWS"]

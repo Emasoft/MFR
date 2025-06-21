@@ -17,7 +17,7 @@ from __future__ import annotations
 from mass_find_replace.mass_find_replace import MAIN_TRANSACTION_FILE_NAME
 from pathlib import Path
 import os
-from typing import List
+from typing import Any, Generator
 import logging
 from unittest.mock import patch
 import sys
@@ -41,7 +41,7 @@ DEFAULT_EXCLUDE_FILES_REL = ["exclude_this_oldname_file.txt"]
 
 
 @pytest.fixture(autouse=True)
-def setup_logging():
+def setup_logging() -> None:
     logger = logging.getLogger("mass_find_replace")
     logger.setLevel(logging.DEBUG)
     if not logger.handlers:
@@ -52,7 +52,7 @@ def setup_logging():
 
 
 @pytest.fixture(autouse=True)
-def reset_replace_logic():
+def reset_replace_logic() -> Generator[None, None, None]:
     replace_logic.reset_module_state()
     yield
 
@@ -78,7 +78,7 @@ def run_main_flow_for_test(
     verbose_mode: bool = False,
     interactive_mode: bool = False,
     process_symlink_names: bool = False,
-):
+) -> None:
     final_exclude_dirs = exclude_dirs if exclude_dirs is not None else DEFAULT_EXCLUDE_DIRS_REL
     base_exclude_files = exclude_files if exclude_files is not None else DEFAULT_EXCLUDE_FILES_REL
     additional_excludes = [map_file.name, BINARY_MATCHES_LOG_FILE]
@@ -107,7 +107,7 @@ def run_main_flow_for_test(
 
 
 # ================ MODIFIED TEST: test_dry_run_behavior =================
-def test_dry_run_behavior(temp_test_dir: dict, default_map_file: Path, assert_file_content):
+def test_dry_run_behavior(temp_test_dir: dict[str, Path], default_map_file: Path, assert_file_content: Any) -> None:
     context_dir = temp_test_dir["runtime"]
     orig_deep_file_path = (
         context_dir / "oldname_root" / "sub_oldname_folder" / "another_OLDNAME_dir" / "deep_oldname_file.txt"
@@ -155,8 +155,9 @@ def test_dry_run_behavior(temp_test_dir: dict, default_map_file: Path, assert_fi
             TransactionType.FILE_NAME.value,
             TransactionType.FOLDER_NAME.value,
         ]:
-            print(f"  Original: {tx.get('ORIGINAL_NAME')}")
-            print(f"  Proposed: {replace_logic.replace_occurrences(tx.get('ORIGINAL_NAME'))}")
+            original_name = tx.get("ORIGINAL_NAME", "")
+            print(f"  Original: {original_name}")
+            print(f"  Proposed: {replace_logic.replace_occurrences(original_name) if original_name else ''}")
         elif tx["TYPE"] == TransactionType.FILE_CONTENT_LINE.value:
             content = tx.get("ORIGINAL_LINE_CONTENT", "")
             print(f"  Line: {tx.get('LINE_NUMBER')}")
@@ -165,7 +166,7 @@ def test_dry_run_behavior(temp_test_dir: dict, default_map_file: Path, assert_fi
 
 
 # ================ MODIFIED TEST: test_dry_run_virtual_paths =================
-def test_dry_run_virtual_paths(temp_test_dir: dict, default_map_file: Path):
+def test_dry_run_virtual_paths(temp_test_dir: dict[str, Path], default_map_file: Path) -> None:
     context_dir = temp_test_dir["runtime"]
     (context_dir / "folder1" / "folder2").mkdir(parents=True)
     (context_dir / "folder1" / "folder2" / "deep.txt").write_text("OLDNAME")
@@ -177,11 +178,12 @@ def test_dry_run_virtual_paths(temp_test_dir: dict, default_map_file: Path):
     transactions = load_transactions(txn_path)
 
     # Fix 2: Updated expected transaction count to 6
+    assert transactions is not None
     assert len(transactions) == 6
 
 
 # ================ MODIFIED TEST: test_path_resolution_after_rename =================
-def test_path_resolution_after_rename(temp_test_dir: dict, default_map_file: Path):
+def test_path_resolution_after_rename(temp_test_dir: dict[str, Path], default_map_file: Path) -> None:
     context_dir = temp_test_dir["runtime"]
 
     # Run dry run first to populate path map
@@ -211,7 +213,7 @@ def test_path_resolution_after_rename(temp_test_dir: dict, default_map_file: Pat
 
 
 # ================ MODIFIED TEST: test_folder_nesting =================
-def test_folder_nesting(temp_test_dir: dict, default_map_file: Path):
+def test_folder_nesting(temp_test_dir: dict[str, Path], default_map_file: Path) -> None:
     """Test that nested folders are processed in correct order (shallow to deep)."""
     context_dir = temp_test_dir["runtime"]
 
@@ -233,6 +235,7 @@ def test_folder_nesting(temp_test_dir: dict, default_map_file: Path):
     transactions = load_transactions(txn_path)
 
     # Fix 4: Filter out transactions from fixture and focus only on new directories
+    assert transactions is not None
     test_folders = [
         tx["PATH"]
         for tx in transactions
@@ -245,7 +248,7 @@ def test_folder_nesting(temp_test_dir: dict, default_map_file: Path):
 # ================ NEW TESTS FOR ADDITIONAL COVERAGE =================
 
 
-def test_unicode_combining_chars(temp_test_dir, default_map_file):
+def test_unicode_combining_chars(temp_test_dir: dict[str, Path], default_map_file: Path) -> None:
     """Test handling of unicode combining characters"""
     context_dir = temp_test_dir["runtime"]
 
@@ -259,6 +262,7 @@ def test_unicode_combining_chars(temp_test_dir, default_map_file):
     # We expect a transaction for the renamed file with replacement applied
     # The original name is "café_oldname.txt" (with combining accent)
     # The replacement should produce "café_oldname.txt" (same combining accent, replaced oldname)
+    assert transactions is not None
     found = False
     for tx in transactions:
         if tx["TYPE"] == TransactionType.FILE_NAME.value:
@@ -271,7 +275,7 @@ def test_unicode_combining_chars(temp_test_dir, default_map_file):
     assert found, "Expected replacement for filename with combining characters"
 
 
-def test_permission_error_handling(temp_test_dir, default_map_file, monkeypatch):
+def test_permission_error_handling(temp_test_dir: dict[str, Path], default_map_file: Path, monkeypatch: Any) -> None:
     """Test permission errors are handled gracefully"""
     import errno
     import stat
@@ -283,7 +287,7 @@ def test_permission_error_handling(temp_test_dir, default_map_file, monkeypatch)
     protected_file.chmod(stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
 
     # Simulate rename raising permission error
-    def mock_rename(*args, **kwargs):
+    def mock_rename(*args: Any, **kwargs: Any) -> None:
         raise OSError(errno.EACCES, "Permission denied")
 
     monkeypatch.setattr(os, "rename", mock_rename)
@@ -298,7 +302,7 @@ def test_permission_error_handling(temp_test_dir, default_map_file, monkeypatch)
         assert transactions is not None
 
 
-def test_self_test_option(monkeypatch):
+def test_self_test_option(monkeypatch: Any) -> None:
     """Test the --self-test CLI option integration"""
     with monkeypatch.context() as m:
         m.setattr(sys, "argv", ["test_mass_find_replace.py", "--self-test"])
@@ -309,7 +313,7 @@ def test_self_test_option(monkeypatch):
             assert exc_info.value.code == 0  # Verify exit code is 0 (success)
 
 
-def test_symlink_name_processing(temp_test_dir, default_map_file):
+def test_symlink_name_processing(temp_test_dir: dict[str, Path], default_map_file: Path) -> None:
     """Test symlink names are processed correctly"""
     context_dir = temp_test_dir["runtime"]
     symlink_path = context_dir / "oldname_symlink"
@@ -320,13 +324,14 @@ def test_symlink_name_processing(temp_test_dir, default_map_file):
     run_main_flow_for_test(context_dir, default_map_file, process_symlink_names=True, dry_run=True)
 
     transactions = load_transactions(context_dir / MAIN_TRANSACTION_FILE_NAME)
+    assert transactions is not None
     symlink_renamed = any(
         tx["TYPE"] == TransactionType.FILE_NAME.value and "oldname_symlink" in tx["PATH"] for tx in transactions
     )
     assert symlink_renamed, "Expected symlink name to be processed"
 
 
-def test_extension_filtering(temp_test_dir, default_map_file):
+def test_extension_filtering(temp_test_dir: dict[str, Path], default_map_file: Path) -> None:
     """Test file extension filtering"""
     context_dir = temp_test_dir["runtime"]
     (context_dir / "include.txt").write_text("OLDNAME")
@@ -335,13 +340,14 @@ def test_extension_filtering(temp_test_dir, default_map_file):
     run_main_flow_for_test(context_dir, default_map_file, extensions=[".txt"], dry_run=True)
 
     transactions = load_transactions(context_dir / MAIN_TRANSACTION_FILE_NAME)
+    assert transactions is not None
     include_found = any("include.txt" in tx["PATH"] for tx in transactions)
     exclude_found = any("exclude.log" in tx["PATH"] for tx in transactions)
     assert include_found, "Included extension should be processed"
     assert not exclude_found, "Excluded extension should be skipped"
 
 
-def test_rtf_processing(temp_test_dir, default_map_file):
+def test_rtf_processing(temp_test_dir: dict[str, Path], default_map_file: Path) -> None:
     """Test RTF files are processed correctly"""
     context_dir = temp_test_dir["runtime"]
     rtf_path = context_dir / "test.rtf"
@@ -350,13 +356,14 @@ def test_rtf_processing(temp_test_dir, default_map_file):
     run_main_flow_for_test(context_dir, default_map_file, dry_run=True)
 
     transactions = load_transactions(context_dir / MAIN_TRANSACTION_FILE_NAME)
+    assert transactions is not None
     rtf_processed = any(
         tx["TYPE"] == TransactionType.FILE_CONTENT_LINE.value and "test.rtf" in tx["PATH"] for tx in transactions
     )
     assert rtf_processed, "RTF file should be processed"
 
 
-def test_binary_files_logging(temp_test_dir, default_map_file):
+def test_binary_files_logging(temp_test_dir: dict[str, Path], default_map_file: Path) -> None:
     """Test binary file matches are logged but not modified.
 
     Binary files should:
@@ -385,7 +392,7 @@ def test_binary_files_logging(temp_test_dir, default_map_file):
         assert "Offset:" in log_content
 
 
-def test_recursive_path_resolution(temp_test_dir, default_map_file):
+def test_recursive_path_resolution(temp_test_dir: dict[str, Path], default_map_file: Path) -> None:
     """Test path resolution after multiple cascading renames.
 
     Verifies that when parent folders are renamed, child paths
@@ -403,6 +410,7 @@ def test_recursive_path_resolution(temp_test_dir, default_map_file):
 
     # Verify virtual path mapping for nested items
     txn_json = load_transactions(context_dir / MAIN_TRANSACTION_FILE_NAME)
+    assert txn_json is not None
     path_map = {}
     for tx in txn_json:
         if tx["TYPE"] in [
@@ -424,12 +432,14 @@ def test_recursive_path_resolution(temp_test_dir, default_map_file):
         assert any(tx["ORIGINAL_NAME"] == component for tx in txn_json), f"Missing transaction for folder {component}"
 
     # Check the deep path translation in the folder mapping
-    assert "Newname_A" in path_map.get("Oldname_A").rsplit("/", 1)[-1]
-    assert "Newname_B" in path_map.get("Oldname_A/Oldname_B").rsplit("/", 1)[-1]
+    newname_a = path_map.get("Oldname_A")
+    assert newname_a is not None and "Newname_A" in newname_a.rsplit("/", 1)[-1]
+    newname_b = path_map.get("Oldname_A/Oldname_B")
+    assert newname_b is not None and "Newname_B" in newname_b.rsplit("/", 1)[-1]
 
 
 # =============== NEW TEST: GB18030 ENCODING SUPPORT =================
-def test_gb18030_encoding(temp_test_dir: dict, default_map_file: Path):
+def test_gb18030_encoding(temp_test_dir: dict[str, Path], default_map_file: Path) -> None:
     """Test content replacement in GB18030 encoded files.
 
     This test creates files with GB18030 encoding (common for Chinese text)
@@ -475,6 +485,7 @@ def test_gb18030_encoding(temp_test_dir: dict, default_map_file: Path):
     txn_file = context_dir / MAIN_TRANSACTION_FILE_NAME
     assert txn_file.exists(), "Transaction file missing"
     transactions = load_transactions(txn_file)
+    assert transactions is not None
     large_file_processed = False
     for tx in transactions:
         if tx["PATH"] == "large_gb18030.txt":
@@ -509,7 +520,7 @@ def test_gb18030_encoding(temp_test_dir: dict, default_map_file: Path):
         )
 
 
-def test_collision_error_logging(temp_test_dir: dict, default_map_file: Path):
+def test_collision_error_logging(temp_test_dir: dict[str, Path], default_map_file: Path) -> None:
     """Test that collision errors are properly logged"""
     # Use a fresh directory to avoid conflicts with fixture files
     test_dir = temp_test_dir["runtime"] / "collision_test"
@@ -578,13 +589,16 @@ def test_collision_error_logging(temp_test_dir: dict, default_map_file: Path):
     transactions = load_transactions(txn_file)
 
     # Find the failed transactions
+    assert transactions is not None
     failed_txs = [tx for tx in transactions if tx["STATUS"] == TransactionStatus.FAILED.value]
     collision_txs = [tx for tx in failed_txs if "collision" in tx.get("ERROR_MESSAGE", "").lower()]
 
     assert len(collision_txs) >= 2, f"Expected at least 2 collision transactions, found {len(collision_txs)}"
 
 
-def test_interactive_mode_collision_skip(temp_test_dir: dict, default_map_file: Path, monkeypatch, capsys):
+def test_interactive_mode_collision_skip(
+    temp_test_dir: dict[str, Path], default_map_file: Path, monkeypatch: Any, capsys: Any
+) -> None:
     """Test that collisions are skipped in interactive mode without prompting user"""
     test_dir = temp_test_dir["runtime"] / "interactive_test"
     test_dir.mkdir()
@@ -604,7 +618,7 @@ def test_interactive_mode_collision_skip(temp_test_dir: dict, default_map_file: 
     # Mock input to approve the non-collision transaction
     input_count = 0
 
-    def mock_input(prompt):
+    def mock_input(prompt: str) -> str:
         nonlocal input_count
         input_count += 1
         return "A"
@@ -651,7 +665,7 @@ def test_interactive_mode_collision_skip(temp_test_dir: dict, default_map_file: 
     assert normal_file.exists() or (test_dir / "newname_utils.py").exists(), "Non-collision file should be processed"
 
 
-def test_malformed_json_handling(temp_test_dir: dict):
+def test_malformed_json_handling(temp_test_dir: dict[str, Path]) -> None:
     """Test handling of malformed JSON in mapping file"""
     test_dir = temp_test_dir["runtime"] / "malformed_test"
     test_dir.mkdir()
