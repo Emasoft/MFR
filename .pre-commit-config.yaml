@@ -101,26 +101,25 @@ repos:
         types: [yaml]
         args: [-c=.yamllint.yml]
 
-  # Shell script linting (run with uv)
-  - repo: local
+  # Shell script linting
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
     hooks:
       - id: shellcheck
-        name: shellcheck
-        entry: uv run shellcheck
-        language: system
-        types: [shell]
-        args: [--severity=error]
+        args: [--severity=warning]
 
-  # GitHub Actions linting (run with uv)
+  # GitHub Actions linting - actionlint must be installed separately
+  # Install with: brew install actionlint (macOS) or download from GitHub
   - repo: local
     hooks:
       - id: actionlint
         name: actionlint
-        entry: uv run actionlint
+        entry: actionlint
         language: system
         files: ^\.github/workflows/.*\.(yml|yaml)$
+        pass_filenames: true
 
-  # Run tests before committing
+  # Run tests before committing (only when Python files change)
   - repo: local
     hooks:
       - id: pytest
@@ -128,7 +127,7 @@ repos:
         entry: uv run pytest
         language: system
         pass_filenames: false
-        always_run: true
+        files: ^(src/.*\.py|tests/.*\.py|pyproject\.toml)$
         args: [tests/, -v]
 
 
