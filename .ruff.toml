@@ -19,7 +19,7 @@ exclude = [
     "build",
     ".eggs",
     ".pytest_cache",
-    ".mypy_cache", 
+    ".mypy_cache",
     ".git",
     ".act",
     "__pycache__",
@@ -30,7 +30,7 @@ exclude = [
 # Select rules - using the defaults plus some additional ones
 select = [
     "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings  
+    "W",   # pycodestyle warnings
     "F",   # pyflakes
     "I",   # isort
     "N",   # pep8-naming
@@ -54,7 +54,7 @@ ignore = [
     "E266",  # Too many leading '#' for block comment
     "W505",  # Doc line too long
     "F841",  # Local variable assigned but never used
-    "F842",  # Local variable annotated but never used  
+    "F842",  # Local variable annotated but never used
     "F401",  # Module imported but unused
     "W293",  # Blank line contains whitespace
     "I001",  # Import block unsorted

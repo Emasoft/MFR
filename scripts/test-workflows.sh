@@ -23,13 +23,13 @@ run_workflow() {
     local workflow=$1
     local job=$2
     local event=${3:-push}
-    
+
     echo ""
     echo "🔧 Running workflow: $workflow"
     echo "   Job: ${job:-all jobs}"
     echo "   Event: $event"
     echo ""
-    
+
     if [ -n "$job" ]; then
         act $event -W .github/workflows/$workflow -j $job
     else
@@ -56,7 +56,7 @@ case $choice in
         echo "b. Security scan"
         echo "c. Build distribution"
         read -p "Enter your choice (a-c): " job_choice
-        
+
         case $job_choice in
             a) run_workflow "ci.yml" "test" "push" ;;
             b) run_workflow "ci.yml" "security" "push" ;;

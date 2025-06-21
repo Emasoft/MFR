@@ -83,6 +83,7 @@ repos:
       - id: check-toml
       - id: debug-statements
       - id: detect-private-key
+        exclude: \.gitleaks\.toml$
       - id: mixed-line-ending
         args: [--fix=lf]
       - id: check-case-conflict

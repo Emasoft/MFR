@@ -316,7 +316,7 @@ EOF
 {
   "REPLACEMENT_MAPPING": {
     "OldProduct": "NewProduct",
-    "oldProduct": "newProduct", 
+    "oldProduct": "newProduct",
     "old-product": "new-product",
     "old_product": "new_product",
     "OLDPRODUCT": "NEWPRODUCT"
@@ -500,11 +500,11 @@ uv run pre-commit install --hook-type pre-push
 1. **Create a feature branch**: `git checkout -b feature/your-feature-name`
 2. **Follow TDD**: Write tests first, then implementation
 3. **Run tests**: `uv run pytest`
-4. **Check code quality**: 
+4. **Check code quality**:
    ```bash
    # Run all pre-commit checks
    uv run pre-commit run --all-files
-   
+
    # Or run individual tools
    uv run ruff format .
    uv run ruff check .
@@ -543,7 +543,7 @@ MFR/
 ├── replacement_mapping.json         # Your string replacements config
 ├── planned_transactions.json        # Generated transaction plan
 ├── requirements.txt                 # Production dependencies
-├── requirements-dev.txt             # Development dependencies  
+├── requirements-dev.txt             # Development dependencies
 ├── pyproject.toml                  # Package configuration
 ├── CLAUDE.md                        # AI assistant guidelines
 ├── README.md                        # This file
