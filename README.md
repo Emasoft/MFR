@@ -11,6 +11,7 @@
 **Surgical precision for your codebase transformations**
 
 <!-- Build Status Badges -->
+
 [![CI/CD Pipeline](https://github.com/Emasoft/MFR/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Emasoft/MFR/actions/workflows/ci.yml)
 [![Pre-commit](https://github.com/Emasoft/MFR/actions/workflows/pre-commit.yml/badge.svg?branch=main)](https://github.com/Emasoft/MFR/actions/workflows/pre-commit.yml)
 [![Security](https://github.com/Emasoft/MFR/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/Emasoft/MFR/actions/workflows/security.yml)
@@ -18,11 +19,13 @@
 [![Nightly Tests](https://github.com/Emasoft/MFR/actions/workflows/nightly.yml/badge.svg)](https://github.com/Emasoft/MFR/actions/workflows/nightly.yml)
 
 <!-- Coverage & Quality Badges -->
+
 [![codecov](https://codecov.io/gh/Emasoft/MFR/branch/main/graph/badge.svg?token=YOUR_TOKEN)](https://codecov.io/gh/Emasoft/MFR)
 [![Code Quality](https://img.shields.io/codefactor/grade/github/Emasoft/MFR/main?label=code%20quality)](https://www.codefactor.io/repository/github/emasoft/mfr)
 [![Maintainability](https://api.codeclimate.com/v1/badges/YOUR_ID/maintainability)](https://codeclimate.com/github/Emasoft/MFR)
 
 <!-- Language & Tool Badges -->
+
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/downloads/)
 [![uv](https://img.shields.io/badge/uv-0.7.13-orange.svg)](https://github.com/astral-sh/uv)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
@@ -30,17 +33,20 @@
 [![code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 <!-- Status & Info Badges -->
+
 [![Status: Early Alpha](https://img.shields.io/badge/status-early%20alpha-red.svg?style=for-the-badge)](#-warning-early-alpha-software)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PyPI - Version](https://img.shields.io/badge/pypi-coming%20soon-lightgrey.svg)](https://pypi.org/project/mass-find-replace/)
 [![GitHub release](https://img.shields.io/github/v/release/Emasoft/MFR?include_prereleases)](https://github.com/Emasoft/MFR/releases)
 
 <!-- Community Badges -->
+
 [![GitHub stars](https://img.shields.io/github/stars/Emasoft/MFR.svg?style=social&label=Star)](https://github.com/Emasoft/MFR)
 [![GitHub forks](https://img.shields.io/github/forks/Emasoft/MFR.svg?style=social&label=Fork)](https://github.com/Emasoft/MFR/fork)
 [![GitHub watchers](https://img.shields.io/github/watchers/Emasoft/MFR.svg?style=social&label=Watch)](https://github.com/Emasoft/MFR)
 
 <!-- Security & Standards -->
+
 [![Security: Gitleaks](https://img.shields.io/badge/security-gitleaks-blue.svg)](https://github.com/gitleaks/gitleaks)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/9999/badge)](https://www.bestpractices.dev/projects/9999)
 [![SLSA 3](https://slsa.dev/images/gh-badge-level3.svg)](https://slsa.dev)
@@ -67,11 +73,11 @@
 
 <div align="center">
 
-| ⚠️ **NOT PRODUCTION READY** ⚠️ |
-|:---:|
-| This software is in **EARLY ALPHA** stage and should be used **AT YOUR OWN RISK** |
+|                           ⚠️ **NOT PRODUCTION READY** ⚠️                            |
+| :---------------------------------------------------------------------------------: |
+|  This software is in **EARLY ALPHA** stage and should be used **AT YOUR OWN RISK**  |
 | **ALWAYS** backup your data before use • Expect breaking changes • APIs will change |
-| For production use, wait for stable v1.0 release |
+|                  For production use, wait for stable v1.0 release                   |
 
 </div>
 
@@ -84,6 +90,7 @@
 - ⚡ **Performance**: Not optimized for large-scale operations yet
 
 **Recommended Use Cases:**
+
 - ✅ Personal projects with backups
 - ✅ Testing and evaluation
 - ✅ Contributing to development
@@ -112,12 +119,12 @@
   - [Command Reference](#command-reference)
 - [Examples](#-examples)
 - [Development](#-development)
-  - [Testing](#testing)
-  - [Contributing](#contributing)
-  - [Architecture](#architecture)
+  - [Testing](#-testing)
+  - [Contributing](#-contributing)
+  - [Architecture](#️-architecture)
 - [Performance](#-performance)
 - [Security](#-security)
-- [Roadmap](#-roadmap)
+- [Roadmap](#️-roadmap)
 - [FAQ](#-faq)
 - [License](#-license)
 - [Acknowledgments](#-acknowledgments)
@@ -128,7 +135,10 @@
 
 ## 🎯 Overview
 
-**Mass Find Replace (MFR)** is a powerful Python tool designed for performing safe, surgical find-and-replace operations across entire directory structures. It can rename files, folders, and modify file contents while preserving file encodings, handling Unicode correctly, and preventing data loss through intelligent collision detection.
+**Mass Find Replace (MFR)** is a powerful Python tool designed for performing safe, surgical
+find-and-replace operations across entire directory structures. It can rename files, folders,
+and modify file contents while preserving file encodings, handling Unicode correctly, and
+preventing data loss through intelligent collision detection.
 
 ### Perfect For:
 
@@ -144,14 +154,14 @@
 
 Traditional find-and-replace tools often fall short when dealing with complex codebases:
 
-| Problem | MFR Solution |
-|---------|--------------|
-| **Data Loss Risk** | Transaction-based operations with full rollback capability |
-| **Encoding Issues** | Automatic encoding detection and preservation |
-| **Name Collisions** | Intelligent collision detection and resolution |
-| **Binary File Corruption** | Automatic binary file detection and protection |
-| **Incomplete Operations** | Full resume capability from any interruption point |
-| **Unicode Problems** | Complete Unicode support including emojis and special chars |
+| Problem                    | MFR Solution                                                |
+| -------------------------- | ----------------------------------------------------------- |
+| **Data Loss Risk**         | Transaction-based operations with full rollback capability  |
+| **Encoding Issues**        | Automatic encoding detection and preservation               |
+| **Name Collisions**        | Intelligent collision detection and resolution              |
+| **Binary File Corruption** | Automatic binary file detection and protection              |
+| **Incomplete Operations**  | Full resume capability from any interruption point          |
+| **Unicode Problems**       | Complete Unicode support including emojis and special chars |
 
 ---
 
@@ -219,12 +229,12 @@ uv run mfr .
 
 ### System Requirements
 
-| Component | Requirement |
-|-----------|-------------|
-| **Python** | 3.10, 3.11, or 3.12 |
+| Component            | Requirement           |
+| -------------------- | --------------------- |
+| **Python**           | 3.10, 3.11, or 3.12   |
 | **Operating System** | Linux, macOS, Windows |
-| **Memory** | 512MB minimum |
-| **Disk Space** | 50MB for installation |
+| **Memory**           | 512MB minimum         |
+| **Disk Space**       | 50MB for installation |
 
 ### Installation Methods
 
@@ -234,11 +244,13 @@ uv run mfr .
 <summary><b>Installing UV Package Manager</b></summary>
 
 **macOS/Linux:**
+
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 **Windows:**
+
 ```powershell
 winget install astral-sh.uv
 # or
@@ -246,6 +258,7 @@ irm https://astral.sh/uv/install.ps1 | iex
 ```
 
 **Via pip:**
+
 ```bash
 pip install uv
 ```
@@ -384,6 +397,7 @@ The `replacement_mapping.json` file supports:
 - ❌ **No recursive replacements** (prevents A→B→C chains)
 
 Example:
+
 ```json
 {
   "REPLACEMENT_MAPPING": {
@@ -422,7 +436,7 @@ States: `PENDING` → `IN_PROGRESS` → `COMPLETED` | `FAILED` | `SKIPPED`
 
 MFR prevents accidental overwrites:
 
-```
+```text
 === Collision Detected ===
 Transaction ID: abc123
 Type: FILE_NAME
@@ -434,6 +448,7 @@ Action: [S]kip, [R]ename, [O]verwrite?
 #### 🔒 Binary File Protection
 
 Automatically detects and protects:
+
 - Executables (`.exe`, `.dll`, `.so`)
 - Images (`.jpg`, `.png`, `.gif`)
 - Archives (`.zip`, `.tar`, `.gz`)
@@ -447,30 +462,30 @@ uv run mfr [directory] [options]
 
 #### Essential Options
 
-| Option | Short | Description |
-|--------|-------|-------------|
-| `--dry-run` | | Preview changes without executing |
-| `--interactive` | `-i` | Approve each change individually |
-| `--force` | `-y` | Skip confirmation prompt |
-| `--resume` | | Resume interrupted operation |
-| `--mapping-file` | `-m` | Custom mapping file path |
+| Option           | Short | Description                       |
+| ---------------- | ----- | --------------------------------- |
+| `--dry-run`      |       | Preview changes without executing |
+| `--interactive`  | `-i`  | Approve each change individually  |
+| `--force`        | `-y`  | Skip confirmation prompt          |
+| `--resume`       |       | Resume interrupted operation      |
+| `--mapping-file` | `-m`  | Custom mapping file path          |
 
 #### File Control Options
 
-| Option | Description |
-|--------|-------------|
-| `--extensions` | Process only specific file types (e.g., `.py .js`) |
-| `--exclude-dirs` | Skip directories (space-separated) |
-| `--exclude-files` | Skip specific files |
-| `--no-gitignore` | Don't use .gitignore exclusions |
+| Option            | Description                                        |
+| ----------------- | -------------------------------------------------- |
+| `--extensions`    | Process only specific file types (e.g., `.py .js`) |
+| `--exclude-dirs`  | Skip directories (space-separated)                 |
+| `--exclude-files` | Skip specific files                                |
+| `--no-gitignore`  | Don't use .gitignore exclusions                    |
 
 #### Processing Options
 
-| Option | Description |
-|--------|-------------|
-| `--skip-file-renaming` | Don't rename files |
-| `--skip-folder-renaming` | Don't rename folders |
-| `--skip-content` | Don't modify file contents |
+| Option                    | Description                 |
+| ------------------------- | --------------------------- |
+| `--skip-file-renaming`    | Don't rename files          |
+| `--skip-folder-renaming`  | Don't rename folders        |
+| `--skip-content`          | Don't modify file contents  |
 | `--process-symlink-names` | Process symbolic link names |
 
 ---
@@ -483,6 +498,7 @@ uv run mfr [directory] [options]
 <summary>Click to expand</summary>
 
 **Configuration:**
+
 ```json
 {
   "REPLACEMENT_MAPPING": {
@@ -495,6 +511,7 @@ uv run mfr [directory] [options]
 ```
 
 **Command:**
+
 ```bash
 # Target only JavaScript/TypeScript files
 uv run mfr ./src --extensions .js .jsx .ts .tsx --dry-run
@@ -508,6 +525,7 @@ uv run mfr ./src --extensions .js .jsx .ts .tsx --dry-run
 <summary>Click to expand</summary>
 
 **Configuration:**
+
 ```json
 {
   "REPLACEMENT_MAPPING": {
@@ -519,6 +537,7 @@ uv run mfr ./src --extensions .js .jsx .ts .tsx --dry-run
 ```
 
 **Command:**
+
 ```bash
 # Process entire codebase, excluding dependencies
 uv run mfr . --exclude-dirs node_modules,vendor,dist
@@ -532,6 +551,7 @@ uv run mfr . --exclude-dirs node_modules,vendor,dist
 <summary>Click to expand</summary>
 
 **Configuration:**
+
 ```json
 {
   "REPLACEMENT_MAPPING": {
@@ -546,6 +566,7 @@ uv run mfr . --exclude-dirs node_modules,vendor,dist
 ```
 
 **Command:**
+
 ```bash
 # Interactive mode to review each change
 uv run mfr . --interactive
@@ -577,11 +598,11 @@ uv run mfr --self-test
 
 Current coverage: **53%** (Target: **80%**)
 
-| Component | Coverage |
-|-----------|----------|
-| Core Logic | 66% |
-| File Operations | 60% |
-| CLI Interface | 33% |
+| Component       | Coverage |
+| --------------- | -------- |
+| Core Logic      | 66%      |
+| File Operations | 60%      |
+| CLI Interface   | 33%      |
 
 ---
 
@@ -653,12 +674,12 @@ graph TB
 
 ### Benchmarks
 
-| Dataset | Files | Size | Scan Time | Execute Time | Memory |
-|---------|-------|------|-----------|--------------|--------|
-| Small | 100 | 10 MB | 0.1s | 0.5s | 25 MB |
-| Medium | 1,000 | 100 MB | 0.8s | 4.2s | 45 MB |
-| Large | 10,000 | 1 GB | 2.3s | 8.7s | 156 MB |
-| Huge | 100,000 | 10 GB | 23s | 87s | 512 MB |
+| Dataset | Files   | Size   | Scan Time | Execute Time | Memory |
+| ------- | ------- | ------ | --------- | ------------ | ------ |
+| Small   | 100     | 10 MB  | 0.1s      | 0.5s         | 25 MB  |
+| Medium  | 1,000   | 100 MB | 0.8s      | 4.2s         | 45 MB  |
+| Large   | 10,000  | 1 GB   | 2.3s      | 8.7s         | 156 MB |
+| Huge    | 100,000 | 10 GB  | 23s       | 87s          | 512 MB |
 
 ### Optimization Tips
 
@@ -681,6 +702,7 @@ graph TB
 ### Reporting Security Issues
 
 Found a vulnerability? Please report it:
+
 1. **Do not** open a public issue
 2. Open a [Security Advisory](https://github.com/Emasoft/MFR/security/advisories/new)
 3. Include steps to reproduce
@@ -691,6 +713,7 @@ Found a vulnerability? Please report it:
 ## 🗺️ Roadmap
 
 ### Version 0.3.0-alpha (Current)
+
 - ✅ Core find-replace engine
 - ✅ Transaction system
 - ✅ Unicode support
@@ -698,6 +721,7 @@ Found a vulnerability? Please report it:
 - ✅ CI/CD pipeline
 
 ### Version 1.0.0-beta (Q1 2025)
+
 - ⏳ Production stability
 - ⏳ Performance optimizations
 - ⏳ PyPI package release
@@ -705,12 +729,14 @@ Found a vulnerability? Please report it:
 - ⏳ 80%+ test coverage
 
 ### Version 1.1.0 (Q2 2025)
+
 - 📅 Regular expression support
 - 📅 Configuration profiles
 - 📅 Plugin system
 - 📅 Advanced filtering
 
 ### Version 2.0.0 (Future)
+
 - 💭 GUI interface
 - 💭 IDE extensions
 - 💭 Cloud storage support
@@ -724,6 +750,7 @@ Found a vulnerability? Please report it:
 <summary><b>Is it safe to use on production code?</b></summary>
 
 **Not yet.** MFR is in early alpha. While it has safety features, it's not recommended for production use. Always:
+
 - Use version control
 - Create backups
 - Test on a copy first
@@ -735,6 +762,7 @@ Found a vulnerability? Please report it:
 <summary><b>Can I undo changes?</b></summary>
 
 MFR doesn't have built-in undo, but:
+
 - Transaction logs show all changes
 - Use Git for easy rollback
 - Always backup before major operations
@@ -751,7 +779,8 @@ Not currently. MFR uses literal string matching for safety and predictability. R
 <details>
 <summary><b>How does it handle large files?</b></summary>
 
-MFR processes files line-by-line to maintain memory efficiency. Files up to 2GB are supported, with larger files planned for future versions.
+MFR processes files line-by-line to maintain memory efficiency. Files up to 2GB are supported,
+with larger files planned for future versions.
 
 </details>
 
@@ -761,7 +790,7 @@ MFR processes files line-by-line to maintain memory efficiency. Files up to 2GB 
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-```
+```text
 MIT License
 
 Copyright (c) 2024 Emasoft
@@ -779,12 +808,12 @@ in the Software without restriction...
 
 ### Built With
 
-| Tool | Purpose |
-|------|---------|
-| [uv](https://github.com/astral-sh/uv) | Lightning-fast Python package management |
-| [Prefect](https://www.prefect.io/) | Workflow orchestration framework |
-| [Ruff](https://github.com/astral-sh/ruff) | Fast Python linter and formatter |
-| [Gitleaks](https://github.com/gitleaks/gitleaks) | Secret scanning and prevention |
+| Tool                                             | Purpose                                  |
+| ------------------------------------------------ | ---------------------------------------- |
+| [uv](https://github.com/astral-sh/uv)            | Lightning-fast Python package management |
+| [Prefect](https://www.prefect.io/)               | Workflow orchestration framework         |
+| [Ruff](https://github.com/astral-sh/ruff)        | Fast Python linter and formatter         |
+| [Gitleaks](https://github.com/gitleaks/gitleaks) | Secret scanning and prevention           |
 
 ### Special Thanks
 
@@ -804,7 +833,9 @@ If you find MFR useful, please consider giving it a star. It helps others discov
 
 <br>
 
-**[Report Bug](https://github.com/Emasoft/MFR/issues)** • **[Request Feature](https://github.com/Emasoft/MFR/issues)** • **[Join Discussion](https://github.com/Emasoft/MFR/discussions)**
+**[Report Bug](https://github.com/Emasoft/MFR/issues)** •
+**[Request Feature](https://github.com/Emasoft/MFR/issues)** •
+**[Join Discussion](https://github.com/Emasoft/MFR/discussions)**
 
 <br>
 
