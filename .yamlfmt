@@ -1,4 +1,5 @@
-# .yamlfmt
+# .yamlfmt - GitHub Actions Workflow Formatting
+# This configuration is specifically for GitHub workflow files only
 formatter:
   indent: 2                      # Use 2-space indentation (standard in GitHub workflows)
   retain_line_breaks: true       # Preserve existing blank lines between blocks
@@ -8,6 +9,16 @@ formatter:
   eof_newline: true              # Ensure the file ends with exactly one newline
   pad_line_comments: 2           # Add 2 spaces before inline comments (yamllint requirement)
 
-# Exclude files that have special formatting requirements
+# Only include GitHub workflow files
+include:
+  - .github/**/*.yml
+  - .github/**/*.yaml
+
+# Exclude all other YAML files
 exclude:
-  - .pre-commit-config.yaml
+  - "*.yml"
+  - "*.yaml"
+  - "**/*.yml"
+  - "**/*.yaml"
+  - "!.github/**/*.yml"
+  - "!.github/**/*.yaml"

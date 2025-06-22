@@ -103,14 +103,15 @@ repos:
         types: [yaml]
         args: [-c=.yamllint.yml]
 
-  # YAML formatting with yamlfmt
+  # YAML formatting with yamlfmt (GitHub Actions workflows only)
   - repo: local
     hooks:
       - id: yamlfmt
-        name: yamlfmt
+        name: yamlfmt (GitHub workflows)
         entry: ./scripts/yamlfmt.sh
         language: system
         types: [yaml]
+        files: ^\.github/.*\.(yml|yaml)$
         require_serial: true
 
   # Shell script linting

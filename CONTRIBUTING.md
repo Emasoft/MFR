@@ -99,7 +99,8 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 - Indentation: 2 spaces (no tabs)
 - Maximum line length: 120 characters
 - Comments: Use 2 spaces before inline comments
-- Formatting: Run `yamlfmt` before committing (automatic via pre-commit)
+- GitHub Actions workflows: Formatted with `yamlfmt` using indentless arrays style
+- Other YAML files: Keep their existing formatting style
 - Linting: Must pass `yamllint` (automatic via pre-commit)
 - Preserve blank lines for readability between sections
 
