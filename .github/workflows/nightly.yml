@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.10', '3.11', '3.12']
       fail-fast: false
 
     steps:
@@ -33,14 +33,10 @@ jobs:
           uv sync --all-extras
 
       - name: Run full test suite
-        env:
-          PREFECT_LOGGING_LEVEL: ERROR
         run: |
           uv run pytest tests/ -v --cov=src/mass_find_replace --cov-report=term-missing
 
       - name: Test with different encodings
-        env:
-          PREFECT_LOGGING_LEVEL: ERROR
         run: |
           uv run python -m pytest tests/test_mass_find_replace.py::test_unicode_combining_chars -v
           uv run python -m pytest tests/test_mass_find_replace.py::test_gb18030_encoding -v

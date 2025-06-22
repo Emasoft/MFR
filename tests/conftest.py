@@ -23,8 +23,6 @@ import json
 import shutil
 from typing import Any, Callable, Generator, Tuple
 import sys
-import logging
-import warnings
 
 
 @pytest.fixture
@@ -106,30 +104,3 @@ def assert_file_content() -> Callable[[Path, str], None]:
         )
 
     return _assert
-
-
-@pytest.fixture(autouse=True)
-def suppress_prefect_logging_errors() -> Generator[None, None, None]:
-    """Suppress Prefect logging errors that occur during test cleanup on Python 3.13+.
-
-    This is a workaround for a known issue where Prefect's Rich console handler
-    tries to write to a closed file during cleanup, causing tests to fail even
-    though they pass.
-    """
-    # Suppress the specific logging error
-    logging.getLogger("prefect.logging.handlers").setLevel(logging.CRITICAL)
-    logging.getLogger("prefect.server.api.server").setLevel(logging.CRITICAL)
-
-    # Also suppress warnings about the logging error
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message=".*I/O operation on closed file.*")
-        warnings.filterwarnings("ignore", category=ResourceWarning)
-        yield
-
-    # Ensure all logging handlers are flushed and closed properly
-    for handler in logging.root.handlers[:]:
-        try:
-            handler.flush()
-            handler.close()
-        except Exception:
-            pass
