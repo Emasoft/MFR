@@ -4,13 +4,15 @@ First off, thank you for considering contributing to MFR! It's people like you t
 
 ## Code of Conduct
 
-This project and everyone participating in it is governed by our Code of Conduct. By participating, you are expected to uphold this code.
+This project and everyone participating in it is governed by our Code of Conduct. By participating, you are expected
+to uphold this code.
 
 ## How Can I Contribute?
 
 ### Reporting Bugs
 
-Before creating bug reports, please check existing issues as you might find out that you don't need to create one. When you are creating a bug report, please include as many details as possible:
+Before creating bug reports, please check existing issues as you might find out that you don't need to create one.
+When you are creating a bug report, please include as many details as possible:
 
 - **Use a clear and descriptive title**
 - **Describe the exact steps to reproduce the problem**
@@ -41,6 +43,7 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 ## Development Process
 
 1. **Setup Development Environment**
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/MFR.git
    cd MFR
@@ -54,6 +57,7 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
    - Follow the existing code style
 
 3. **Test Your Changes**
+
    ```bash
    uv run pytest
    uv run pre-commit run --all-files

@@ -51,7 +51,7 @@ echo -e "${GREEN}✅ Git configuration set${NC}"
 
 # Set up branch protection for main branch
 echo -e "\n${BLUE}Setting up branch protection...${NC}"
-if gh api repos/${REPO_OWNER}/${REPO_NAME}/branches/main/protection \
+if gh api "repos/${REPO_OWNER}/${REPO_NAME}/branches/main/protection" \
     --method PUT \
     --field required_status_checks='{"strict":true,"contexts":["test","security","pre-commit"]}' \
     --field enforce_admins=false \

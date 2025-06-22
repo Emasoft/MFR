@@ -3,9 +3,9 @@ Copyright (c) 2024 Emasoft
 
 This product includes software developed by Emasoft.
 
-=========================================================================
+-------------------------------------------------------------------------
 Third Party Dependencies and Licenses
-=========================================================================
+-------------------------------------------------------------------------
 
 This software includes the following third-party dependencies:
 
@@ -36,9 +36,9 @@ This software includes the following third-party dependencies:
    Licensed under the BSD 3-Clause License
    See: https://github.com/joshy/striprtf/blob/master/LICENSE
 
-=========================================================================
+-------------------------------------------------------------------------
 License Notices
-=========================================================================
+-------------------------------------------------------------------------
 
 The full text of the licenses mentioned above can be found at their
 respective URLs or in the licenses/ directory of this distribution.

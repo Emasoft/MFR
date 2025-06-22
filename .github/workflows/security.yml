@@ -9,7 +9,7 @@ on:
 
 env:
   PYTHON_VERSION: "3.11"
-  UV_VERSION: "0.5.0"
+  UV_VERSION: "0.7.13"
   # Git configuration
   GIT_AUTHOR_NAME: "Emasoft"
   GIT_AUTHOR_EMAIL: "713559+Emasoft@users.noreply.github.com"

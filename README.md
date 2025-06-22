@@ -645,12 +645,14 @@ Please report security vulnerabilities by opening a [Security Advisory](https://
 - ⏳ PyPI package release
 
 ### Version 1.1 (Q2 2025)
+
 - ⏳ Regular expression support
 - ⏳ Configuration profiles
 - ⏳ Advanced filtering options
 - ⏳ Plugin system
 
 ### Version 2.0 (Future)
+
 - 📅 GUI interface
 - 📅 IDE plugins (VSCode, IntelliJ)
 - 📅 Parallel processing
@@ -727,6 +729,7 @@ See the [NOTICE](NOTICE) file for full attribution details.
 </td>
 <td align="center">
 <a href="https://www.prefect.io/">
+<!-- markdownlint-disable-next-line MD013 -->
 <img src="https://images.ctfassets.net/gm98wzqotmnx/3Ufcb7yYqcXBDlAhJ30gce/c237bb3254190795b30bf734f3cbc1d4/prefect-logo-mark-solid-white-500.png" width="60px;" alt="Prefect"/>
 <br /><sub><b>Prefect</b></sub>
 </a>
@@ -756,6 +759,7 @@ Special thanks to all [contributors](https://github.com/Emasoft/MFR/graphs/contr
 
 Made with ❤️ by [Emasoft](https://github.com/Emasoft) and contributors
 
+<!-- markdownlint-disable-next-line MD013 -->
 [**Report Bug**](https://github.com/Emasoft/MFR/issues) • [**Request Feature**](https://github.com/Emasoft/MFR/issues) • [**Discussions**](https://github.com/Emasoft/MFR/discussions)
 
 </div>
