@@ -94,6 +94,15 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 - Include code examples where relevant
 - Keep language clear and concise
 
+### YAML Style
+
+- Indentation: 2 spaces (no tabs)
+- Maximum line length: 120 characters
+- Comments: Use 2 spaces before inline comments
+- Formatting: Run `yamlfmt` before committing (automatic via pre-commit)
+- Linting: Must pass `yamllint` (automatic via pre-commit)
+- Preserve blank lines for readability between sections
+
 ## Additional Notes
 
 ### Issue and Pull Request Labels
