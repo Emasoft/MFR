@@ -9,10 +9,10 @@ services:
         PYTHON_VERSION: "3.11"
     image: mass-find-replace:latest
     volumes:
-      - ./workspace:/workspace
+    - ./workspace:/workspace
     working_dir: /workspace
     environment:
-      - UV_SYSTEM_PYTHON=1
+    - UV_SYSTEM_PYTHON=1
     command: ["--dry-run"]
 
   mfr-dev:
@@ -23,11 +23,11 @@ services:
         PYTHON_VERSION: "3.11"
     image: mass-find-replace:dev
     volumes:
-      - .:/app
-      - ./workspace:/workspace
+    - .:/app
+    - ./workspace:/workspace
     working_dir: /app
     environment:
-      - UV_SYSTEM_PYTHON=1
+    - UV_SYSTEM_PYTHON=1
     stdin_open: true
     tty: true
     command: /bin/bash
@@ -38,7 +38,7 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     volumes:
-      - .:/app
+    - .:/app
     working_dir: /app
     command: ["uv", "run", "pytest", "-v"]
 
@@ -48,6 +48,6 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     volumes:
-      - .:/app
+    - .:/app
     working_dir: /app
     command: ["uv", "run", "pre-commit", "run", "--all-files"]
