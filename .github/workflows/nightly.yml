@@ -33,10 +33,14 @@ jobs:
           uv sync --all-extras
 
       - name: Run full test suite
+        env:
+          PREFECT_LOGGING_LEVEL: ERROR
         run: |
           uv run pytest tests/ -v --cov=src/mass_find_replace --cov-report=term-missing
 
       - name: Test with different encodings
+        env:
+          PREFECT_LOGGING_LEVEL: ERROR
         run: |
           uv run python -m pytest tests/test_mass_find_replace.py::test_unicode_combining_chars -v
           uv run python -m pytest tests/test_mass_find_replace.py::test_gb18030_encoding -v
