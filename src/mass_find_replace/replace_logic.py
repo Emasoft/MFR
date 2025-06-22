@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#
+
 # HERE IS THE CHANGELOG FOR THIS VERSION OF THE CODE:
 # - Fixed regex pattern compilation in load_replacement_map to properly escape keys containing regex special characters.
 # - Fixed replace_occurrences to normalize input string to NFC before searching and replacing to ensure consistency.

@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+
+# Copyright (c) 2024 Emasoft
+#
+# This software is licensed under the MIT License.
+# Refer to the LICENSE file for more details.
+
 """
 Comprehensive test suite for Mass Find Replace tool.
 

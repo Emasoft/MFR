@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 # HERE IS THE CHANGELOG FOR THIS VERSION OF THE CODE:
 # - Fixed file encoding handling: ensured all file opens use detected encoding with errors='surrogateescape'.
 # - Added strict=False to Path.resolve() calls to prevent exceptions and improve sandbox safety.

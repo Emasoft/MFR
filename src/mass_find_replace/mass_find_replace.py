@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 # HERE IS THE CHANGELOG FOR THIS VERSION OF THE CODE:
 # - Consolidated redundant empty map checks into a single check in main_flow.
 # - Removed unused skip_scan parameter from execute_all_transactions call.

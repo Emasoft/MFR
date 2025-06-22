@@ -1,6 +1,6 @@
 [project]
 name = "mass-find-replace"
-version = "0.2.1"
+version = "0.3.0-alpha"
 description = "A sophisticated Python tool for safe, surgical find-and-replace operations across directory structures"
 authors = [
     {name = "Emasoft", email = "713559+Emasoft@users.noreply.github.com"},
@@ -17,7 +17,7 @@ dependencies = [
 ]
 keywords = ["find-replace", "refactoring", "cli", "unicode", "encoding"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 3 - Alpha",
     "Environment :: Console",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",

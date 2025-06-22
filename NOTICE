@@ -1,0 +1,48 @@
+Mass Find Replace (MFR)
+Copyright (c) 2024 Emasoft
+
+This product includes software developed by Emasoft.
+
+=========================================================================
+Third Party Dependencies and Licenses
+=========================================================================
+
+This software includes the following third-party dependencies:
+
+1. Prefect (https://github.com/PrefectHQ/prefect)
+   Copyright (c) 2019 Prefect Technologies, Inc.
+   Licensed under the Apache License, Version 2.0
+   See: https://github.com/PrefectHQ/prefect/blob/main/LICENSE
+
+2. chardet (https://github.com/chardet/chardet)
+   Copyright (c) 2006-2023 Dan Blanchard and contributors
+   Copyright (c) 2023 chardet contributors
+   Based on code from Mozilla (https://www.mozilla.org/en-US/MPL/)
+   Licensed under the GNU Lesser General Public License v2.1
+   See: https://github.com/chardet/chardet/blob/main/LICENSE
+
+3. binaryornot (https://github.com/binaryornot/binaryornot)
+   Copyright (c) 2013-2023 Audrey Roy Greenfeld
+   Licensed under the BSD 3-Clause License
+   See: https://github.com/binaryornot/binaryornot/blob/main/LICENSE
+
+4. pathspec (https://github.com/cpburnz/python-pathspec)
+   Copyright (c) 2013-2023 Caleb P. Burns
+   Licensed under the Mozilla Public License 2.0
+   See: https://github.com/cpburnz/python-pathspec/blob/master/LICENSE
+
+5. striprtf (https://github.com/joshy/striprtf)
+   Copyright (c) 2016-2023 Joshy Cyriac
+   Licensed under the BSD 3-Clause License
+   See: https://github.com/joshy/striprtf/blob/master/LICENSE
+
+=========================================================================
+License Notices
+=========================================================================
+
+The full text of the licenses mentioned above can be found at their
+respective URLs or in the licenses/ directory of this distribution.
+
+This software is provided "as is" without warranty of any kind, express
+or implied. See the LICENSE file for the full MIT license text governing
+this software.

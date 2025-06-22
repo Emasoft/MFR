@@ -1,10 +1,18 @@
 #!/usr/bin/env python3
+
 # HERE IS THE CHANGELOG FOR THIS VERSION OF THE CODE:
 # - Added shebang and encoding header as per project requirements
 # - Added proper type annotations for all functions
 # - Fixed dict type annotation to use modern Python 3.10+ syntax
 # - Added return type annotations for all functions
+# - Added license header
 #
+
+# Copyright (c) 2024 Emasoft
+#
+# This software is licensed under the MIT License.
+# Refer to the LICENSE file for more details.
+
 """
 Pytest configuration and fixtures for Mass Find Replace tests.
 """

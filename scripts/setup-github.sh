@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+#
+# Copyright (c) 2024 Emasoft
+#
+# This software is licensed under the MIT License.
+# Refer to the LICENSE file for more details.
+#
 # Script to set up GitHub repository configuration using GitHub CLI
 
 set -euo pipefail
