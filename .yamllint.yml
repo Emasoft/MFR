@@ -10,10 +10,11 @@ rules:
     min-spaces-from-content: 2
   indentation:
     spaces: 2
+    indent-sequences: false  # Allow GitHub Actions style where lists align with parent
   document-start:
     present: false
 
-ignore: |
+ignore: |-
   .venv/
   venv/
   .git/

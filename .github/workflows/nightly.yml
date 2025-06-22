@@ -2,8 +2,8 @@ name: Nightly Tests
 
 on:
   schedule:
-    # Run at 2 AM UTC every day
-    - cron: '0 2 * * *'
+  # Run at 2 AM UTC every day
+  - cron: '0 2 * * *'
   workflow_dispatch:
 
 jobs:
@@ -17,63 +17,63 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v6
-        with:
-          enable-cache: true
-          cache-dependency-glob: '**/requirements*.txt'
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        enable-cache: true
+        cache-dependency-glob: '**/requirements*.txt'
 
-      - name: Set up Python ${{ matrix.python-version }}
-        run: uv python pin ${{ matrix.python-version }}
+    - name: Set up Python ${{ matrix.python-version }}
+      run: uv python pin ${{ matrix.python-version }}
 
-      - name: Install dependencies
-        run: |
-          uv sync --all-extras
+    - name: Install dependencies
+      run: |
+        uv sync --all-extras
 
-      - name: Run full test suite
-        run: |
-          uv run pytest tests/ -v --cov=src/mass_find_replace --cov-report=term-missing
+    - name: Run full test suite
+      run: |
+        uv run pytest tests/ -v --cov=src/mass_find_replace --cov-report=term-missing
 
-      - name: Test with different encodings
-        run: |
-          uv run python -m pytest tests/test_mass_find_replace.py::test_unicode_combining_chars -v
-          uv run python -m pytest tests/test_mass_find_replace.py::test_gb18030_encoding -v
-          uv run python -m pytest tests/test_mass_find_replace.py::test_binary_files_logging -v
+    - name: Test with different encodings
+      run: |
+        uv run python -m pytest tests/test_mass_find_replace.py::test_unicode_combining_chars -v
+        uv run python -m pytest tests/test_mass_find_replace.py::test_gb18030_encoding -v
+        uv run python -m pytest tests/test_mass_find_replace.py::test_binary_files_logging -v
 
-      - name: Performance benchmark
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
-        run: |
-          echo "Running performance benchmarks..."
-          uv run python -c "
-          import time
-          import tempfile
-          import shutil
-          from pathlib import Path
-          from mass_find_replace.mass_find_replace import main_flow
+    - name: Performance benchmark
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+      run: |-
+        echo "Running performance benchmarks..."
+        uv run python -c "
+        import time
+        import tempfile
+        import shutil
+        from pathlib import Path
+        from mass_find_replace.mass_find_replace import main_flow
 
-          with tempfile.TemporaryDirectory() as tmpdir:
-              # Create test structure
-              root = Path(tmpdir)
-              for i in range(100):
-                  (root / f'dir_{i}').mkdir()
-                  for j in range(10):
-                      (root / f'dir_{i}' / f'file_{j}.txt').write_text(f'atlasvibe content {i}-{j}')
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create test structure
+            root = Path(tmpdir)
+            for i in range(100):
+                (root / f'dir_{i}').mkdir()
+                for j in range(10):
+                    (root / f'dir_{i}' / f'file_{j}.txt').write_text(f'atlasvibe content {i}-{j}')
 
-              # Create mapping file
-              map_file = root / 'mapping.json'
-              map_file.write_text('{\"REPLACEMENT_MAPPING\": {\"atlasvibe\": \"flojoy\"}}')
+            # Create mapping file
+            map_file = root / 'mapping.json'
+            map_file.write_text('{\"REPLACEMENT_MAPPING\": {\"atlasvibe\": \"flojoy\"}}')
 
-              # Measure time
-              start = time.time()
-              main_flow(
-                  str(root), str(map_file), None, ['.git'], [],
-                  dry_run=True, skip_scan=False, resume=False, force_execution=True,
-                  ignore_symlinks_arg=True, use_gitignore=False, custom_ignore_file_path=None,
-                  skip_file_renaming=False, skip_folder_renaming=False, skip_content=False,
-                  timeout_minutes=1, quiet_mode=True, verbose_mode=False, interactive_mode=False
-              )
-              elapsed = time.time() - start
-              print(f'Performance: Processed 1000 files in {elapsed:.2f} seconds')
-          "
+            # Measure time
+            start = time.time()
+            main_flow(
+                str(root), str(map_file), None, ['.git'], [],
+                dry_run=True, skip_scan=False, resume=False, force_execution=True,
+                ignore_symlinks_arg=True, use_gitignore=False, custom_ignore_file_path=None,
+                skip_file_renaming=False, skip_folder_renaming=False, skip_content=False,
+                timeout_minutes=1, quiet_mode=True, verbose_mode=False, interactive_mode=False
+            )
+            elapsed = time.time() - start
+            print(f'Performance: Processed 1000 files in {elapsed:.2f} seconds')
+        "

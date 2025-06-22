@@ -23,88 +23,88 @@ jobs:
       statuses: write
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          # Full git history is needed to get a proper list of changed files
-          fetch-depth: 0
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        # Full git history is needed to get a proper list of changed files
+        fetch-depth: 0
 
-      - name: Run Super-Linter
-        uses: super-linter/super-linter@v7.2.0
-        env:
-          # Global settings
-          DEFAULT_BRANCH: main
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Run Super-Linter
+      uses: super-linter/super-linter@v7.2.0
+      env:
+        # Global settings
+        DEFAULT_BRANCH: main
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-          # Validation settings
-          VALIDATE_ALL_CODEBASE: false  # Only validate changed files in PRs
-          # Exclude directories that should not be linted
-          FILTER_REGEX_EXCLUDE: |
-            .*(\.venv|venv|env|\.env|node_modules|dist|build|\.eggs|
-            \.pytest_cache|\.mypy_cache|\.git|\.act|uv\.lock|
-            planned_transactions\.json).*
+        # Validation settings
+        VALIDATE_ALL_CODEBASE: false  # Only validate changed files in PRs
+        # Exclude directories that should not be linted
+        FILTER_REGEX_EXCLUDE: |
+          .*(\.venv|venv|env|\.env|node_modules|dist|build|\.eggs|
+          \.pytest_cache|\.mypy_cache|\.git|\.act|uv\.lock|
+          planned_transactions\.json).*
 
-          # Enable all by default, then disable what we don't need
-          # This avoids the "mixed mode" error from super-linter
+        # Enable all by default, then disable what we don't need
+        # This avoids the "mixed mode" error from super-linter
 
-          # Python - disable conflicting linters (we use ruff)
-          VALIDATE_PYTHON_BLACK: false  # Using ruff format instead
-          VALIDATE_PYTHON_FLAKE8: false  # Using ruff instead
-          VALIDATE_PYTHON_ISORT: false  # Using ruff import sorting
-          VALIDATE_PYTHON_PYLINT: false  # Using ruff instead
-          PYTHON_RUFF_CONFIG_FILE: .ruff.toml
+        # Python - disable conflicting linters (we use ruff)
+        VALIDATE_PYTHON_BLACK: false  # Using ruff format instead
+        VALIDATE_PYTHON_FLAKE8: false  # Using ruff instead
+        VALIDATE_PYTHON_ISORT: false  # Using ruff import sorting
+        VALIDATE_PYTHON_PYLINT: false  # Using ruff instead
+        PYTHON_RUFF_CONFIG_FILE: .ruff.toml
 
-          # Configuration files for enabled linters
-          YAML_CONFIG_FILE: .yamllint.yml
-          MARKDOWN_CONFIG_FILE: .markdownlint.yml
+        # Configuration files for enabled linters
+        YAML_CONFIG_FILE: .yamllint.yml
+        MARKDOWN_CONFIG_FILE: .markdownlint.yml
 
-          # Disable languages not used in this project
-          VALIDATE_NATURAL_LANGUAGE: false  # Can be noisy for technical docs
-          VALIDATE_JAVASCRIPT_ES: false
-          VALIDATE_TYPESCRIPT_ES: false
-          VALIDATE_CSS: false
-          VALIDATE_HTML: false
-          VALIDATE_ANSIBLE: false
-          VALIDATE_TERRAFORM: false
-          VALIDATE_TERRAFORM_FMT: false
-          VALIDATE_TERRAGRUNT: false
-          VALIDATE_CLOUDFORMATION: false
-          VALIDATE_CLOJURE: false
-          VALIDATE_COFFEE: false
-          VALIDATE_DART: false
-          VALIDATE_GO: false
-          VALIDATE_GROOVY: false
-          VALIDATE_JAVA: false
-          VALIDATE_JSX: false
-          VALIDATE_KOTLIN: false
-          VALIDATE_LATEX: false
-          VALIDATE_LUA: false
-          VALIDATE_PERL: false
-          VALIDATE_PHP: false
-          VALIDATE_POWERSHELL: false
-          VALIDATE_PROTOBUF: false
-          VALIDATE_R: false
-          VALIDATE_RAKU: false
-          VALIDATE_RUBY: false
-          VALIDATE_RUST: false
-          VALIDATE_SCALA: false
-          VALIDATE_TSX: false
-          VALIDATE_TYPESCRIPT_STANDARD: false
-          VALIDATE_XML: false
+        # Disable languages not used in this project
+        VALIDATE_NATURAL_LANGUAGE: false  # Can be noisy for technical docs
+        VALIDATE_JAVASCRIPT_ES: false
+        VALIDATE_TYPESCRIPT_ES: false
+        VALIDATE_CSS: false
+        VALIDATE_HTML: false
+        VALIDATE_ANSIBLE: false
+        VALIDATE_TERRAFORM: false
+        VALIDATE_TERRAFORM_FMT: false
+        VALIDATE_TERRAGRUNT: false
+        VALIDATE_CLOUDFORMATION: false
+        VALIDATE_CLOJURE: false
+        VALIDATE_COFFEE: false
+        VALIDATE_DART: false
+        VALIDATE_GO: false
+        VALIDATE_GROOVY: false
+        VALIDATE_JAVA: false
+        VALIDATE_JSX: false
+        VALIDATE_KOTLIN: false
+        VALIDATE_LATEX: false
+        VALIDATE_LUA: false
+        VALIDATE_PERL: false
+        VALIDATE_PHP: false
+        VALIDATE_POWERSHELL: false
+        VALIDATE_PROTOBUF: false
+        VALIDATE_R: false
+        VALIDATE_RAKU: false
+        VALIDATE_RUBY: false
+        VALIDATE_RUST: false
+        VALIDATE_SCALA: false
+        VALIDATE_TSX: false
+        VALIDATE_TYPESCRIPT_STANDARD: false
+        VALIDATE_XML: false
 
-          # Disable other linters that might conflict
-          VALIDATE_JSCPD: false  # Copy-paste detection can be noisy
-          VALIDATE_EDITORCONFIG: false  # Not using .editorconfig
-          VALIDATE_CHECKOV: false  # Disable infrastructure security checks
-          VALIDATE_PYTHON_PYINK: false  # Conflicts with ruff formatting
-          VALIDATE_PYTHON_MYPY: false  # Already run in pre-commit and CI
-          VALIDATE_YAML_PRETTIER: false  # Using yamllint instead
+        # Disable other linters that might conflict
+        VALIDATE_JSCPD: false  # Copy-paste detection can be noisy
+        VALIDATE_EDITORCONFIG: false  # Not using .editorconfig
+        VALIDATE_CHECKOV: false  # Disable infrastructure security checks
+        VALIDATE_PYTHON_PYINK: false  # Conflicts with ruff formatting
+        VALIDATE_PYTHON_MYPY: false  # Already run in pre-commit and CI
+        VALIDATE_YAML_PRETTIER: false  # Using yamllint instead
 
-          # Output settings
-          LINTER_RULES_PATH: .
-          LOG_LEVEL: WARN  # Can be set to INFO or DEBUG for troubleshooting
-          CREATE_LOG_FILE: false
+        # Output settings
+        LINTER_RULES_PATH: .
+        LOG_LEVEL: WARN  # Can be set to INFO or DEBUG for troubleshooting
+        CREATE_LOG_FILE: false
 
-          # Error handling
-          DISABLE_ERRORS: false  # Fail the workflow on linting errors
-          MULTI_STATUS: true  # Report individual linter status
+        # Error handling
+        DISABLE_ERRORS: false  # Fail the workflow on linting errors
+        MULTI_STATUS: true  # Report individual linter status

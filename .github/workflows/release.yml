@@ -22,66 +22,66 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v6
-        with:
-          enable-cache: true
-          cache-dependency-glob: '**/requirements*.txt'
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        enable-cache: true
+        cache-dependency-glob: '**/requirements*.txt'
 
-      - name: Set up Python
-        run: uv python pin 3.11
+    - name: Set up Python
+      run: uv python pin 3.11
 
-      - name: Validate version
-        run: |
-          if [[ ! "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
-            echo "Error: Invalid version format. Use semantic versioning (e.g., 1.0.0 or 1.0.0-beta1)"
-            exit 1
-          fi
+    - name: Validate version
+      run: |
+        if [[ ! "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
+          echo "Error: Invalid version format. Use semantic versioning (e.g., 1.0.0 or 1.0.0-beta1)"
+          exit 1
+        fi
 
-      - name: Update version in pyproject.toml
-        run: |
-          sed -i 's/^version = .*/version = "${{ inputs.version }}"/' pyproject.toml
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add pyproject.toml
-          git commit -m "chore: bump version to ${{ inputs.version }}"
+    - name: Update version in pyproject.toml
+      run: |
+        sed -i 's/^version = .*/version = "${{ inputs.version }}"/' pyproject.toml
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add pyproject.toml
+        git commit -m "chore: bump version to ${{ inputs.version }}"
 
-      - name: Create and push tag
-        run: |
-          git tag -a "v${{ inputs.version }}" -m "Release v${{ inputs.version }}"
-          git push origin "v${{ inputs.version }}"
+    - name: Create and push tag
+      run: |
+        git tag -a "v${{ inputs.version }}" -m "Release v${{ inputs.version }}"
+        git push origin "v${{ inputs.version }}"
 
-      - name: Build package
-        run: uv build
+    - name: Build package
+      run: uv build
 
-      - name: Generate changelog
-        id: changelog
-        run: |
-          echo "## What's Changed" > CHANGELOG_TEMP.md
-          git log --pretty=format:"* %s by @%an" "$(git describe --tags --abbrev=0 HEAD^)"..HEAD >> CHANGELOG_TEMP.md
-          echo "" >> CHANGELOG_TEMP.md
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^)
-          REPO_URL="https://github.com/Emasoft/MFR"
-          echo "**Full Changelog**: ${REPO_URL}/compare/${PREV_TAG}...v${{ inputs.version }}" >> CHANGELOG_TEMP.md
+    - name: Generate changelog
+      id: changelog
+      run: |
+        echo "## What's Changed" > CHANGELOG_TEMP.md
+        git log --pretty=format:"* %s by @%an" "$(git describe --tags --abbrev=0 HEAD^)"..HEAD >> CHANGELOG_TEMP.md
+        echo "" >> CHANGELOG_TEMP.md
+        PREV_TAG=$(git describe --tags --abbrev=0 HEAD^)
+        REPO_URL="https://github.com/Emasoft/MFR"
+        echo "**Full Changelog**: ${REPO_URL}/compare/${PREV_TAG}...v${{ inputs.version }}" >> CHANGELOG_TEMP.md
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: "v${{ inputs.version }}"
-          name: "Release v${{ inputs.version }}"
-          body_path: CHANGELOG_TEMP.md
-          draft: false
-          prerelease: ${{ inputs.prerelease }}
-          files: dist/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: "v${{ inputs.version }}"
+        name: "Release v${{ inputs.version }}"
+        body_path: CHANGELOG_TEMP.md
+        draft: false
+        prerelease: ${{ inputs.prerelease }}
+        files: dist/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish to PyPI
-        if: ${{ !inputs.prerelease }}
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          skip-existing: true
+    - name: Publish to PyPI
+      if: ${{ !inputs.prerelease }}
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        skip-existing: true

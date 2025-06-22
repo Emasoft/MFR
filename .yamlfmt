@@ -1,15 +1,12 @@
 # .yamlfmt
-# Conservative formatting that works well with yamllint
 formatter:
-  type: basic
-  indent: 2
-  line_ending: lf
-  retain_line_breaks: true
-  disallow_anchors: false
-  max_line_length: 120
-  scan_folded_as_literal: false
-  drop_merge_tag: false
-  pad_line_comments: 2  # Match yamllint requirement of 2 spaces before comments
+  indent: 2                      # Use 2-space indentation (standard in GitHub workflows)
+  retain_line_breaks: true       # Preserve existing blank lines between blocks
+  indentless_arrays: true        # Don't add extra indent before each "-" list item
+  scan_folded_as_literal: true   # Keep multi-line ">"-style blocks as-is, avoid collapsing
+  trim_trailing_whitespace: true # Remove trailing spaces at end of lines
+  eof_newline: true              # Ensure the file ends with exactly one newline
+  pad_line_comments: 2           # Add 2 spaces before inline comments (yamllint requirement)
 
 # Exclude files that have special formatting requirements
 exclude:
