@@ -49,6 +49,7 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
    cd MFR
    uv sync --all-extras
    uv run pre-commit install
+   uv run pre-commit install --hook-type pre-push
    ```
 
 2. **Make Your Changes**
@@ -72,10 +73,11 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 ### Python Style
 
 - Follow PEP 8
-- Use type hints
-- Write docstrings for all public functions
+- Use type hints for all functions
+- Write Google-style docstrings for all public functions
 - Keep functions under 50 lines
 - Use descriptive variable names
+- Requires Python 3.10, 3.11, or 3.12
 
 ### Commit Messages
 
