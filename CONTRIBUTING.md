@@ -53,6 +53,7 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
    ```
 
 2. **Make Your Changes**
+
    - Write tests first (TDD)
    - Keep changes focused and atomic
    - Follow the existing code style
