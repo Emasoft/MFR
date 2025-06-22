@@ -87,7 +87,7 @@ binary_files_matches.log
 collisions_errors.log
 
 # UV package manager
-uv.lock
+# Note: uv.lock is tracked for reproducible builds
 
 # Temporary test directories
 test_temp/
