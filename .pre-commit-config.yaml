@@ -103,6 +103,16 @@ repos:
         types: [yaml]
         args: [-c=.yamllint.yml]
 
+  # YAML formatting with yamlfmt
+  - repo: local
+    hooks:
+      - id: yamlfmt
+        name: yamlfmt
+        entry: ./scripts/yamlfmt.sh
+        language: system
+        types: [yaml]
+        require_serial: true
+
   # Shell script linting
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.10.0.1

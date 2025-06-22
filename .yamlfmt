@@ -1,0 +1,16 @@
+# .yamlfmt
+# Conservative formatting that works well with yamllint
+formatter:
+  type: basic
+  indent: 2
+  line_ending: lf
+  retain_line_breaks: true
+  disallow_anchors: false
+  max_line_length: 120
+  scan_folded_as_literal: false
+  drop_merge_tag: false
+  pad_line_comments: 2  # Match yamllint requirement of 2 spaces before comments
+
+# Exclude files that have special formatting requirements
+exclude:
+  - .pre-commit-config.yaml
