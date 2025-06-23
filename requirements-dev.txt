@@ -246,7 +246,7 @@ prefect==3.4.6
     # via mass-find-replace
 prometheus-client==0.22.1
     # via prefect
-psutil==6.1.1
+psutil==7.0.0
     # via safety
 py-serializable==2.0.0
     # via cyclonedx-python-lib
