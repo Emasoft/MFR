@@ -1,9 +1,7 @@
 {
-  "REPLACEMENT_MAPPING": {
-    "oldname": "newname",
-    "Oldname": "Newname",
-    "oldName": "newName",
-    "OldName": "NewName",
-    "OLDNAME": "NEWNAME"
-  }
+  "old_name": "new_name",
+  "OldProject": "NewProject",
+  "old-project": "new-project",
+  "oldproject": "newproject",
+  "OLDPROJECT": "NEWPROJECT"
 }
