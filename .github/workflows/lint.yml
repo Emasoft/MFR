@@ -78,10 +78,12 @@ jobs:
 
     - name: Install actionlint
       run: |
-        curl -s https://api.github.com/repos/rhysd/actionlint/releases/latest | \
-        grep -E 'browser_download_url.*linux_amd64' | cut -d'"' -f4 | \
-        xargs -I {} curl -L {} | tar xz actionlint
+        VERSION=$(curl -s https://api.github.com/repos/rhysd/actionlint/releases/latest | \
+          jq -r '.tag_name' | sed 's/^v//')
+        URL="https://github.com/rhysd/actionlint/releases/download/v${VERSION}"
+        curl -L "${URL}/actionlint_${VERSION}_linux_amd64.tar.gz" | tar xz actionlint
         sudo mv actionlint /usr/local/bin/
+        actionlint -version
 
     - name: Run actionlint
       run: |
