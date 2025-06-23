@@ -646,6 +646,8 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 - 🔧 Use `uv` for dependency management
 - 📏 Line length limit: 320 characters
 - 🚀 Run `uv run pre-commit run --all-files` before committing
+- 🔒 Dependencies are locked with `uv.lock` (auto-updated by pre-commit)
+- 📦 Requirements files are auto-exported for compatibility
 
 ---
 

@@ -3,18 +3,34 @@
 default_language_version:
   python: python3.11
 
+# This section configures CI-only hooks (use with: pre-commit run --hook-stage manual)
+ci:
+  autofix_prs: false  # Don't auto-fix PRs, let developers handle it
+  autoupdate_commit_msg: 'chore: pre-commit autoupdate'
+
 repos:
-  # UV for fast Python formatting
+  # UV for dependency management and formatting
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: 0.7.13
     hooks:
-      # Compile requirements
-      - id: pip-compile
-        args: [pyproject.toml, -o, requirements.txt, --python-version=3.10]
-      # Compile dev requirements
-      - id: pip-compile
-        name: pip-compile dev-requirements
-        args: [pyproject.toml, --extra=dev, -o, requirements-dev.txt, --python-version=3.10]
+      # Keep uv.lock up to date
+      - id: uv-lock
+        files: ^(pyproject\.toml|uv\.lock)$
+        pass_filenames: false
+      # Export requirements for compatibility
+      - id: uv-export
+        args: [--frozen, --no-hashes, -o, requirements.txt]
+        files: ^(pyproject\.toml|uv\.lock)$
+      # Export dev requirements
+      - id: uv-export
+        name: uv-export dev-requirements
+        args: [--frozen, --no-hashes, --extra=dev, -o, requirements-dev.txt]
+        files: ^(pyproject\.toml|uv\.lock)$
+      # CI-only: verify dependencies are synced
+      - id: uv-sync
+        stages: [manual]
+        additional_dependencies: []
+        pass_filenames: false
 
   # Gitleaks for secret scanning
   - repo: https://github.com/gitleaks/gitleaks
@@ -22,21 +38,14 @@ repos:
     hooks:
       - id: gitleaks
 
-  # Ruff for linting and formatting (run with uv)
-  - repo: local
+  # Ruff for linting and formatting (using uv-pre-commit for better integration)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.5
     hooks:
       - id: ruff
-        name: ruff (legacy alias)
-        entry: uv run ruff check --ignore E203,E402,E501,E266,W505,F841,F842,F401,W293,I001,UP015,C901,W291 --isolated --fix --output-format full
-        language: system
-        types: [python]
-        require_serial: true
+        args: [--ignore, "E203,E402,E501,E266,W505,F841,F842,F401,W293,I001,UP015,C901,W291", --isolated, --fix, --output-format=full]
       - id: ruff-format
-        name: ruff format
-        entry: uv run ruff format --line-length=320 --isolated
-        language: system
-        types: [python]
-        require_serial: true
+        args: [--line-length=320, --isolated]
 
   # Mypy for type checking (run with uv)
   - repo: local

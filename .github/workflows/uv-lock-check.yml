@@ -1,0 +1,70 @@
+name: UV Lock Check
+
+on:
+  pull_request:
+    paths:
+    - 'pyproject.toml'
+    - 'uv.lock'
+  push:
+    branches: [main, develop]
+    paths:
+    - 'pyproject.toml'
+    - 'uv.lock'
+
+env:
+  UV_VERSION: "0.7.13"
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  check-lock:
+    name: Check UV Lock File
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        version: ${{ env.UV_VERSION }}
+        enable-cache: true
+
+    - name: Check if uv.lock is up to date
+      run: |
+        # Create a copy of the current lock file
+        cp uv.lock uv.lock.bak
+
+        # Generate a fresh lock file
+        uv lock --no-cache
+
+        # Compare the files
+        if ! diff -q uv.lock uv.lock.bak > /dev/null; then
+          echo "::error::uv.lock is out of date. Please run 'uv lock' locally and commit the changes."
+          exit 1
+        fi
+
+        echo "✅ uv.lock is up to date"
+
+    - name: Verify requirements exports
+      run: |-
+        # Export requirements
+        uv export --frozen --no-hashes -o requirements.txt.new
+        uv export --frozen --no-hashes --extra=dev -o requirements-dev.txt.new
+
+        # Compare with existing files
+        if [ -f requirements.txt ]; then
+          if ! diff -q requirements.txt requirements.txt.new > /dev/null; then
+            echo "::warning::requirements.txt is out of sync with uv.lock"
+          fi
+        fi
+
+        if [ -f requirements-dev.txt ]; then
+          if ! diff -q requirements-dev.txt requirements-dev.txt.new > /dev/null; then
+            echo "::warning::requirements-dev.txt is out of sync with uv.lock"
+          fi
+        fi
