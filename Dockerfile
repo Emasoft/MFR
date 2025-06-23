@@ -32,7 +32,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 # Copy source code
 COPY src ./src
-COPY replacement_mapping.json ./
+# Copy replacement mapping file if it exists (make it optional)
+COPY replacement_mapping.json* ./
 
 # Install the project
 RUN --mount=type=cache,target=/root/.cache/uv \
