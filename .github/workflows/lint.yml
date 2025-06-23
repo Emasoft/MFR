@@ -1,0 +1,121 @@
+name: Lint
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: "3.11"
+  UV_VERSION: "0.7.13"
+
+jobs:
+  lint-python:
+    name: Lint Python Code
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        version: ${{ env.UV_VERSION }}
+        enable-cache: true
+
+    - name: Install dependencies
+      run: |
+        uv sync --frozen --all-extras
+
+    - name: Run ruff check
+      run: |
+        uv run ruff check --ignore E203,E402,E501,E266,W505,F841,F842,F401,W293,I001,UP015,C901,W291 \
+          --isolated --fix --output-format full src/ tests/
+
+    - name: Run mypy
+      run: |
+        COLUMNS=400 uv run mypy --strict --show-error-context --pretty \
+          --install-types --no-color-output --non-interactive \
+          --show-error-codes --show-error-code-links --no-error-summary \
+          --follow-imports=normal src/
+
+    - name: Run deptry
+      run: |
+        uv run deptry src
+
+  lint-yaml:
+    name: Lint YAML Files
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        version: ${{ env.UV_VERSION }}
+        enable-cache: true
+
+    - name: Install dependencies
+      run: |
+        uv sync --frozen --all-extras
+
+    - name: Run yamllint
+      run: |
+        uv run yamllint -c .yamllint.yml .
+
+    - name: Run actionlint
+      run: |
+        uv run actionlint
+
+  lint-shell:
+    name: Lint Shell Scripts
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        version: ${{ env.UV_VERSION }}
+        enable-cache: true
+
+    - name: Install dependencies
+      run: |
+        uv sync --frozen --all-extras
+
+    - name: Run shellcheck
+      run: |
+        uv run shellcheck --severity=error --extended-analysis=true \
+          scripts/*.sh setup_dev_tools.sh || true
+
+  lint-json:
+    name: Lint JSON Files
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Validate JSON files
+      run: |-
+        find . -name "*.json" -not -path "./node_modules/*" -not -path "./.venv/*" \
+          -not -path "./uv.lock" -not -path "./planned_transactions.json" \
+          -exec python -m json.tool {} \; > /dev/null

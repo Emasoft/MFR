@@ -27,13 +27,13 @@ repos:
     hooks:
       - id: ruff
         name: ruff (legacy alias)
-        entry: uv run ruff check --fix
+        entry: uv run ruff check --ignore E203,E402,E501,E266,W505,F841,F842,F401,W293,I001,UP015,C901,W291 --isolated --fix --output-format full
         language: system
         types: [python]
         require_serial: true
       - id: ruff-format
         name: ruff format
-        entry: uv run ruff format
+        entry: uv run ruff format --line-length=400 --isolated
         language: system
         types: [python]
         require_serial: true

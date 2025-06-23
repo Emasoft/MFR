@@ -1,0 +1,51 @@
+# autofix.ci configuration
+# https://autofix.ci/setup
+
+# Tools to run automatically on pull requests
+tools:
+  # Python formatting with ruff
+  ruff:
+    enabled: true
+    args:
+    - "format"
+    - "--line-length=400"
+    - "--isolated"
+
+  # Python linting with ruff
+  ruff-check:
+    enabled: true
+    args:
+    - "check"
+    - "--ignore"
+    - "E203,E402,E501,E266,W505,F841,F842,F401,W293,I001,UP015,C901,W291"
+    - "--isolated"
+    - "--fix"
+    - "--output-format"
+    - "full"
+
+  # Format non-Python files with Prettier
+  prettier:
+    enabled: true
+    exclude:
+    - "*.py"
+    - "*.yml"
+    - "*.yaml"
+
+# Only run on pull requests
+branches:
+- main
+- develop
+
+# Skip certain paths
+exclude:
+- ".venv/**"
+- "venv/**"
+- "node_modules/**"
+- "dist/**"
+- "build/**"
+- "*.egg-info/**"
+- "__pycache__/**"
+- ".pytest_cache/**"
+- ".mypy_cache/**"
+- "uv.lock"
+- "planned_transactions.json"
