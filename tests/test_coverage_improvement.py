@@ -7,7 +7,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock, call
+from unittest.mock import Mock, patch, MagicMock
 import pytest
 
 # Add src to path
@@ -23,7 +23,7 @@ def test_get_logger_verbose_mode():
     """Test _get_logger with verbose mode."""
     # Mock Prefect logger
     mock_logger = Mock()
-    with patch('prefect.get_run_logger', return_value=mock_logger):
+    with patch("prefect.get_run_logger", return_value=mock_logger):
         logger = mfr._get_logger(verbose_mode=True)
         mock_logger.setLevel.assert_called_once_with(logging.DEBUG)
 
@@ -31,8 +31,8 @@ def test_get_logger_verbose_mode():
 def test_get_logger_missing_context_error():
     """Test _get_logger when Prefect raises MissingContextError."""
     from prefect.exceptions import MissingContextError
-    
-    with patch('prefect.get_run_logger', side_effect=MissingContextError()):
+
+    with patch("prefect.get_run_logger", side_effect=MissingContextError()):
         logger = mfr._get_logger(verbose_mode=False)
         assert isinstance(logger, logging.Logger)
         assert logger.name == "mass_find_replace"
@@ -42,17 +42,18 @@ def test_get_logger_import_error():
     """Test _get_logger when Prefect import fails."""
     # Make the import fail
     import sys
+
     original_modules = {}
     for key in list(sys.modules.keys()):
-        if key.startswith('prefect'):
+        if key.startswith("prefect"):
             original_modules[key] = sys.modules[key]
             del sys.modules[key]
-    
+
     try:
         # Clear any existing handlers
         test_logger = logging.getLogger("mass_find_replace")
         test_logger.handlers.clear()
-        
+
         logger = mfr._get_logger(verbose_mode=True)
         assert isinstance(logger, logging.Logger)
         assert logger.level == logging.DEBUG
@@ -77,20 +78,15 @@ def test_main_flow_verbose_logging(tmp_path, caplog):
     test_dir = tmp_path / "test"
     test_dir.mkdir()
     (test_dir / "file.txt").write_text("content")
-    
+
     # Create a valid mapping file
     mapping_file = tmp_path / "mapping.json"
     mapping_file.write_text('{"REPLACEMENT_MAPPING": {"old": "new"}}')
-    
+
     with caplog.at_level(logging.DEBUG):
         # Mock scan to return empty to avoid full execution
-        with patch('mass_find_replace.file_system_operations.scan_directory_for_occurrences', return_value=[]):
-            result = mfr.main_flow(
-                directory=str(test_dir),
-                mapping_file=str(mapping_file),
-                verbose_mode=True,
-                force=True
-            )
+        with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences", return_value=[]):
+            result = mfr.main_flow(directory=str(test_dir), mapping_file=str(mapping_file), verbose_mode=True, force=True)
             assert "Verbose mode enabled" in caplog.text
 
 
@@ -99,14 +95,15 @@ def test_main_flow_directory_validation():
     """Test directory validation in main_flow."""
     # Non-existent directory
     assert mfr.main_flow(directory="/nonexistent/path") == 1
-    
+
     # File instead of directory
     import tempfile
+
     with tempfile.NamedTemporaryFile() as f:
         assert mfr.main_flow(directory=f.name) == 1
-    
+
     # Unreadable directory
-    with patch('os.access', return_value=False):
+    with patch("os.access", return_value=False):
         assert mfr.main_flow(directory=".") == 1
 
 
@@ -115,27 +112,24 @@ def test_main_flow_resume_prompt(tmp_path, monkeypatch):
     """Test resume prompt for existing transactions."""
     test_dir = tmp_path / "test"
     test_dir.mkdir()
-    
+
     # Create existing transaction file
     trans_file = test_dir / mfr.MAIN_TRANSACTION_FILE_NAME
-    trans_file.write_text(json.dumps([
-        {"status": "COMPLETED"},
-        {"status": "PENDING"}
-    ]))
-    
+    trans_file.write_text(json.dumps([{"status": "COMPLETED"}, {"status": "PENDING"}]))
+
     # Mock user says yes to resume
-    monkeypatch.setattr('builtins.input', lambda _: 'y')
-    
-    with patch('mass_find_replace.file_system_operations.execute_all_transactions', return_value=0):
+    monkeypatch.setattr("builtins.input", lambda _: "y")
+
+    with patch("mass_find_replace.file_system_operations.execute_all_transactions", return_value=0):
         result = mfr.main_flow(directory=str(test_dir))
         assert result == 0
-    
+
     # Mock user says no to resume
     trans_file.write_text(json.dumps([{"status": "PENDING"}]))
-    monkeypatch.setattr('builtins.input', lambda _: 'n')
-    
-    with patch('mass_find_replace.file_system_operations.scan_directory_for_occurrences', return_value=[]):
-        with patch('mass_find_replace.file_system_operations.save_transactions'):
+    monkeypatch.setattr("builtins.input", lambda _: "n")
+
+    with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences", return_value=[]):
+        with patch("mass_find_replace.file_system_operations.save_transactions"):
             result = mfr.main_flow(directory=str(test_dir))
 
 
@@ -144,13 +138,8 @@ def test_main_flow_all_operations_skipped(tmp_path):
     """Test when all operations are skipped."""
     test_dir = tmp_path / "test"
     test_dir.mkdir()
-    
-    result = mfr.main_flow(
-        directory=str(test_dir),
-        skip_file_renaming=True,
-        skip_folder_renaming=True,
-        skip_content=True
-    )
+
+    result = mfr.main_flow(directory=str(test_dir), skip_file_renaming=True, skip_folder_renaming=True, skip_content=True)
     assert result == 1
 
 
@@ -159,7 +148,7 @@ def test_main_flow_empty_directory(tmp_path):
     """Test empty directory handling."""
     empty_dir = tmp_path / "empty"
     empty_dir.mkdir()
-    
+
     result = mfr.main_flow(directory=str(empty_dir))
     assert result == 1
 
@@ -170,21 +159,15 @@ def test_main_flow_mapping_file_errors(tmp_path):
     test_dir = tmp_path / "test"
     test_dir.mkdir()
     (test_dir / "file.txt").write_text("content")
-    
+
     # Non-existent mapping file
-    result = mfr.main_flow(
-        directory=str(test_dir),
-        mapping_file="/nonexistent/mapping.json"
-    )
+    result = mfr.main_flow(directory=str(test_dir), mapping_file="/nonexistent/mapping.json")
     assert result == 1
-    
+
     # File instead of mapping file
     not_json = tmp_path / "notjson.txt"
     not_json.write_text("not json")
-    result = mfr.main_flow(
-        directory=str(test_dir),
-        mapping_file=str(not_json)
-    )
+    result = mfr.main_flow(directory=str(test_dir), mapping_file=str(not_json))
     assert result == 1
 
 
@@ -194,8 +177,8 @@ def test_main_flow_map_load_critical_error(tmp_path):
     test_dir = tmp_path / "test"
     test_dir.mkdir()
     (test_dir / "file.txt").write_text("content")
-    
-    with patch('mass_find_replace.replace_logic.load_replacement_map', return_value=None):
+
+    with patch("mass_find_replace.replace_logic.load_replacement_map", return_value=None):
         result = mfr.main_flow(directory=str(test_dir))
         assert result == 1
 
@@ -206,20 +189,16 @@ def test_main_flow_print_mapping_and_confirm(tmp_path, capsys, monkeypatch):
     test_dir = tmp_path / "test"
     test_dir.mkdir()
     (test_dir / "file.txt").write_text("content")
-    
+
     mapping_file = tmp_path / "mapping.json"
     mapping_file.write_text('{"REPLACEMENT_MAPPING": {"OldName": "NewName"}}')
-    
+
     # User confirms
-    monkeypatch.setattr('builtins.input', lambda _: 'y')
-    
-    with patch('mass_find_replace.file_system_operations.scan_directory_for_occurrences', return_value=[]):
-        result = mfr.main_flow(
-            directory=str(test_dir),
-            mapping_file=str(mapping_file),
-            quiet_mode=False
-        )
-        
+    monkeypatch.setattr("builtins.input", lambda _: "y")
+
+    with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences", return_value=[]):
+        result = mfr.main_flow(directory=str(test_dir), mapping_file=str(mapping_file), quiet_mode=False)
+
         captured = capsys.readouterr()
         assert "OldName" in captured.out
         assert "NewName" in captured.out
@@ -230,26 +209,20 @@ def test_main_flow_empty_mapping(tmp_path, monkeypatch):
     """Test empty mapping handling."""
     test_dir = tmp_path / "test"
     test_dir.mkdir()
-    
+
     empty_mapping = tmp_path / "empty.json"
     empty_mapping.write_text('{"REPLACEMENT_MAPPING": {}}')
-    
+
     # User continues anyway
-    monkeypatch.setattr('builtins.input', lambda _: 'y')
-    
-    with patch('mass_find_replace.file_system_operations.scan_directory_for_occurrences', return_value=[]):
-        result = mfr.main_flow(
-            directory=str(test_dir),
-            mapping_file=str(empty_mapping)
-        )
+    monkeypatch.setattr("builtins.input", lambda _: "y")
+
+    with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences", return_value=[]):
+        result = mfr.main_flow(directory=str(test_dir), mapping_file=str(empty_mapping))
         assert result == 0
-    
+
     # User aborts
-    monkeypatch.setattr('builtins.input', lambda _: 'n')
-    result = mfr.main_flow(
-        directory=str(test_dir),
-        mapping_file=str(empty_mapping)
-    )
+    monkeypatch.setattr("builtins.input", lambda _: "n")
+    result = mfr.main_flow(directory=str(test_dir), mapping_file=str(empty_mapping))
     assert result == 0
 
 
@@ -259,26 +232,22 @@ def test_main_flow_gitignore_loading(tmp_path):
     test_dir = tmp_path / "test"
     test_dir.mkdir()
     (test_dir / "file.txt").write_text("content")
-    
+
     # Create .gitignore
     gitignore = test_dir / ".gitignore"
     gitignore.write_text("*.pyc\n__pycache__/")
-    
+
     mapping_file = tmp_path / "mapping.json"
     mapping_file.write_text('{"REPLACEMENT_MAPPING": {"old": "new"}}')
-    
-    with patch('mass_find_replace.file_system_operations.scan_directory_for_occurrences') as mock_scan:
+
+    with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences") as mock_scan:
         mock_scan.return_value = []
-        result = mfr.main_flow(
-            directory=str(test_dir),
-            mapping_file=str(mapping_file),
-            force=True
-        )
-        
+        result = mfr.main_flow(directory=str(test_dir), mapping_file=str(mapping_file), force=True)
+
         # Check that ignore patterns were passed
         args, kwargs = mock_scan.call_args
-        assert 'ignore_patterns' in kwargs
-        assert kwargs['ignore_patterns'] is not None
+        assert "ignore_patterns" in kwargs
+        assert kwargs["ignore_patterns"] is not None
 
 
 # Test custom ignore file (lines 332-342)
@@ -286,25 +255,20 @@ def test_main_flow_custom_ignore_file(tmp_path):
     """Test custom ignore file loading."""
     test_dir = tmp_path / "test"
     test_dir.mkdir()
-    
+
     # Create custom ignore file
     custom_ignore = tmp_path / ".mfrignore"
     custom_ignore.write_text("*.tmp\ntemp/")
-    
+
     mapping_file = tmp_path / "mapping.json"
     mapping_file.write_text('{"REPLACEMENT_MAPPING": {"old": "new"}}')
-    
-    with patch('mass_find_replace.file_system_operations.scan_directory_for_occurrences') as mock_scan:
+
+    with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences") as mock_scan:
         mock_scan.return_value = []
-        result = mfr.main_flow(
-            directory=str(test_dir),
-            mapping_file=str(mapping_file),
-            exclude_from=str(custom_ignore),
-            force=True
-        )
-        
+        result = mfr.main_flow(directory=str(test_dir), mapping_file=str(mapping_file), exclude_from=str(custom_ignore), force=True)
+
         args, kwargs = mock_scan.call_args
-        assert 'ignore_patterns' in kwargs
+        assert "ignore_patterns" in kwargs
 
 
 # Test ignore pattern error (lines 344-349)
@@ -312,18 +276,13 @@ def test_main_flow_ignore_pattern_error(tmp_path):
     """Test ignore pattern compilation error."""
     test_dir = tmp_path / "test"
     test_dir.mkdir()
-    
+
     mapping_file = tmp_path / "mapping.json"
     mapping_file.write_text('{"REPLACEMENT_MAPPING": {"old": "new"}}')
-    
-    with patch('pathspec.PathSpec.from_lines', side_effect=Exception("Pattern error")):
-        with patch('mass_find_replace.file_system_operations.scan_directory_for_occurrences', return_value=[]):
-            result = mfr.main_flow(
-                directory=str(test_dir),
-                mapping_file=str(mapping_file),
-                exclude_from="/some/file",
-                force=True
-            )
+
+    with patch("pathspec.PathSpec.from_lines", side_effect=Exception("Pattern error")):
+        with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences", return_value=[]):
+            result = mfr.main_flow(directory=str(test_dir), mapping_file=str(mapping_file), exclude_from="/some/file", force=True)
             # Should continue without patterns
             assert result == 0
 
@@ -333,18 +292,15 @@ def test_main_flow_user_confirmation(tmp_path, monkeypatch):
     """Test user confirmation prompts."""
     test_dir = tmp_path / "test"
     test_dir.mkdir()
-    
+
     mapping_file = tmp_path / "mapping.json"
     mapping_file.write_text('{"REPLACEMENT_MAPPING": {"old": "new"}}')
-    
+
     # User aborts
-    monkeypatch.setattr('builtins.input', lambda _: 'n')
-    
-    with patch('mass_find_replace.file_system_operations.scan_directory_for_occurrences', return_value=[{"id": "1"}]):
-        result = mfr.main_flow(
-            directory=str(test_dir),
-            mapping_file=str(mapping_file)
-        )
+    monkeypatch.setattr("builtins.input", lambda _: "n")
+
+    with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences", return_value=[{"id": "1"}]):
+        result = mfr.main_flow(directory=str(test_dir), mapping_file=str(mapping_file))
         assert result == 0
 
 
@@ -353,60 +309,57 @@ def test_main_flow_no_occurrences(tmp_path):
     """Test when no occurrences are found."""
     test_dir = tmp_path / "test"
     test_dir.mkdir()
-    
+
     mapping_file = tmp_path / "mapping.json"
     mapping_file.write_text('{"REPLACEMENT_MAPPING": {"notfound": "replacement"}}')
-    
-    with patch('mass_find_replace.file_system_operations.scan_directory_for_occurrences', return_value=[]):
-        result = mfr.main_flow(
-            directory=str(test_dir),
-            mapping_file=str(mapping_file),
-            force=True
-        )
+
+    with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences", return_value=[]):
+        result = mfr.main_flow(directory=str(test_dir), mapping_file=str(mapping_file), force=True)
         assert result == 0
 
 
 # Test _run_subprocess_command (lines 525-527)
 def test_run_subprocess_command_exception():
     """Test _run_subprocess_command with exception."""
-    with patch('subprocess.run', side_effect=Exception("Unexpected error")):
+    with patch("subprocess.run", side_effect=Exception("Unexpected error")):
         result = mfr._run_subprocess_command(["test"], "Test command")
-        assert result is False
+        assert not result
 
 
 # Test CLI missing dependency (lines 542-546)
 def test_main_cli_missing_dependency(monkeypatch):
     """Test CLI when dependencies are missing."""
-    monkeypatch.setattr('sys.argv', ['mfr', '.'])
-    
+    monkeypatch.setattr("sys.argv", ["mfr", "."])
+
     # Hide a required module
     import sys
-    sys.modules['click'] = None
-    
+
+    sys.modules["click"] = None
+
     try:
         with pytest.raises(SystemExit) as exc:
             mfr.main_cli()
         assert exc.value.code == 1
     finally:
         # Restore
-        del sys.modules['click']
+        del sys.modules["click"]
 
 
 # Test CLI self-test fallback (lines 689-690, 693-694)
 def test_main_cli_self_test_fallback(monkeypatch):
     """Test self-test with pip fallback."""
-    monkeypatch.setattr('sys.argv', ['mfr', '--self-test'])
-    
-    with patch('mass_find_replace.mass_find_replace._run_subprocess_command') as mock_run:
+    monkeypatch.setattr("sys.argv", ["mfr", "--self-test"])
+
+    with patch("mass_find_replace.mass_find_replace._run_subprocess_command") as mock_run:
         # uv fails, pip succeeds
         mock_run.side_effect = [False, True]
         result = mfr.main_cli()
         assert result == 0
-        
+
         # Verify pip was called
         calls = mock_run.call_args_list
         assert len(calls) == 2
-        assert 'pip' in str(calls[1])
+        assert "pip" in str(calls[1])
 
 
 # Test file operations log functions
@@ -414,24 +367,24 @@ def test_log_fs_op_message_no_logger():
     """Test _log_fs_op_message without logger."""
     import io
     import sys
-    
+
     # Capture output
     old_stdout = sys.stdout
     old_stderr = sys.stderr
-    
+
     try:
         sys.stdout = io.StringIO()
         sys.stderr = io.StringIO()
-        
+
         fs_ops._log_fs_op_message(None, "Info msg", logging.INFO)
         assert "INFO: Info msg" in sys.stdout.getvalue()
-        
+
         fs_ops._log_fs_op_message(None, "Error msg", logging.ERROR)
         assert "ERROR: Error msg" in sys.stderr.getvalue()
-        
+
         fs_ops._log_fs_op_message(None, "Debug msg", logging.DEBUG)
         assert "DEBUG: Debug msg" in sys.stdout.getvalue()
-        
+
     finally:
         sys.stdout = old_stdout
         sys.stderr = old_stderr
@@ -441,8 +394,8 @@ def test_log_fs_op_message_no_logger():
 def test_log_collision_error_exception(tmp_path):
     """Test _log_collision_error with write exception."""
     log_file = tmp_path / "collision.log"
-    
-    with patch('builtins.open', side_effect=OSError("Write failed")):
+
+    with patch("builtins.open", side_effect=OSError("Write failed")):
         # Should not raise exception
         fs_ops._log_collision_error("old", "new", None, str(log_file))
 
@@ -451,19 +404,20 @@ def test_log_collision_error_exception(tmp_path):
 def test_replace_logic_log_message_debug():
     """Test _log_message in debug mode."""
     import mass_find_replace.replace_logic as rl
-    
+
     original = rl._DEBUG_REPLACE_LOGIC
     rl._DEBUG_REPLACE_LOGIC = True
-    
+
     try:
         import io
+
         old_stderr = sys.stderr
         sys.stderr = io.StringIO()
-        
+
         replace._log_message("Debug test", level=logging.DEBUG)
         output = sys.stderr.getvalue()
         assert "[DEBUG] Debug test" in output
-        
+
         sys.stderr = old_stderr
     finally:
         rl._DEBUG_REPLACE_LOGIC = original
@@ -472,19 +426,20 @@ def test_replace_logic_log_message_debug():
 def test_replace_logic_log_message_no_logger():
     """Test _log_message without logger."""
     import io
+
     old_stdout = sys.stdout
     old_stderr = sys.stderr
-    
+
     try:
         sys.stdout = io.StringIO()
         sys.stderr = io.StringIO()
-        
+
         replace._log_message("Info", level=logging.INFO, logger=None)
         assert "[INFO] Info" in sys.stdout.getvalue()
-        
+
         replace._log_message("Error", level=logging.ERROR, logger=None)
         assert "[ERROR] Error" in sys.stderr.getvalue()
-        
+
     finally:
         sys.stdout = old_stdout
         sys.stderr = old_stderr
