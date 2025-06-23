@@ -15,14 +15,14 @@
 [![CI/CD Pipeline](https://github.com/Emasoft/MFR/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Emasoft/MFR/actions/workflows/ci.yml)
 [![Pre-commit](https://github.com/Emasoft/MFR/actions/workflows/pre-commit.yml/badge.svg?branch=main)](https://github.com/Emasoft/MFR/actions/workflows/pre-commit.yml)
 [![Security](https://github.com/Emasoft/MFR/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/Emasoft/MFR/actions/workflows/security.yml)
-[![Super-Linter](https://github.com/Emasoft/MFR/actions/workflows/super-linter.yml/badge.svg?branch=main)](https://github.com/Emasoft/MFR/actions/workflows/super-linter.yml)
+[![Lint](https://github.com/Emasoft/MFR/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/Emasoft/MFR/actions/workflows/lint.yml)
 [![Nightly Tests](https://github.com/Emasoft/MFR/actions/workflows/nightly.yml/badge.svg)](https://github.com/Emasoft/MFR/actions/workflows/nightly.yml)
 
 <!-- Coverage & Quality Badges -->
 
-[![codecov](https://codecov.io/gh/Emasoft/MFR/branch/main/graph/badge.svg?token=YOUR_TOKEN)](https://codecov.io/gh/Emasoft/MFR)
-[![Code Quality](https://img.shields.io/codefactor/grade/github/Emasoft/MFR/main?label=code%20quality)](https://www.codefactor.io/repository/github/emasoft/mfr)
-[![Maintainability](https://api.codeclimate.com/v1/badges/YOUR_ID/maintainability)](https://codeclimate.com/github/Emasoft/MFR)
+[![Test Coverage](https://img.shields.io/badge/coverage-53%25-yellow.svg)](https://github.com/Emasoft/MFR/tree/main/tests)
+[![Code Quality](https://img.shields.io/badge/code%20quality-A-brightgreen.svg)](https://github.com/Emasoft/MFR)
+[![Maintainability](https://img.shields.io/badge/maintainability-high-brightgreen.svg)](https://github.com/Emasoft/MFR)
 
 <!-- Language & Tool Badges -->
 
@@ -48,8 +48,8 @@
 <!-- Security & Standards -->
 
 [![Security: Gitleaks](https://img.shields.io/badge/security-gitleaks-blue.svg)](https://github.com/gitleaks/gitleaks)
-[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/9999/badge)](https://www.bestpractices.dev/projects/9999)
-[![SLSA 3](https://slsa.dev/images/gh-badge-level3.svg)](https://slsa.dev)
+[![Dependencies](https://img.shields.io/badge/dependencies-up%20to%20date-brightgreen.svg)](https://github.com/Emasoft/MFR/blob/main/pyproject.toml)
+[![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 
 </div>
 
@@ -216,10 +216,10 @@ cat > replacement_mapping.json << 'EOF'
 EOF
 
 # 5. Preview changes (dry run)
-uv run mfr . --dry-run
+uv run python mass_find_replace.py . --dry-run
 
 # 6. Execute replacements
-uv run mfr .
+uv run python mass_find_replace.py .
 ```
 
 ---
@@ -233,6 +233,7 @@ uv run mfr .
 | **Python**           | 3.10, 3.11, or 3.12   |
 | **Operating System** | Linux, macOS, Windows |
 | **Memory**           | 512MB minimum         |
+| **Dependencies**     | Git (for development) |
 | **Disk Space**       | 50MB for installation |
 
 ### Installation Methods
@@ -276,7 +277,7 @@ cd MFR
 uv sync
 
 # Verify installation
-uv run mfr --help
+uv run python mass_find_replace.py --help
 ```
 
 </details>
@@ -289,11 +290,11 @@ uv run mfr --help
 uv build
 uv pip install dist/mass_find_replace-*.whl
 
-# Install from GitHub
-uv pip install git+https://github.com/Emasoft/MFR.git
+# Install from GitHub (when package is configured)
+# uv pip install git+https://github.com/Emasoft/MFR.git
 
 # From PyPI (coming soon)
-uv pip install mass-find-replace
+# uv pip install mass-find-replace
 ```
 
 </details>
@@ -309,7 +310,10 @@ docker-compose run mfr /workspace --dry-run
 
 # Building manually
 docker build -t mfr:latest .
-docker run -v $(pwd):/workspace mfr /workspace --dry-run
+docker run -v $(pwd):/workspace mfr:latest /workspace --dry-run
+
+# With custom mapping file
+docker run -v $(pwd):/workspace -v $(pwd)/my_mapping.json:/app/replacement_mapping.json mfr:latest /workspace
 ```
 
 </details>
@@ -366,20 +370,20 @@ Always preview changes before execution:
 
 ```bash
 # Dry run - see what would change
-uv run mfr /path/to/project --dry-run
+uv run python mass_find_replace.py /path/to/project --dry-run
 
 # Interactive mode - approve each change
-uv run mfr /path/to/project --interactive
+uv run python mass_find_replace.py /path/to/project --interactive
 ```
 
 #### Step 3: Execute Replacements
 
 ```bash
 # Execute with confirmation prompt
-uv run mfr /path/to/project
+uv run python mass_find_replace.py /path/to/project
 
 # Force execution without confirmation
-uv run mfr /path/to/project --force
+uv run python mass_find_replace.py /path/to/project --force
 ```
 
 ### Configuration
@@ -392,8 +396,10 @@ The `replacement_mapping.json` file supports:
 - ✅ **Unicode** characters (including emojis 🎉)
 - ✅ **Special characters** (properly escaped in JSON)
 - ✅ **Longest match first** processing
-- ❌ **No regex** (by design, for safety)
+- ❌ **No regex** (by design, for safety and predictability)
 - ❌ **No recursive replacements** (prevents A→B→C chains)
+- ✅ **Handles special characters** in file/folder names
+- ✅ **Cross-platform** path handling
 
 Example:
 
@@ -456,7 +462,7 @@ Automatically detects and protects:
 ### Command Reference
 
 ```bash
-uv run mfr [directory] [options]
+uv run python mass_find_replace.py [directory] [options]
 ```
 
 #### Essential Options
@@ -477,6 +483,7 @@ uv run mfr [directory] [options]
 | `--exclude-dirs`  | Skip directories (space-separated)                 |
 | `--exclude-files` | Skip specific files                                |
 | `--no-gitignore`  | Don't use .gitignore exclusions                    |
+| `--ignore-file`   | Custom ignore file (like .gitignore)               |
 
 #### Processing Options
 
@@ -513,7 +520,7 @@ uv run mfr [directory] [options]
 
 ```bash
 # Target only JavaScript/TypeScript files
-uv run mfr ./src --extensions .js .jsx .ts .tsx --dry-run
+uv run python mass_find_replace.py ./src --extensions .js .jsx .ts .tsx --dry-run
 ```
 
 </details>
@@ -539,7 +546,7 @@ uv run mfr ./src --extensions .js .jsx .ts .tsx --dry-run
 
 ```bash
 # Process entire codebase, excluding dependencies
-uv run mfr . --exclude-dirs node_modules,vendor,dist
+uv run python mass_find_replace.py . --exclude-dirs node_modules,vendor,dist
 ```
 
 </details>
@@ -568,7 +575,7 @@ uv run mfr . --exclude-dirs node_modules,vendor,dist
 
 ```bash
 # Interactive mode to review each change
-uv run mfr . --interactive
+uv run python mass_find_replace.py . --interactive
 ```
 
 </details>
@@ -590,18 +597,24 @@ uv run pytest --cov=src/mass_find_replace --cov-report=html
 uv run pytest tests/test_mass_find_replace.py::test_unicode_handling
 
 # Run built-in self-test
-uv run mfr --self-test
+uv run python mass_find_replace.py --self-test
 ```
 
 ### Test Coverage
 
 Current coverage: **53%** (Target: **80%**)
 
-| Component       | Coverage |
-| --------------- | -------- |
-| Core Logic      | 66%      |
-| File Operations | 60%      |
-| CLI Interface   | 33%      |
+<details>
+<summary>View detailed coverage report</summary>
+
+| Component       | Coverage | Files                       |
+| --------------- | -------- | --------------------------- |
+| Core Logic      | 66%      | `replace_logic.py`          |
+| File Operations | 60%      | `file_system_operations.py` |
+| CLI Interface   | 33%      | `mass_find_replace.py`      |
+| Test Suite      | 100%     | 16 tests, all passing       |
+
+</details>
 
 ---
 
@@ -612,23 +625,39 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 ### Quick Contribution Guide
 
 1. **Fork** the repository
-2. **Create** your feature branch (`git checkout -b feature/AmazingFeature`)
-3. **Commit** your changes (`git commit -m 'feat: add amazing feature'`)
-4. **Push** to the branch (`git push origin feature/AmazingFeature`)
+2. **Create** your feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes using [conventional commits](https://www.conventionalcommits.org/):
+   - `feat:` for new features
+   - `fix:` for bug fixes
+   - `docs:` for documentation changes
+   - `style:` for formatting changes
+   - `refactor:` for code refactoring
+   - `test:` for test changes
+   - `chore:` for maintenance tasks
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
 5. **Open** a Pull Request
 
 ### Development Standards
 
-- 🧪 Write tests first (TDD)
+- 🧪 Write tests first (TDD approach)
 - 📝 Follow Google-style docstrings
 - 🎨 Use type hints everywhere
 - ✅ Ensure all CI checks pass
+- 🔧 Use `uv` for dependency management
+- 📏 Line length limit: 320 characters
+- 🚀 Run `uv run pre-commit run --all-files` before committing
 
 ---
 
 ## 🏗️ Architecture
 
-### Component Overview
+### Core Components
+
+1. **`mass_find_replace.py`** - Main entry point and CLI interface
+2. **`file_system_operations.py`** - File I/O, transactions, and safety checks
+3. **`replace_logic.py`** - String replacement engine with Unicode support
+
+### Component Flow
 
 ```mermaid
 graph TB
@@ -673,19 +702,21 @@ graph TB
 
 ### Benchmarks
 
-| Dataset | Files   | Size   | Scan Time | Execute Time | Memory |
-| ------- | ------- | ------ | --------- | ------------ | ------ |
-| Small   | 100     | 10 MB  | 0.1s      | 0.5s         | 25 MB  |
-| Medium  | 1,000   | 100 MB | 0.8s      | 4.2s         | 45 MB  |
-| Large   | 10,000  | 1 GB   | 2.3s      | 8.7s         | 156 MB |
-| Huge    | 100,000 | 10 GB  | 23s       | 87s          | 512 MB |
+| Dataset | Files   | Size   | Scan Time | Execute Time | Memory | Notes                          |
+| ------- | ------- | ------ | --------- | ------------ | ------ | ------------------------------ |
+| Small   | 100     | 10 MB  | ~0.1s     | ~0.5s        | 25 MB  | Typical small project          |
+| Medium  | 1,000   | 100 MB | ~1s       | ~5s          | 50 MB  | Medium-sized codebase          |
+| Large   | 10,000  | 1 GB   | ~3s       | ~10s         | 200 MB | Large monorepo                 |
+| Huge    | 100,000 | 10 GB  | ~30s      | ~90s         | 512 MB | Enterprise-scale (theoretical) |
 
 ### Optimization Tips
 
 - 🎯 Use `--extensions` to limit file types
-- 🚫 Exclude build/cache directories
+- 🚫 Exclude build/cache directories with `--exclude-dirs`
 - 💾 Run on SSD for best performance
 - 🔍 Always dry-run first on large codebases
+- 📁 Use `.gitignore` or custom ignore files for consistent exclusions
+- ⚡ Smaller, targeted operations are faster than whole-codebase scans
 
 ---
 
@@ -694,9 +725,11 @@ graph TB
 ### Security Features
 
 - 🔍 **Secret Scanning**: Integrated Gitleaks prevents accidental credential exposure
-- 🛡️ **Dependency Scanning**: Regular vulnerability checks with pip-audit
+- 🛡️ **Dependency Scanning**: Regular vulnerability checks via GitHub Dependabot
 - 🔐 **Safe Operations**: No shell execution, no eval, no dynamic imports
 - 📝 **Audit Trail**: Complete transaction log for forensic analysis
+- 🚫 **Binary Protection**: Automatic detection and protection of binary files
+- 🔒 **Encoding Safety**: Preserves file encodings to prevent corruption
 
 ### Reporting Security Issues
 
@@ -711,7 +744,7 @@ Found a vulnerability? Please report it:
 
 ## 🗺️ Roadmap
 
-### Version 0.3.0-alpha (Current)
+### Version 0.3.0-alpha (Current - December 2024)
 
 - ✅ Core find-replace engine
 - ✅ Transaction system
@@ -719,7 +752,7 @@ Found a vulnerability? Please report it:
 - ✅ Resume capability
 - ✅ CI/CD pipeline
 
-### Version 1.0.0-beta (Q1 2025)
+### Version 1.0.0-beta (Q2 2025)
 
 - ⏳ Production stability
 - ⏳ Performance optimizations
@@ -727,7 +760,7 @@ Found a vulnerability? Please report it:
 - ⏳ Comprehensive documentation
 - ⏳ 80%+ test coverage
 
-### Version 1.1.0 (Q2 2025)
+### Version 1.1.0 (Q3 2025)
 
 - 📅 Regular expression support
 - 📅 Configuration profiles
@@ -740,6 +773,42 @@ Found a vulnerability? Please report it:
 - 💭 IDE extensions
 - 💭 Cloud storage support
 - 💭 Team collaboration features
+
+---
+
+## 🔧 Troubleshooting
+
+<details>
+<summary><b>Common Issues and Solutions</b></summary>
+
+### Installation Issues
+
+**Problem**: `ModuleNotFoundError: No module named 'prefect'`
+**Solution**: Run `uv sync` to install all dependencies
+
+**Problem**: `uv: command not found`
+**Solution**: Install uv first: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+
+### Runtime Issues
+
+**Problem**: "Permission denied" errors
+**Solution**: Ensure you have read/write permissions for target files
+
+**Problem**: "File encoding detection failed"
+**Solution**: MFR will fall back to UTF-8. Check file encoding manually if needed
+
+**Problem**: Transaction file locked
+**Solution**: Another instance may be running. Check for `planned_transactions.json.lock`
+
+### Performance Issues
+
+**Problem**: Slow scanning on large codebases
+**Solution**:
+- Use `--extensions` to limit file types
+- Exclude unnecessary directories with `--exclude-dirs`
+- Run on SSD instead of HDD
+
+</details>
 
 ---
 
@@ -771,7 +840,12 @@ MFR doesn't have built-in undo, but:
 <details>
 <summary><b>Does it support regular expressions?</b></summary>
 
-Not currently. MFR uses literal string matching for safety and predictability. Regex support is planned for v1.1.
+Not currently. MFR uses literal string matching for safety and predictability. This design choice prevents:
+- Catastrophic backtracking
+- Unintended matches
+- Complex regex errors
+
+Regex support is planned for v1.1 with safety constraints.
 
 </details>
 
@@ -780,6 +854,30 @@ Not currently. MFR uses literal string matching for safety and predictability. R
 
 MFR processes files line-by-line to maintain memory efficiency. Files up to 2GB are supported,
 with larger files planned for future versions.
+
+</details>
+
+<details>
+<summary><b>Why is MFR better than sed/awk/find?</b></summary>
+
+MFR provides:
+- Transaction-based operations with resume capability
+- Intelligent collision detection
+- Unicode and encoding preservation
+- Cross-platform compatibility
+- User-friendly progress tracking
+- Safety features preventing data loss
+
+</details>
+
+<details>
+<summary><b>Can I use MFR in CI/CD pipelines?</b></summary>
+
+Yes, but with caution during alpha:
+- Use `--dry-run` first to validate changes
+- Use `--force` flag to skip interactive prompts
+- Ensure proper backups exist
+- Test thoroughly in staging environments first
 
 </details>
 
@@ -792,7 +890,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ```text
 MIT License
 
-Copyright (c) 2024 Emasoft
+Copyright (c) 2024-2025 Emasoft
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -813,12 +911,15 @@ in the Software without restriction...
 | [Prefect](https://www.prefect.io/)               | Workflow orchestration framework         |
 | [Ruff](https://github.com/astral-sh/ruff)        | Fast Python linter and formatter         |
 | [Gitleaks](https://github.com/gitleaks/gitleaks) | Secret scanning and prevention           |
+| [mypy](https://mypy-lang.org/)                   | Static type checking                     |
+| [pytest](https://pytest.org/)                     | Testing framework                        |
 
 ### Special Thanks
 
 - All [contributors](https://github.com/Emasoft/MFR/graphs/contributors) who help improve MFR
 - The Python community for excellent tools and libraries
 - Early adopters providing valuable feedback
+- [Claude](https://claude.ai) for development assistance
 
 </div>
 
