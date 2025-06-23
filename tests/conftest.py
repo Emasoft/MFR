@@ -54,9 +54,7 @@ def temp_test_dir(tmp_path: Path) -> Generator[dict[str, Path], None, None]:
     yield context
 
     # Cleanup - handle Windows read-only files
-    def handle_remove_readonly(
-        func: Callable[..., Any], path: str, exc_info: Tuple[type[BaseException], BaseException, Any]
-    ) -> None:
+    def handle_remove_readonly(func: Callable[..., Any], path: str, exc_info: Tuple[type[BaseException], BaseException, Any]) -> None:
         """Error handler for Windows readonly files."""
         import stat
         import os
@@ -99,8 +97,6 @@ def assert_file_content() -> Callable[[Path, str], None]:
     def _assert(file_path: Path, expected_content: str) -> None:
         """Helper to validate file content with readable diffs"""
         actual = file_path.read_text(encoding="utf-8")
-        assert actual == expected_content, (
-            f"Content mismatch in {file_path}: Expected {expected_content!r}, got {actual!r}"
-        )
+        assert actual == expected_content, f"Content mismatch in {file_path}: Expected {expected_content!r}, got {actual!r}"
 
     return _assert

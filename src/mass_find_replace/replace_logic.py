@@ -42,14 +42,7 @@ def reset_module_state() -> None:
     might be called multiple times within the same process, e.g., in tests
     or sequential script runs.
     """
-    global \
-        _RAW_REPLACEMENT_MAPPING, \
-        _COMPILED_PATTERN_FOR_SCAN, \
-        _MAPPING_LOADED, \
-        _SORTED_RAW_KEYS_FOR_REPLACE, \
-        _COMPILED_PATTERN_FOR_ACTUAL_REPLACE, \
-        _MODULE_LOGGER, \
-        _KEY_CHARACTER_SET
+    global _RAW_REPLACEMENT_MAPPING, _COMPILED_PATTERN_FOR_SCAN, _MAPPING_LOADED, _SORTED_RAW_KEYS_FOR_REPLACE, _COMPILED_PATTERN_FOR_ACTUAL_REPLACE, _MODULE_LOGGER, _KEY_CHARACTER_SET
 
     _RAW_REPLACEMENT_MAPPING = {}
     _COMPILED_PATTERN_FOR_SCAN = None
@@ -136,14 +129,7 @@ def load_replacement_map(
     Assumes that `reset_module_state()` has been called prior to this function
     if a clean state is required.
     """
-    global \
-        _RAW_REPLACEMENT_MAPPING, \
-        _COMPILED_PATTERN_FOR_SCAN, \
-        _MAPPING_LOADED, \
-        _SORTED_RAW_KEYS_FOR_REPLACE, \
-        _COMPILED_PATTERN_FOR_ACTUAL_REPLACE, \
-        _MODULE_LOGGER, \
-        _KEY_CHARACTER_SET
+    global _RAW_REPLACEMENT_MAPPING, _COMPILED_PATTERN_FOR_SCAN, _MAPPING_LOADED, _SORTED_RAW_KEYS_FOR_REPLACE, _COMPILED_PATTERN_FOR_ACTUAL_REPLACE, _MODULE_LOGGER, _KEY_CHARACTER_SET
 
     _MODULE_LOGGER = logger
     _KEY_CHARACTER_SET.clear()
@@ -429,12 +415,7 @@ def replace_occurrences(input_string: str) -> str:
         String with all replacements applied
     """
     if _DEBUG_REPLACE_LOGIC:
-        entry_debug_msg = (
-            f"REPLACE_OCC_ENTRY: input='{input_string[:30] if isinstance(input_string, str) else str(input_string)[:30]}...', "
-            f"_MAPPING_LOADED={_MAPPING_LOADED}, "
-            f"pattern_is_set={_COMPILED_PATTERN_FOR_ACTUAL_REPLACE is not None}, "
-            f"map_is_populated={bool(_RAW_REPLACEMENT_MAPPING)}"
-        )
+        entry_debug_msg = f"REPLACE_OCC_ENTRY: input='{input_string[:30] if isinstance(input_string, str) else str(input_string)[:30]}...', _MAPPING_LOADED={_MAPPING_LOADED}, pattern_is_set={_COMPILED_PATTERN_FOR_ACTUAL_REPLACE is not None}, map_is_populated={bool(_RAW_REPLACEMENT_MAPPING)}"
         _log_message(logging.DEBUG, entry_debug_msg, _MODULE_LOGGER)
 
     # Ensure input is normalized to NFC for consistent matching
@@ -443,17 +424,10 @@ def replace_occurrences(input_string: str) -> str:
     else:
         normalized_input = input_string
 
-    if (
-        not _MAPPING_LOADED
-        or not _COMPILED_PATTERN_FOR_ACTUAL_REPLACE
-        or not _RAW_REPLACEMENT_MAPPING
-        or not isinstance(normalized_input, str)
-    ):
+    if not _MAPPING_LOADED or not _COMPILED_PATTERN_FOR_ACTUAL_REPLACE or not _RAW_REPLACEMENT_MAPPING or not isinstance(normalized_input, str):
         _log_message(
             logging.DEBUG,
-            f"DEBUG_REPLACE_OCCURRENCES: Early exit. _MAPPING_LOADED={_MAPPING_LOADED}, "
-            f"_COMPILED_PATTERN_FOR_ACTUAL_REPLACE is {'None' if _COMPILED_PATTERN_FOR_ACTUAL_REPLACE is None else 'Set'}, "
-            f"_RAW_REPLACEMENT_MAPPING is {'Empty' if not _RAW_REPLACEMENT_MAPPING else 'Populated'}",
+            f"DEBUG_REPLACE_OCCURRENCES: Early exit. _MAPPING_LOADED={_MAPPING_LOADED}, _COMPILED_PATTERN_FOR_ACTUAL_REPLACE is {'None' if _COMPILED_PATTERN_FOR_ACTUAL_REPLACE is None else 'Set'}, _RAW_REPLACEMENT_MAPPING is {'Empty' if not _RAW_REPLACEMENT_MAPPING else 'Populated'}",
             _MODULE_LOGGER,
         )
         return normalized_input if isinstance(normalized_input, str) else input_string

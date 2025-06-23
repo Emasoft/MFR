@@ -115,9 +115,7 @@ def run_main_flow_for_test(
 # ================ MODIFIED TEST: test_dry_run_behavior =================
 def test_dry_run_behavior(temp_test_dir: dict[str, Path], default_map_file: Path, assert_file_content: Any) -> None:
     context_dir = temp_test_dir["runtime"]
-    orig_deep_file_path = (
-        context_dir / "oldname_root" / "sub_oldname_folder" / "another_OLDNAME_dir" / "deep_oldname_file.txt"
-    )
+    orig_deep_file_path = context_dir / "oldname_root" / "sub_oldname_folder" / "another_OLDNAME_dir" / "deep_oldname_file.txt"
     original_content = orig_deep_file_path.read_text(encoding="utf-8")
 
     assert original_content == "This file contains OLDNAME multiple times: Oldname oldName"
@@ -139,9 +137,7 @@ def test_dry_run_behavior(temp_test_dir: dict[str, Path], default_map_file: Path
         print("ERROR: No transactions generated!")
         assert False, "No transactions were generated in dry run"
 
-    name_txs = [
-        tx for tx in transactions if tx["TYPE"] in (TransactionType.FILE_NAME.value, TransactionType.FOLDER_NAME.value)
-    ]
+    name_txs = [tx for tx in transactions if tx["TYPE"] in (TransactionType.FILE_NAME.value, TransactionType.FOLDER_NAME.value)]
     content_txs = [tx for tx in transactions if tx["TYPE"] == TransactionType.FILE_CONTENT_LINE.value]
 
     # 3 folders + 1 file = 4 name transactions
@@ -203,9 +199,7 @@ def test_path_resolution_after_rename(temp_test_dir: dict[str, Path], default_ma
     path_map = {}
     for tx in txn_json:
         if tx["TYPE"] == TransactionType.FOLDER_NAME.value:
-            path_map[tx["PATH"]] = (
-                tx["PATH"].replace("oldname", "newname").replace("OLDNAME", "NEWNAME").replace("Oldname", "Newname")
-            )
+            path_map[tx["PATH"]] = tx["PATH"].replace("oldname", "newname").replace("OLDNAME", "NEWNAME").replace("Oldname", "Newname")
 
     # Fix 3: Validate with actual paths from fixture
     expected_path_map = {
@@ -242,11 +236,7 @@ def test_folder_nesting(temp_test_dir: dict[str, Path], default_map_file: Path) 
 
     # Fix 4: Filter out transactions from fixture and focus only on new directories
     assert transactions is not None
-    test_folders = [
-        tx["PATH"]
-        for tx in transactions
-        if tx["TYPE"] == TransactionType.FOLDER_NAME.value and "oldname_a" in tx["PATH"]
-    ]
+    test_folders = [tx["PATH"] for tx in transactions if tx["TYPE"] == TransactionType.FOLDER_NAME.value and "oldname_a" in tx["PATH"]]
 
     assert test_folders == ["oldname_a", "oldname_a/oldname_b"], "Folders not processed from shallow to deep"
 
@@ -331,9 +321,7 @@ def test_symlink_name_processing(temp_test_dir: dict[str, Path], default_map_fil
 
     transactions = load_transactions(context_dir / MAIN_TRANSACTION_FILE_NAME)
     assert transactions is not None
-    symlink_renamed = any(
-        tx["TYPE"] == TransactionType.FILE_NAME.value and "oldname_symlink" in tx["PATH"] for tx in transactions
-    )
+    symlink_renamed = any(tx["TYPE"] == TransactionType.FILE_NAME.value and "oldname_symlink" in tx["PATH"] for tx in transactions)
     assert symlink_renamed, "Expected symlink name to be processed"
 
 
@@ -363,9 +351,7 @@ def test_rtf_processing(temp_test_dir: dict[str, Path], default_map_file: Path) 
 
     transactions = load_transactions(context_dir / MAIN_TRANSACTION_FILE_NAME)
     assert transactions is not None
-    rtf_processed = any(
-        tx["TYPE"] == TransactionType.FILE_CONTENT_LINE.value and "test.rtf" in tx["PATH"] for tx in transactions
-    )
+    rtf_processed = any(tx["TYPE"] == TransactionType.FILE_CONTENT_LINE.value and "test.rtf" in tx["PATH"] for tx in transactions)
     assert rtf_processed, "RTF file should be processed"
 
 
@@ -479,9 +465,7 @@ def test_gb18030_encoding(temp_test_dir: dict[str, Path], default_map_file: Path
 
     # Verify file sizes
     assert small_file.stat().st_size > 0, "Small file not created"
-    assert large_file.stat().st_size >= target_size, (
-        f"Large file too small: {large_file.stat().st_size} < {target_size}"
-    )
+    assert large_file.stat().st_size >= target_size, f"Large file too small: {large_file.stat().st_size} < {target_size}"
 
     # Run the replacement process
     run_main_flow_for_test(context_dir, default_map_file, dry_run=False, extensions=[".txt"])
@@ -507,9 +491,7 @@ def test_gb18030_encoding(temp_test_dir: dict[str, Path], default_map_file: Path
     with open(small_file, "r", encoding=encoding) as f:
         updated_small = f.read()
         expected_small = small_content.replace(test_string, replacement_string)
-        assert updated_small == expected_small, (
-            f"Small file replacement failed:\nExpected: {expected_small}\nActual: {updated_small}"
-        )
+        assert updated_small == expected_small, f"Small file replacement failed:\nExpected: {expected_small}\nActual: {updated_small}"
         # Verify occurrence count
         assert updated_small.count(replacement_string) == 3, "Unexpected replacement count in small file"
 
@@ -521,9 +503,7 @@ def test_gb18030_encoding(temp_test_dir: dict[str, Path], default_map_file: Path
         # Verify occurrence count matches expected
         original_count = large_content_str.count(test_string)
         replaced_count = updated_large.count(replacement_string)
-        assert replaced_count == original_count, (
-            f"Replacement count mismatch in large file: {replaced_count} vs {original_count}"
-        )
+        assert replaced_count == original_count, f"Replacement count mismatch in large file: {replaced_count} vs {original_count}"
 
 
 def test_collision_error_logging(temp_test_dir: dict[str, Path], default_map_file: Path) -> None:
@@ -602,9 +582,7 @@ def test_collision_error_logging(temp_test_dir: dict[str, Path], default_map_fil
     assert len(collision_txs) >= 2, f"Expected at least 2 collision transactions, found {len(collision_txs)}"
 
 
-def test_interactive_mode_collision_skip(
-    temp_test_dir: dict[str, Path], default_map_file: Path, monkeypatch: Any, capsys: Any
-) -> None:
+def test_interactive_mode_collision_skip(temp_test_dir: dict[str, Path], default_map_file: Path, monkeypatch: Any, capsys: Any) -> None:
     """Test that collisions are skipped in interactive mode without prompting user"""
     test_dir = temp_test_dir["runtime"] / "interactive_test"
     test_dir.mkdir()
