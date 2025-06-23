@@ -41,7 +41,7 @@ jobs:
 
     - name: Run ruff format
       run: |
-        uv run ruff format --line-length=400 --isolated src/ tests/
+        uv run ruff format --line-length=320 --isolated src/ tests/
 
     - name: Run ruff check with fixes
       run: |

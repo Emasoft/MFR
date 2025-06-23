@@ -76,9 +76,16 @@ jobs:
       run: |
         uv run yamllint -c .yamllint.yml .
 
+    - name: Install actionlint
+      run: |
+        curl -s https://api.github.com/repos/rhysd/actionlint/releases/latest | \
+        grep -E 'browser_download_url.*linux_amd64' | cut -d'"' -f4 | \
+        xargs -I {} curl -L {} | tar xz actionlint
+        sudo mv actionlint /usr/local/bin/
+
     - name: Run actionlint
       run: |
-        uv run actionlint
+        /usr/local/bin/actionlint
 
   lint-shell:
     name: Lint Shell Scripts

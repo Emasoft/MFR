@@ -8,7 +8,7 @@ tools:
     enabled: true
     args:
     - "format"
-    - "--line-length=400"
+    - "--line-length=320"
     - "--isolated"
 
   # Python linting with ruff

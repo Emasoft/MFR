@@ -140,20 +140,8 @@ def _log_collision_error(
 
     try:
         # Get relative paths for cleaner logging
-        source_rel = (
-            source_path.relative_to(root_dir)
-            if root_dir in source_path.parents or source_path == root_dir
-            else source_path
-        )
-        collision_rel = (
-            (
-                collision_path.relative_to(root_dir)
-                if collision_path and (root_dir in collision_path.parents or collision_path == root_dir)
-                else collision_path
-            )
-            if collision_path
-            else None
-        )
+        source_rel = source_path.relative_to(root_dir) if root_dir in source_path.parents or source_path == root_dir else source_path
+        collision_rel = (collision_path.relative_to(root_dir) if collision_path and (root_dir in collision_path.parents or collision_path == root_dir) else collision_path) if collision_path else None
 
         with open(collision_log_path, "a", encoding="utf-8") as log_f:
             log_f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - COLLISION ({collision_type}):\n")
@@ -172,9 +160,7 @@ def _log_collision_error(
         _log_fs_op_message(logging.WARNING, f"Could not write to collision log: {e}", logger)
 
 
-def get_file_encoding(
-    file_path: Path, sample_size: int = DEFAULT_ENCODING_SAMPLE_SIZE, logger: LoggerType = None
-) -> str:
+def get_file_encoding(file_path: Path, sample_size: int = DEFAULT_ENCODING_SAMPLE_SIZE, logger: LoggerType = None) -> str:
     """Detect file encoding using multiple strategies.
 
     Args:
@@ -315,20 +301,14 @@ def _walk_for_scan(
         try:
             if ignore_symlinks and item_path_from_rglob.is_symlink():
                 continue
-            is_excluded_by_dir_arg = any(
-                item_path_from_rglob == ex_dir
-                or (ex_dir.is_dir() and str(item_path_from_rglob).startswith(str(ex_dir) + os.sep))
-                for ex_dir in excluded_dirs_abs
-            )
+            is_excluded_by_dir_arg = any(item_path_from_rglob == ex_dir or (ex_dir.is_dir() and str(item_path_from_rglob).startswith(str(ex_dir) + os.sep)) for ex_dir in excluded_dirs_abs)
             if is_excluded_by_dir_arg:
                 continue
             if ignore_spec:
                 try:
                     path_rel_to_root_for_spec = item_path_from_rglob.relative_to(root_dir)
                     rel_posix = str(path_rel_to_root_for_spec).replace("\\", "/")
-                    if ignore_spec.match_file(rel_posix) or (
-                        item_path_from_rglob.is_dir() and ignore_spec.match_file(rel_posix + "/")
-                    ):
+                    if ignore_spec.match_file(rel_posix) or (item_path_from_rglob.is_dir() and ignore_spec.match_file(rel_posix + "/")):
                         continue
                 except ValueError:  # Not relative, should not happen with rglob from root
                     pass
@@ -375,9 +355,7 @@ def _get_current_absolute_path(
             return root_dir
         original_path_obj = Path(original_relative_path_str)
         parent_rel_str = "." if original_path_obj.parent == Path() else str(original_path_obj.parent)
-        current_parent_abs_path = _get_current_absolute_path(
-            parent_rel_str, root_dir, path_translation_map, cache, dry_run
-        )
+        current_parent_abs_path = _get_current_absolute_path(parent_rel_str, root_dir, path_translation_map, cache, dry_run)
         current_item_name = path_translation_map.get(original_relative_path_str, original_path_obj.name)
         current_abs_path = current_parent_abs_path / current_item_name
         cache[original_relative_path_str] = current_abs_path
@@ -434,9 +412,7 @@ def scan_directory_for_occurrences(
     existing_transaction_ids: set[tuple[str, str, int]] = set()
     # Handle None as "rescan everything"
     rescan_all = paths_to_force_rescan is None
-    paths_to_force_rescan_internal: set[str] = (
-        set() if rescan_all else (paths_to_force_rescan if paths_to_force_rescan is not None else set())
-    )
+    paths_to_force_rescan_internal: set[str] = set() if rescan_all else (paths_to_force_rescan if paths_to_force_rescan is not None else set())
     abs_root_dir = root_dir
 
     binary_log_path = root_dir / BINARY_MATCHES_LOG_FILE
@@ -448,16 +424,11 @@ def scan_directory_for_occurrences(
         processed_transactions = list(resume_from_transactions)
         # Backfill NEW_NAME for existing rename transactions if missing
         for tx in resume_from_transactions:
-            if (
-                tx["TYPE"] in [TransactionType.FILE_NAME.value, TransactionType.FOLDER_NAME.value]
-                and "NEW_NAME" not in tx
-            ):
+            if tx["TYPE"] in [TransactionType.FILE_NAME.value, TransactionType.FOLDER_NAME.value] and "NEW_NAME" not in tx:
                 tx["NEW_NAME"] = replace_logic.replace_occurrences(tx["ORIGINAL_NAME"])
         for tx in resume_from_transactions:
             tx_rel_path = tx.get("PATH")
-            if (rescan_all or tx_rel_path in paths_to_force_rescan_internal) and tx.get(
-                "TYPE"
-            ) == TransactionType.FILE_CONTENT_LINE.value:
+            if (rescan_all or tx_rel_path in paths_to_force_rescan_internal) and tx.get("TYPE") == TransactionType.FILE_CONTENT_LINE.value:
                 continue
             tx_type, tx_line = tx.get("TYPE"), tx.get("LINE_NUMBER", 0)
             if tx_type and tx_rel_path:
@@ -470,14 +441,8 @@ def scan_directory_for_occurrences(
         except Exception:
             resolved_abs_excluded_dirs.append(abs_root_dir.joinpath(d_str).absolute())
 
-    excluded_basenames = {
-        Path(f).name
-        for f in excluded_files
-        if Path(f).name == f and os.path.sep not in f and not ("/" in f or "\\" in f)
-    }
-    excluded_relative_paths_set = {
-        f.replace("\\", "/") for f in excluded_files if os.path.sep in f or "/" in f or "\\" in f
-    }
+    excluded_basenames = {Path(f).name for f in excluded_files if Path(f).name == f and os.path.sep not in f and not ("/" in f or "\\" in f)}
+    excluded_relative_paths_set = {f.replace("\\", "/") for f in excluded_files if os.path.sep in f or "/" in f or "\\" in f}
 
     normalized_extensions = {ext.lower() for ext in file_extensions} if file_extensions else None
 
@@ -562,9 +527,7 @@ def scan_directory_for_occurrences(
             )
             continue
 
-        if (scan_pattern and scan_pattern.search(searchable_name)) and (
-            replace_logic.replace_occurrences(original_name) != original_name
-        ):
+        if (scan_pattern and scan_pattern.search(searchable_name)) and (replace_logic.replace_occurrences(original_name) != original_name):
             tx_type_val: str | None = None
             if item_is_dir:  # True only if not a symlink and is_dir() was true
                 if not skip_folder_renaming:
@@ -647,9 +610,7 @@ def scan_directory_for_occurrences(
                                         else:
                                             log_path_str = str(item_abs_path.relative_to(root_dir)).replace("\\", "/")
                                         with open(binary_log_path, "a", encoding="utf-8") as log_f:
-                                            log_f.write(
-                                                f"{time.strftime('%Y-%m-%d %H:%M:%S')} - MATCH: File: {log_path_str}, Key: '{key_str}', Offset: {idx}\n"
-                                            )
+                                            log_f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - MATCH: File: {log_path_str}, Key: '{key_str}', Offset: {idx}\n")
                                         offset = idx + len(key_bytes)
                             except OSError as e_bin_read:
                                 _log_fs_op_message(
@@ -665,11 +626,7 @@ def scan_directory_for_occurrences(
                                 )
                         continue
 
-                    if (
-                        normalized_extensions
-                        and item_abs_path.suffix.lower() not in normalized_extensions
-                        and not is_rtf
-                    ):
+                    if normalized_extensions and item_abs_path.suffix.lower() not in normalized_extensions and not is_rtf:
                         continue
 
                     file_content_for_scan: str | None = None
@@ -741,9 +698,7 @@ def scan_directory_for_occurrences(
                             )
                             # Calculate new content once for consistency
                             new_line_content = replace_logic.replace_occurrences(line_content)
-                            if (scan_pattern and scan_pattern.search(searchable_line_content)) and (
-                                new_line_content != line_content
-                            ):
+                            if (scan_pattern and scan_pattern.search(searchable_line_content)) and (new_line_content != line_content):
                                 tx_id_tuple = (
                                     relative_path_str,
                                     TransactionType.FILE_CONTENT_LINE.value,
@@ -905,9 +860,7 @@ def _execute_rename_transaction(
     # Use precomputed NEW_NAME if available
     new_name = tx.get("NEW_NAME", replace_logic.replace_occurrences(original_name))
 
-    current_abs_path = _get_current_absolute_path(
-        original_relative_path_str, root_dir, path_translation_map, path_cache, dry_run
-    )
+    current_abs_path = _get_current_absolute_path(original_relative_path_str, root_dir, path_translation_map, path_cache, dry_run)
     if not dry_run and not current_abs_path.exists():
         return TransactionStatus.FAILED, f"Path not found: {current_abs_path}", False
 
@@ -1004,9 +957,7 @@ def _execute_content_line_transaction(
 
     try:
         # Get current file location (accounts for renames)
-        current_abs_path = _get_current_absolute_path(
-            relative_path_str, root_dir, path_translation_map, path_cache, dry_run=False
-        )
+        current_abs_path = _get_current_absolute_path(relative_path_str, root_dir, path_translation_map, path_cache, dry_run=False)
 
         # Read file with original encoding
         with open(
@@ -1350,7 +1301,7 @@ def group_and_process_file_transactions(
     # Return nothing - transactions modified in-place
 
 
-@flow(name="execute-all-transactions")  # type: ignore[misc]
+@flow(name="execute-all-transactions")
 def execute_all_transactions(
     transactions_file_path: Path,
     root_dir: Path,
@@ -1436,11 +1387,7 @@ def execute_all_transactions(
                 break
 
             # Pre-check for collisions in interactive mode to avoid prompting for doomed transactions
-            if (
-                interactive_mode
-                and not dry_run
-                and tx_type in [TransactionType.FILE_NAME.value, TransactionType.FOLDER_NAME.value]
-            ):
+            if interactive_mode and not dry_run and tx_type in [TransactionType.FILE_NAME.value, TransactionType.FOLDER_NAME.value]:
                 # Pre-flight collision check
                 original_name = tx_item.get("ORIGINAL_NAME", "")
                 new_name = tx_item.get("NEW_NAME", replace_logic.replace_occurrences(original_name))
@@ -1541,9 +1488,7 @@ def execute_all_transactions(
                     TransactionType.FILE_NAME.value,
                     TransactionType.FOLDER_NAME.value,
                 ]:
-                    if (tx_type == TransactionType.FILE_NAME.value and skip_file_renaming) or (
-                        tx_type == TransactionType.FOLDER_NAME.value and skip_folder_renaming
-                    ):
+                    if (tx_type == TransactionType.FILE_NAME.value and skip_file_renaming) or (tx_type == TransactionType.FOLDER_NAME.value and skip_folder_renaming):
                         update_transaction_status_in_list(
                             transactions,
                             tx_id,
@@ -1695,11 +1640,7 @@ def execute_all_transactions(
                 finished = True
 
     # After rename and individual transaction processing, process content transactions grouped by file
-    content_txs = [
-        tx
-        for tx in transactions
-        if tx["TYPE"] == TransactionType.FILE_CONTENT_LINE.value and tx["STATUS"] == TransactionStatus.PENDING.value
-    ]
+    content_txs = [tx for tx in transactions if tx["TYPE"] == TransactionType.FILE_CONTENT_LINE.value and tx["STATUS"] == TransactionStatus.PENDING.value]
 
     group_and_process_file_transactions(
         content_txs,

@@ -33,7 +33,7 @@ repos:
         require_serial: true
       - id: ruff-format
         name: ruff format
-        entry: uv run ruff format --line-length=400 --isolated
+        entry: uv run ruff format --line-length=320 --isolated
         language: system
         types: [python]
         require_serial: true

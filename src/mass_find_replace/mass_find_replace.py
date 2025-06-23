@@ -57,7 +57,7 @@ def _get_logger(
             logger = get_run_logger()
             if verbose_mode:
                 logger.setLevel(logging.DEBUG)
-            return logger  # type: ignore[no-any-return]
+            return logger
         except MissingContextError:
             pass
     except ImportError:
@@ -130,9 +130,7 @@ def _get_operation_description(skip_file: bool, skip_folder: bool, skip_content:
     return f"{', '.join(operations[:-1])}, and {operations[-1]}"
 
 
-def _check_existing_transactions(
-    directory: Path, logger: logging.Logger | logging.LoggerAdapter[logging.Logger]
-) -> tuple[bool, int]:
+def _check_existing_transactions(directory: Path, logger: logging.Logger | logging.LoggerAdapter[logging.Logger]) -> tuple[bool, int]:
     """Check for existing transaction file and calculate progress."""
     txn_file = directory / MAIN_TRANSACTION_FILE_NAME
     if not txn_file.exists():
@@ -156,7 +154,7 @@ def _check_existing_transactions(
         return False, 0
 
 
-@flow(name="Mass Find Replace")  # type: ignore[misc]
+@flow(name="Mass Find Replace")
 def main_flow(
     directory: str,
     mapping_file: str,
@@ -292,9 +290,7 @@ def main_flow(
         _print_mapping_table(replacement_mapping, logger)
 
         operations_desc = _get_operation_description(skip_file_renaming, skip_folder_renaming, skip_content)
-        print(
-            f"\n{BLUE}This will replace the strings in the 'Search' column with those in the 'Replace' column.{RESET}"
-        )
+        print(f"\n{BLUE}This will replace the strings in the 'Search' column with those in the 'Replace' column.{RESET}")
         print(f"{BLUE}Operations will be performed on: {operations_desc}{RESET}")
 
         if dry_run:
@@ -308,9 +304,7 @@ def main_flow(
     # Consolidated empty map check
     if not replacement_mapping:
         if not (skip_file_renaming or skip_folder_renaming or skip_content):
-            logger.info(
-                "Map is empty and no operations are configured that would proceed without map rules. Nothing to execute."
-            )
+            logger.info("Map is empty and no operations are configured that would proceed without map rules. Nothing to execute.")
             return
         logger.info("Map is empty. No string-based replacements will occur.")
 
@@ -340,13 +334,9 @@ def main_flow(
             logger.info(f"Using custom ignore file: {custom_ignore_abs_path}")
             try:
                 with open(custom_ignore_abs_path, "r", encoding="utf-8", errors="ignore") as f_custom:
-                    raw_patterns_list.extend(
-                        p for p in (line.strip() for line in f_custom) if p and not p.startswith("#")
-                    )
+                    raw_patterns_list.extend(p for p in (line.strip() for line in f_custom) if p and not p.startswith("#"))
             except Exception as e:
-                logger.warning(
-                    f"{YELLOW}Warning: Could not read custom ignore file {custom_ignore_abs_path}: {e}{RESET}"
-                )
+                logger.warning(f"{YELLOW}Warning: Could not read custom ignore file {custom_ignore_abs_path}: {e}{RESET}")
         else:
             logger.error(f"Ignore file not found: {custom_ignore_abs_path}. Aborting")
             return
@@ -378,11 +368,7 @@ def main_flow(
         if final_ignore_spec:
             print(f"Effective ignore patterns: {len(final_ignore_spec.patterns)} compiled from ignore files.")
 
-        symlink_processing_message = (
-            "Symlinks will be ignored (names not renamed, targets not processed for content)."
-            if ignore_symlinks_arg
-            else "Symlink names WILL BE PROCESSED for renaming; targets not processed for content."
-        )
+        symlink_processing_message = "Symlinks will be ignored (names not renamed, targets not processed for content)." if ignore_symlinks_arg else "Symlink names WILL BE PROCESSED for renaming; targets not processed for content."
         print(f"Symlink Handling: {symlink_processing_message}")
 
         print(f"Skip File Renaming: {skip_file_renaming}")
@@ -391,15 +377,8 @@ def main_flow(
         print(f"Retry Timeout: {timeout_minutes} minutes (0 for indefinite retries)")
         print(f"{BLUE}-------------------------{RESET}")
         sys.stdout.flush()
-        if (
-            not replacement_mapping
-            and (skip_file_renaming or not extensions)
-            and (skip_folder_renaming or not extensions)
-            and skip_content
-        ):
-            print(
-                f"{YELLOW}Warning: No replacement rules and no operations enabled that don't require rules. Likely no operations will be performed.{RESET}"
-            )
+        if not replacement_mapping and (skip_file_renaming or not extensions) and (skip_folder_renaming or not extensions) and skip_content:
+            print(f"{YELLOW}Warning: No replacement rules and no operations enabled that don't require rules. Likely no operations will be performed.{RESET}")
 
         confirm = input("Proceed with these changes? (yes/no): ")
         if confirm.lower() != "yes":
@@ -445,9 +424,7 @@ def main_flow(
                                 continue
                             mtime = item_fs.stat().st_mtime
                             if rel_p in path_last_processed_time and mtime > path_last_processed_time[rel_p]:
-                                logger.info(
-                                    f"File '{rel_p}' (mtime:{mtime:.0f}) modified after last process (ts:{path_last_processed_time[rel_p]:.0f}). Re-scan."
-                                )
+                                logger.info(f"File '{rel_p}' (mtime:{mtime:.0f}) modified after last process (ts:{path_last_processed_time[rel_p]:.0f}). Re-scan.")
                                 if paths_to_force_rescan is not None:
                                     paths_to_force_rescan.add(rel_p)
                     except OSError as e:
@@ -473,19 +450,13 @@ def main_flow(
         save_transactions(found_txns or [], txn_json_path, logger=logger)
         logger.info(f"Scan complete. {len(found_txns or [])} transactions planned in '{txn_json_path}'")
         if not found_txns:
-            logger.info(
-                "No actionable occurrences found by scan."
-                if replacement_mapping
-                else "Map empty and no scannable items found, or all items ignored."
-            )
+            logger.info("No actionable occurrences found by scan." if replacement_mapping else "Map empty and no scannable items found, or all items ignored.")
             return
     elif not txn_json_path.exists():
         logger.error(f"Error: --skip-scan used, but '{txn_json_path}' not found.")
         return
     else:
-        logger.info(
-            f"Using existing transaction file: '{txn_json_path}'. Ensure it was generated with compatible settings."
-        )
+        logger.info(f"Using existing transaction file: '{txn_json_path}'. Ensure it was generated with compatible settings.")
 
     txns_for_exec = load_transactions(txn_json_path, logger=logger)
     if not txns_for_exec:
@@ -525,15 +496,11 @@ def main_flow(
 
     binary_log = abs_root_dir / BINARY_MATCHES_LOG_FILE
     if binary_log.exists() and binary_log.stat().st_size > 0:
-        logger.info(
-            f"{YELLOW}Note: Matches were found in binary files. See '{binary_log}' for details. Binary file content was NOT modified.{RESET}"
-        )
+        logger.info(f"{YELLOW}Note: Matches were found in binary files. See '{binary_log}' for details. Binary file content was NOT modified.{RESET}")
 
     collisions_log = abs_root_dir / COLLISIONS_ERRORS_LOG_FILE
     if collisions_log.exists() and collisions_log.stat().st_size > 0:
-        logger.info(
-            f"{RED}Warning: File/folder rename collisions were detected. See '{collisions_log}' for details. These renames were skipped.{RESET}"
-        )
+        logger.info(f"{RED}Warning: File/folder rename collisions were detected. See '{collisions_log}' for details. These renames were skipped.{RESET}")
 
 
 def _run_subprocess_command(command: list[str], description: str) -> bool:
@@ -572,16 +539,10 @@ def main_cli() -> None:
     for module_name, display_name in required_deps:
         try:
             if importlib.util.find_spec(module_name) is None:
-                sys.stderr.write(
-                    f"{RED}CRITICAL ERROR: Missing core dependency: {display_name}. "
-                    f"Please install all required packages (e.g., via 'uv sync').{RESET}\n"
-                )
+                sys.stderr.write(f"{RED}CRITICAL ERROR: Missing core dependency: {display_name}. Please install all required packages (e.g., via 'uv sync').{RESET}\n")
                 sys.exit(1)
         except ImportError:
-            sys.stderr.write(
-                f"{RED}CRITICAL ERROR: Missing core dependency: {display_name} "
-                f"(import error during check). Please install all required packages.{RESET}\n"
-            )
+            sys.stderr.write(f"{RED}CRITICAL ERROR: Missing core dependency: {display_name} (import error during check). Please install all required packages.{RESET}\n")
             sys.exit(1)
 
     parser = argparse.ArgumentParser(
@@ -639,9 +600,7 @@ def main_cli() -> None:
     symlink_group.add_argument(
         "--process-symlink-names",
         action="store_true",
-        help="If set, symlink names WILL BE PROCESSED for renaming. "
-        "Default: symlink names are NOT processed for renaming. "
-        "Symlink targets are never followed for content modification by this script.",
+        help="If set, symlink names WILL BE PROCESSED for renaming. Default: symlink names are NOT processed for renaming. Symlink targets are never followed for content modification by this script.",
     )
 
     skip_group = parser.add_argument_group("Skip Operation Options")
@@ -695,8 +654,7 @@ def main_cli() -> None:
         type=float,
         default=10.0,
         metavar="MINUTES",
-        help="Maximum minutes for the retry phase when files are locked/inaccessible. "
-        "Set to 0 for indefinite retries (until CTRL-C). Minimum 1 minute if not 0. Default: 10 minutes.",
+        help="Maximum minutes for the retry phase when files are locked/inaccessible. Set to 0 for indefinite retries (until CTRL-C). Minimum 1 minute if not 0. Default: 10 minutes.",
     )
 
     output_group = parser.add_argument_group("Output Control")
