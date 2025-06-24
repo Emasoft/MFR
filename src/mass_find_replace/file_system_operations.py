@@ -438,11 +438,12 @@ def _walk_for_scan(
 
                     # Also check if symlink points to a parent directory (would cause infinite recursion)
                     try:
-                        root_real = root_dir.resolve(strict=False)
-                        if root_real in real_path.parents:
+                        # Check if the symlink target is an ancestor of the symlink location
+                        symlink_parents = list(item_path_from_rglob.parents)
+                        if real_path in symlink_parents:
                             _log_fs_op_message(
                                 logging.WARNING,
-                                f"Symlink points to parent directory: {item_path_from_rglob} -> {real_path}. Skipping.",
+                                f"Symlink points to ancestor directory: {item_path_from_rglob} -> {real_path}. Skipping to prevent infinite recursion.",
                                 logger,
                             )
                             continue
