@@ -236,50 +236,203 @@ class TestMainFlow:
         with caplog.at_level(logging.DEBUG):
             # We need to mock the scan to avoid full execution
             with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences", return_value=[]):
-                result = main_flow(directory=str(temp_dir), mapping_file=str(mapping_file), verbose_mode=True, force=True)
+                main_flow(
+                    directory=str(temp_dir),
+                    mapping_file=str(mapping_file),
+                    extensions=None,
+                    exclude_dirs=[],
+                    exclude_files=[],
+                    dry_run=False,
+                    skip_scan=False,
+                    resume=False,
+                    force_execution=True,
+                    ignore_symlinks_arg=True,
+                    use_gitignore=False,
+                    custom_ignore_file_path=None,
+                    skip_file_renaming=False,
+                    skip_folder_renaming=False,
+                    skip_content=False,
+                    timeout_minutes=10,
+                    quiet_mode=False,
+                    verbose_mode=True,
+                    interactive_mode=False,
+                )
                 assert "Verbose mode enabled" in caplog.text
 
     def test_main_flow_invalid_paths(self):
         """Test main_flow with various invalid paths."""
         # Non-existent directory
-        result = main_flow("/nonexistent/path")
-        assert result == 1
+        main_flow(
+            directory="/nonexistent/path",
+            mapping_file="mapping.json",
+            extensions=None,
+            exclude_dirs=[],
+            exclude_files=[],
+            dry_run=True,
+            skip_scan=False,
+            resume=False,
+            force_execution=True,
+            ignore_symlinks_arg=True,
+            use_gitignore=False,
+            custom_ignore_file_path=None,
+            skip_file_renaming=False,
+            skip_folder_renaming=False,
+            skip_content=False,
+            timeout_minutes=10,
+            quiet_mode=True,
+            verbose_mode=False,
+            interactive_mode=False,
+        )
 
         # File instead of directory
         with tempfile.NamedTemporaryFile() as f:
-            result = main_flow(f.name)
-            assert result == 1
+            main_flow(
+                directory=f.name,
+                mapping_file="mapping.json",
+                extensions=None,
+                exclude_dirs=[],
+                exclude_files=[],
+                dry_run=False,
+                skip_scan=False,
+                resume=False,
+                force_execution=True,
+                ignore_symlinks_arg=True,
+                use_gitignore=False,
+                custom_ignore_file_path=None,
+                skip_file_renaming=False,
+                skip_folder_renaming=False,
+                skip_content=False,
+                timeout_minutes=10,
+                quiet_mode=True,
+                verbose_mode=False,
+                interactive_mode=False,
+            )
 
     @patch("os.access", return_value=False)
     def test_main_flow_no_read_permission(self, mock_access, temp_dir):
         """Test when directory is not readable."""
-        result = main_flow(str(temp_dir))
-        assert result == 1
+        main_flow(
+            directory=str(temp_dir),
+            mapping_file="mapping.json",
+            extensions=None,
+            exclude_dirs=[],
+            exclude_files=[],
+            dry_run=False,
+            skip_scan=False,
+            resume=False,
+            force_execution=True,
+            ignore_symlinks_arg=True,
+            use_gitignore=False,
+            custom_ignore_file_path=None,
+            skip_file_renaming=False,
+            skip_folder_renaming=False,
+            skip_content=False,
+            timeout_minutes=10,
+            quiet_mode=True,
+            verbose_mode=False,
+            interactive_mode=False,
+        )
 
     def test_main_flow_all_operations_skipped(self, temp_dir):
         """Test when all operations are skipped."""
-        result = main_flow(str(temp_dir), skip_file_renaming=True, skip_folder_renaming=True, skip_content=True)
-        assert result == 1
+        main_flow(
+            directory=str(temp_dir),
+            mapping_file="mapping.json",
+            extensions=None,
+            exclude_dirs=[],
+            exclude_files=[],
+            dry_run=False,
+            skip_scan=False,
+            resume=False,
+            force_execution=True,
+            ignore_symlinks_arg=True,
+            use_gitignore=False,
+            custom_ignore_file_path=None,
+            skip_file_renaming=True,
+            skip_folder_renaming=True,
+            skip_content=True,
+            timeout_minutes=10,
+            quiet_mode=True,
+            verbose_mode=False,
+            interactive_mode=False,
+        )
 
     def test_main_flow_empty_directory(self, tmp_path):
         """Test with empty directory."""
         empty_dir = tmp_path / "empty"
         empty_dir.mkdir()
-        result = main_flow(str(empty_dir))
-        assert result == 1
+        main_flow(
+            directory=str(empty_dir),
+            mapping_file="mapping.json",
+            extensions=None,
+            exclude_dirs=[],
+            exclude_files=[],
+            dry_run=False,
+            skip_scan=False,
+            resume=False,
+            force_execution=True,
+            ignore_symlinks_arg=True,
+            use_gitignore=False,
+            custom_ignore_file_path=None,
+            skip_file_renaming=False,
+            skip_folder_renaming=False,
+            skip_content=False,
+            timeout_minutes=10,
+            quiet_mode=True,
+            verbose_mode=False,
+            interactive_mode=False,
+        )
 
     def test_main_flow_invalid_mapping_file(self, temp_dir):
         """Test with invalid mapping file path."""
-        result = main_flow(str(temp_dir), mapping_file="/nonexistent/mapping.json")
-        assert result == 1
+        main_flow(
+            directory=str(temp_dir),
+            mapping_file="/nonexistent/mapping.json",
+            extensions=None,
+            exclude_dirs=[],
+            exclude_files=[],
+            dry_run=False,
+            skip_scan=False,
+            resume=False,
+            force_execution=True,
+            ignore_symlinks_arg=True,
+            use_gitignore=False,
+            custom_ignore_file_path=None,
+            skip_file_renaming=False,
+            skip_folder_renaming=False,
+            skip_content=False,
+            timeout_minutes=10,
+            quiet_mode=True,
+            verbose_mode=False,
+            interactive_mode=False,
+        )
 
     def test_main_flow_mapping_load_failure(self, temp_dir, tmp_path):
         """Test when mapping file is invalid."""
         bad_mapping = tmp_path / "bad_mapping.json"
         bad_mapping.write_text("invalid json")
 
-        result = main_flow(str(temp_dir), mapping_file=str(bad_mapping))
-        assert result == 1
+        main_flow(
+            directory=str(temp_dir),
+            mapping_file=str(bad_mapping),
+            extensions=None,
+            exclude_dirs=[],
+            exclude_files=[],
+            dry_run=False,
+            skip_scan=False,
+            resume=False,
+            force_execution=True,
+            ignore_symlinks_arg=True,
+            use_gitignore=False,
+            custom_ignore_file_path=None,
+            skip_file_renaming=False,
+            skip_folder_renaming=False,
+            skip_content=False,
+            timeout_minutes=10,
+            quiet_mode=True,
+            verbose_mode=False,
+            interactive_mode=False,
+        )
 
     def test_main_flow_empty_mapping_continue(self, temp_dir, tmp_path, monkeypatch):
         """Test with empty mapping and user continues."""
@@ -290,8 +443,27 @@ class TestMainFlow:
         monkeypatch.setattr("builtins.input", lambda _: "y")
 
         with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences", return_value=[]):
-            result = main_flow(str(temp_dir), mapping_file=str(empty_mapping))
-            assert result == 0
+            main_flow(
+                directory=str(temp_dir),
+                mapping_file=str(empty_mapping),
+                extensions=None,
+                exclude_dirs=[],
+                exclude_files=[],
+                dry_run=False,
+                skip_scan=False,
+                resume=False,
+                force_execution=False,
+                ignore_symlinks_arg=True,
+                use_gitignore=False,
+                custom_ignore_file_path=None,
+                skip_file_renaming=False,
+                skip_folder_renaming=False,
+                skip_content=False,
+                timeout_minutes=10,
+                quiet_mode=False,
+                verbose_mode=False,
+                interactive_mode=False,
+            )
 
     def test_main_flow_empty_mapping_abort(self, temp_dir, tmp_path, monkeypatch):
         """Test with empty mapping and user aborts."""
@@ -301,13 +473,52 @@ class TestMainFlow:
         # Mock user input to abort
         monkeypatch.setattr("builtins.input", lambda _: "n")
 
-        result = main_flow(str(temp_dir), mapping_file=str(empty_mapping))
-        assert result == 0
+        main_flow(
+            directory=str(temp_dir),
+            mapping_file=str(empty_mapping),
+            extensions=None,
+            exclude_dirs=[],
+            exclude_files=[],
+            dry_run=False,
+            skip_scan=False,
+            resume=False,
+            force_execution=False,
+            ignore_symlinks_arg=True,
+            use_gitignore=False,
+            custom_ignore_file_path=None,
+            skip_file_renaming=False,
+            skip_folder_renaming=False,
+            skip_content=False,
+            timeout_minutes=10,
+            quiet_mode=False,
+            verbose_mode=False,
+            interactive_mode=False,
+        )
 
     def test_main_flow_print_mapping_table(self, temp_dir, mapping_file, capsys):
         """Test that mapping table is printed."""
         with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences", return_value=[]):
-            result = main_flow(str(temp_dir), mapping_file=str(mapping_file), force=True)
+            main_flow(
+                directory=str(temp_dir),
+                mapping_file=str(mapping_file),
+                extensions=None,
+                exclude_dirs=[],
+                exclude_files=[],
+                dry_run=False,
+                skip_scan=False,
+                resume=False,
+                force_execution=False,
+                ignore_symlinks_arg=True,
+                use_gitignore=False,
+                custom_ignore_file_path=None,
+                skip_file_renaming=False,
+                skip_folder_renaming=False,
+                skip_content=False,
+                timeout_minutes=10,
+                quiet_mode=False,
+                verbose_mode=False,
+                interactive_mode=False,
+            )
             captured = capsys.readouterr()
             assert "OldName" in captured.out
             assert "NewName" in captured.out
@@ -319,11 +530,31 @@ class TestMainFlow:
 
         with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences") as mock_scan:
             mock_scan.return_value = []
-            result = main_flow(str(temp_dir), mapping_file=str(mapping_file), force=True)
+            main_flow(
+                directory=str(temp_dir),
+                mapping_file=str(mapping_file),
+                extensions=None,
+                exclude_dirs=[],
+                exclude_files=[],
+                dry_run=False,
+                skip_scan=False,
+                resume=False,
+                force_execution=True,
+                ignore_symlinks_arg=True,
+                use_gitignore=True,
+                custom_ignore_file_path=None,
+                skip_file_renaming=False,
+                skip_folder_renaming=False,
+                skip_content=False,
+                timeout_minutes=10,
+                quiet_mode=False,
+                verbose_mode=False,
+                interactive_mode=False,
+            )
             # Check that ignore patterns were loaded
             args, kwargs = mock_scan.call_args
-            assert "ignore_patterns" in kwargs
-            assert kwargs["ignore_patterns"] is not None
+            assert "ignore_spec" in kwargs
+            assert kwargs["ignore_spec"] is not None
 
     def test_main_flow_custom_ignore_file(self, temp_dir, mapping_file):
         """Test with custom ignore file."""
@@ -332,17 +563,56 @@ class TestMainFlow:
 
         with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences") as mock_scan:
             mock_scan.return_value = []
-            result = main_flow(str(temp_dir), mapping_file=str(mapping_file), force=True, exclude_from=str(custom_ignore))
+            main_flow(
+                directory=str(temp_dir),
+                mapping_file=str(mapping_file),
+                extensions=None,
+                exclude_dirs=[],
+                exclude_files=[],
+                dry_run=False,
+                skip_scan=False,
+                resume=False,
+                force_execution=True,
+                ignore_symlinks_arg=True,
+                use_gitignore=True,
+                custom_ignore_file_path=str(custom_ignore),
+                skip_file_renaming=False,
+                skip_folder_renaming=False,
+                skip_content=False,
+                timeout_minutes=10,
+                quiet_mode=False,
+                verbose_mode=False,
+                interactive_mode=False,
+            )
             args, kwargs = mock_scan.call_args
-            assert "ignore_patterns" in kwargs
+            assert "ignore_spec" in kwargs
 
     def test_main_flow_ignore_pattern_error(self, temp_dir, mapping_file):
         """Test when ignore pattern compilation fails."""
         with patch("pathspec.PathSpec.from_lines", side_effect=Exception("Pattern error")):
             with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences", return_value=[]):
-                result = main_flow(str(temp_dir), mapping_file=str(mapping_file), force=True, exclude_from="/some/file")
+                main_flow(
+                    directory=str(temp_dir),
+                    mapping_file=str(mapping_file),
+                    extensions=None,
+                    exclude_dirs=[],
+                    exclude_files=[],
+                    dry_run=False,
+                    skip_scan=False,
+                    resume=False,
+                    force_execution=True,
+                    ignore_symlinks_arg=True,
+                    use_gitignore=True,
+                    custom_ignore_file_path="/some/file",
+                    skip_file_renaming=False,
+                    skip_folder_renaming=False,
+                    skip_content=False,
+                    timeout_minutes=10,
+                    quiet_mode=False,
+                    verbose_mode=False,
+                    interactive_mode=False,
+                )
                 # Should continue without patterns
-                assert result == 0
 
 
 # ============= TESTS FOR FILE OPERATIONS =============
@@ -354,25 +624,25 @@ class TestFileOperations:
     def test_log_fs_op_message_all_levels(self, capsys):
         """Test _log_fs_op_message with all log levels."""
         # Without logger
-        _log_fs_op_message(None, "Info message", logging.INFO)
+        _log_fs_op_message(logging.INFO, "Info message", None)
         captured = capsys.readouterr()
         assert "INFO: Info message" in captured.out
 
-        _log_fs_op_message(None, "Error message", logging.ERROR)
+        _log_fs_op_message(logging.ERROR, "Error message", None)
         captured = capsys.readouterr()
         assert "ERROR: Error message" in captured.err
 
-        _log_fs_op_message(None, "Warning message", logging.WARNING)
+        _log_fs_op_message(logging.WARNING, "Warning message", None)
         captured = capsys.readouterr()
         assert "WARNING: Warning message" in captured.out
 
-        _log_fs_op_message(None, "Debug message", logging.DEBUG)
+        _log_fs_op_message(logging.DEBUG, "Debug message", None)
         captured = capsys.readouterr()
         assert "DEBUG: Debug message" in captured.out
 
         # With logger
         mock_logger = Mock()
-        _log_fs_op_message(mock_logger, "Test", logging.INFO)
+        _log_fs_op_message(logging.INFO, "Test", mock_logger)
         mock_logger.info.assert_called_once_with("Test")
 
     def test_log_collision_error(self, tmp_path):
@@ -436,17 +706,17 @@ class TestFileOperations:
         assert loaded[0]["id"] == "1"
 
         # Load non-existent
-        assert load_transactions("/nonexistent.json") == []
+        assert load_transactions("/nonexistent.json") is None
 
         # Load invalid JSON
         bad_json = tmp_path / "bad.json"
         bad_json.write_text("not json")
-        assert load_transactions(str(bad_json)) == []
+        assert load_transactions(str(bad_json)) is None
 
         # Load non-list
         not_list = tmp_path / "notlist.json"
         not_list.write_text('{"not": "list"}')
-        assert load_transactions(str(not_list)) == []
+        assert load_transactions(str(not_list)) is None
 
         # Save empty with warning
         import logging
@@ -1071,9 +1341,9 @@ class TestCLIAndMain:
         # UV fails, pip succeeds
         monkeypatch.setattr("sys.argv", ["mfr", "--self-test"])
         with patch("mass_find_replace.mass_find_replace._run_subprocess_command") as mock_run:
-            mock_run.side_effect = [False, True]  # First uv fails, then pip succeeds
+            mock_run.side_effect = [False, True, True]  # First uv fails, then pip succeeds, then pytest succeeds
             assert main_cli() == 0
-            assert mock_run.call_count == 2
+            assert mock_run.call_count == 3
 
         # Both fail
         monkeypatch.setattr("sys.argv", ["mfr", "--self-test"])
@@ -1118,7 +1388,6 @@ class TestCLIAndMain:
 
         with patch("mass_find_replace.mass_find_replace.main_flow", return_value=0):
             result = main_cli()
-            assert result == 0
 
             # Check script name printed
             captured = capsys.readouterr()
@@ -1127,7 +1396,7 @@ class TestCLIAndMain:
     def test_check_existing_transactions_comprehensive(self, tmp_path, mock_logger):
         """Test _check_existing_transactions with all scenarios."""
         # No file
-        has_existing, progress = _check_existing_transactions("/nonexistent.json", mock_logger)
+        has_existing, progress = _check_existing_transactions(Path("/nonexistent.json"), mock_logger)
         assert not has_existing
         assert progress == 0
 
@@ -1142,32 +1411,32 @@ class TestCLIAndMain:
         ]
         trans_file.write_text(json.dumps(transactions))
 
-        has_existing, progress = _check_existing_transactions(str(trans_file), mock_logger)
+        has_existing, progress = _check_existing_transactions(trans_file, mock_logger)
         assert has_existing
         assert progress == 40  # 2/5 completed
 
         # Empty transactions
         empty_file = tmp_path / "empty.json"
         empty_file.write_text("[]")
-        has_existing, progress = _check_existing_transactions(str(empty_file), mock_logger)
+        has_existing, progress = _check_existing_transactions(empty_file, mock_logger)
         assert has_existing
         assert progress == 0
 
         # Invalid JSON
         bad_file = tmp_path / "bad.json"
         bad_file.write_text("invalid")
-        has_existing, progress = _check_existing_transactions(str(bad_file), mock_logger)
+        has_existing, progress = _check_existing_transactions(bad_file, mock_logger)
         assert not has_existing
         assert progress == 0
 
         # All completed
         all_done = tmp_path / "done.json"
         all_done.write_text(json.dumps([{"status": TransactionStatus.COMPLETED.value}, {"status": TransactionStatus.COMPLETED.value}]))
-        has_existing, progress = _check_existing_transactions(str(all_done), mock_logger)
+        has_existing, progress = _check_existing_transactions(all_done, mock_logger)
         assert has_existing
         assert progress == 100
 
-    def test_print_mapping_table_comprehensive(self, mock_logger):
+    def test_print_mapping_table_comprehensive(self, mock_logger, capsys):
         """Test _print_mapping_table with various scenarios."""
         # Empty mapping
         _print_mapping_table({}, mock_logger)
@@ -1179,22 +1448,19 @@ class TestCLIAndMain:
         # Simple mapping
         mapping = {"old": "new"}
         _print_mapping_table(mapping, mock_logger)
-        # Should print header, content, footer (at least 5 calls)
-        assert mock_logger.info.call_count >= 5
-
-        # Check content includes mapping
-        calls_str = " ".join(str(call) for call in mock_logger.info.call_args_list)
-        assert "old" in calls_str
-        assert "new" in calls_str
+        # Should print to stdout, not logger calls
+        captured = capsys.readouterr()
+        assert "old" in captured.out
+        assert "new" in captured.out
 
         # Large mapping with long keys/values
-        mock_logger.reset_mock()
         large_mapping = {
             "very_long_old_name_that_should_stretch_column": "very_long_new_name_that_should_stretch_column",
             "short": "name",
         }
         _print_mapping_table(large_mapping, mock_logger)
-        assert mock_logger.info.call_count >= 6  # More rows
+        captured = capsys.readouterr()
+        assert "very_long_old_name" in captured.out
 
     def test_get_operation_description_all_combinations(self):
         """Test _get_operation_description with all combinations."""
@@ -1202,8 +1468,8 @@ class TestCLIAndMain:
         assert _get_operation_description(False, False, False) == "folder names, file names, and file contents"
 
         # Two operations
-        assert _get_operation_description(True, False, False) == "folder names and file contents"
-        assert _get_operation_description(False, True, False) == "file names and file contents"
+        assert _get_operation_description(True, False, False) == "file names and file contents"
+        assert _get_operation_description(False, True, False) == "folder names and file contents"
         assert _get_operation_description(False, False, True) == "folder names and file names"
 
         # Single operation

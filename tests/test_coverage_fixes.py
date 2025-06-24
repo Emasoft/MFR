@@ -28,6 +28,8 @@ def test_get_logger_verbose_mode():
 
 
 def test_get_logger_missing_context_error():
+    """Test test_get_logger_missing_context_error()."""
+    mock_logger = Mock()
     """Test _get_logger when Prefect raises MissingContextError."""
     from prefect.exceptions import MissingContextError
 
@@ -38,6 +40,8 @@ def test_get_logger_missing_context_error():
 
 
 def test_get_logger_import_error():
+    """Test test_get_logger_import_error()."""
+    mock_logger = Mock()
     """Test _get_logger when Prefect import fails."""
     # Mock the import failure
     with patch.dict("sys.modules", {"prefect": None}):
@@ -48,6 +52,8 @@ def test_get_logger_import_error():
 
 # Test _get_operation_description
 def test_get_operation_description_combinations():
+    """Test test_get_operation_description_combinations()."""
+    mock_logger = Mock()
     """Test all combinations of _get_operation_description."""
     # Two operations enabled
     assert mfr._get_operation_description(False, True, True) == "file names"
@@ -354,6 +360,9 @@ def test_main_flow_custom_ignore_file(tmp_path):
     """Test custom ignore file loading."""
     test_dir = tmp_path / "test"
     test_dir.mkdir()
+
+    # Create a file so directory is not empty
+    (test_dir / "file.txt").write_text("content")
 
     # Create custom ignore file
     custom_ignore = tmp_path / ".mfrignore"

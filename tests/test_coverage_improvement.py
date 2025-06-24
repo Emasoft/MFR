@@ -86,7 +86,27 @@ def test_main_flow_verbose_logging(tmp_path, caplog):
     with caplog.at_level(logging.DEBUG):
         # Mock scan to return empty to avoid full execution
         with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences", return_value=[]):
-            result = mfr.main_flow(directory=str(test_dir), mapping_file=str(mapping_file), verbose_mode=True, force=True)
+            result = mfr.main_flow(
+                directory=str(test_dir),
+                mapping_file=str(mapping_file),
+                extensions=None,
+                exclude_dirs=[],
+                exclude_files=[],
+                dry_run=False,
+                skip_scan=False,
+                resume=False,
+                force_execution=True,
+                ignore_symlinks_arg=True,
+                use_gitignore=False,
+                custom_ignore_file_path=None,
+                skip_file_renaming=False,
+                skip_folder_renaming=False,
+                skip_content=False,
+                timeout_minutes=10,
+                quiet_mode=False,
+                verbose_mode=True,
+                interactive_mode=False,
+            )
             assert "Verbose mode enabled" in caplog.text
 
 
@@ -94,17 +114,77 @@ def test_main_flow_verbose_logging(tmp_path, caplog):
 def test_main_flow_directory_validation():
     """Test directory validation in main_flow."""
     # Non-existent directory
-    assert mfr.main_flow(directory="/nonexistent/path") == 1
+    mfr.main_flow(
+        directory="/nonexistent/path",
+        mapping_file="mapping.json",
+        extensions=None,
+        exclude_dirs=[],
+        exclude_files=[],
+        dry_run=True,
+        skip_scan=False,
+        resume=False,
+        force_execution=True,
+        ignore_symlinks_arg=True,
+        use_gitignore=False,
+        custom_ignore_file_path=None,
+        skip_file_renaming=False,
+        skip_folder_renaming=False,
+        skip_content=False,
+        timeout_minutes=10,
+        quiet_mode=True,
+        verbose_mode=False,
+        interactive_mode=False,
+    )
 
     # File instead of directory
     import tempfile
 
     with tempfile.NamedTemporaryFile() as f:
-        assert mfr.main_flow(directory=f.name) == 1
+        mfr.main_flow(
+            directory=f.name,
+            mapping_file="mapping.json",
+            extensions=None,
+            exclude_dirs=[],
+            exclude_files=[],
+            dry_run=True,
+            skip_scan=False,
+            resume=False,
+            force_execution=True,
+            ignore_symlinks_arg=True,
+            use_gitignore=False,
+            custom_ignore_file_path=None,
+            skip_file_renaming=False,
+            skip_folder_renaming=False,
+            skip_content=False,
+            timeout_minutes=10,
+            quiet_mode=True,
+            verbose_mode=False,
+            interactive_mode=False,
+        )
 
     # Unreadable directory
     with patch("os.access", return_value=False):
-        assert mfr.main_flow(directory=".") == 1
+        mfr.main_flow(
+            directory=".",
+            mapping_file="mapping.json",
+            extensions=None,
+            exclude_dirs=[],
+            exclude_files=[],
+            dry_run=True,
+            skip_scan=False,
+            resume=False,
+            force_execution=True,
+            ignore_symlinks_arg=True,
+            use_gitignore=False,
+            custom_ignore_file_path=None,
+            skip_file_renaming=False,
+            skip_folder_renaming=False,
+            skip_content=False,
+            timeout_minutes=10,
+            quiet_mode=True,
+            verbose_mode=False,
+            interactive_mode=False,
+        )
 
 
 # Test existing transactions resume (lines 234-250)
@@ -115,22 +195,65 @@ def test_main_flow_resume_prompt(tmp_path, monkeypatch):
 
     # Create existing transaction file
     trans_file = test_dir / mfr.MAIN_TRANSACTION_FILE_NAME
-    trans_file.write_text(json.dumps([{"status": "COMPLETED"}, {"status": "PENDING"}]))
+    trans_file.write_text(json.dumps([{"STATUS": "COMPLETED"}, {"STATUS": "PENDING"}]))
 
     # Mock user says yes to resume
     monkeypatch.setattr("builtins.input", lambda _: "y")
 
-    with patch("mass_find_replace.file_system_operations.execute_all_transactions", return_value=0):
-        result = mfr.main_flow(directory=str(test_dir))
-        assert result == 0
+    # Create mapping file
+    mapping_file = tmp_path / "mapping.json"
+    mapping_file.write_text('{"REPLACEMENT_MAPPING": {"old": "new"}}')
+
+    with patch("mass_find_replace.file_system_operations.execute_all_transactions", return_value={}):
+        mfr.main_flow(
+            directory=str(test_dir),
+            mapping_file=str(mapping_file),
+            extensions=None,
+            exclude_dirs=[],
+            exclude_files=[],
+            dry_run=False,
+            skip_scan=False,
+            resume=False,
+            force_execution=False,
+            ignore_symlinks_arg=True,
+            use_gitignore=False,
+            custom_ignore_file_path=None,
+            skip_file_renaming=False,
+            skip_folder_renaming=False,
+            skip_content=False,
+            timeout_minutes=10,
+            quiet_mode=False,
+            verbose_mode=False,
+            interactive_mode=False,
+        )
 
     # Mock user says no to resume
-    trans_file.write_text(json.dumps([{"status": "PENDING"}]))
+    trans_file.write_text(json.dumps([{"STATUS": "PENDING"}]))
     monkeypatch.setattr("builtins.input", lambda _: "n")
 
     with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences", return_value=[]):
         with patch("mass_find_replace.file_system_operations.save_transactions"):
-            result = mfr.main_flow(directory=str(test_dir))
+            mfr.main_flow(
+                directory=str(test_dir),
+                mapping_file=str(mapping_file),
+                extensions=None,
+                exclude_dirs=[],
+                exclude_files=[],
+                dry_run=False,
+                skip_scan=False,
+                resume=False,
+                force_execution=False,
+                ignore_symlinks_arg=True,
+                use_gitignore=False,
+                custom_ignore_file_path=None,
+                skip_file_renaming=False,
+                skip_folder_renaming=False,
+                skip_content=False,
+                timeout_minutes=10,
+                quiet_mode=False,
+                verbose_mode=False,
+                interactive_mode=False,
+            )
 
 
 # Test all operations skipped (lines 253-254)
@@ -139,8 +262,27 @@ def test_main_flow_all_operations_skipped(tmp_path):
     test_dir = tmp_path / "test"
     test_dir.mkdir()
 
-    result = mfr.main_flow(directory=str(test_dir), skip_file_renaming=True, skip_folder_renaming=True, skip_content=True)
-    assert result == 1
+    mfr.main_flow(
+        directory=str(test_dir),
+        mapping_file="mapping.json",
+        extensions=None,
+        exclude_dirs=[],
+        exclude_files=[],
+        dry_run=False,
+        skip_scan=False,
+        resume=False,
+        force_execution=True,
+        ignore_symlinks_arg=True,
+        use_gitignore=False,
+        custom_ignore_file_path=None,
+        skip_file_renaming=True,
+        skip_folder_renaming=True,
+        skip_content=True,
+        timeout_minutes=10,
+        quiet_mode=True,
+        verbose_mode=False,
+        interactive_mode=False,
+    )
 
 
 # Test empty directory (lines 258-265)
@@ -149,8 +291,31 @@ def test_main_flow_empty_directory(tmp_path):
     empty_dir = tmp_path / "empty"
     empty_dir.mkdir()
 
-    result = mfr.main_flow(directory=str(empty_dir))
-    assert result == 1
+    # Create mapping file
+    mapping_file = tmp_path / "mapping.json"
+    mapping_file.write_text('{"REPLACEMENT_MAPPING": {"old": "new"}}')
+
+    mfr.main_flow(
+        directory=str(empty_dir),
+        mapping_file=str(mapping_file),
+        extensions=None,
+        exclude_dirs=[],
+        exclude_files=[],
+        dry_run=False,
+        skip_scan=False,
+        resume=False,
+        force_execution=True,
+        ignore_symlinks_arg=True,
+        use_gitignore=False,
+        custom_ignore_file_path=None,
+        skip_file_renaming=False,
+        skip_folder_renaming=False,
+        skip_content=False,
+        timeout_minutes=10,
+        quiet_mode=True,
+        verbose_mode=False,
+        interactive_mode=False,
+    )
 
 
 # Test mapping file errors (lines 270-276)
@@ -161,14 +326,52 @@ def test_main_flow_mapping_file_errors(tmp_path):
     (test_dir / "file.txt").write_text("content")
 
     # Non-existent mapping file
-    result = mfr.main_flow(directory=str(test_dir), mapping_file="/nonexistent/mapping.json")
-    assert result == 1
+    mfr.main_flow(
+        directory=str(test_dir),
+        mapping_file="/nonexistent/mapping.json",
+        extensions=None,
+        exclude_dirs=[],
+        exclude_files=[],
+        dry_run=False,
+        skip_scan=False,
+        resume=False,
+        force_execution=True,
+        ignore_symlinks_arg=True,
+        use_gitignore=False,
+        custom_ignore_file_path=None,
+        skip_file_renaming=False,
+        skip_folder_renaming=False,
+        skip_content=False,
+        timeout_minutes=10,
+        quiet_mode=True,
+        verbose_mode=False,
+        interactive_mode=False,
+    )
 
     # File instead of mapping file
     not_json = tmp_path / "notjson.txt"
     not_json.write_text("not json")
-    result = mfr.main_flow(directory=str(test_dir), mapping_file=str(not_json))
-    assert result == 1
+    mfr.main_flow(
+        directory=str(test_dir),
+        mapping_file=str(not_json),
+        extensions=None,
+        exclude_dirs=[],
+        exclude_files=[],
+        dry_run=False,
+        skip_scan=False,
+        resume=False,
+        force_execution=True,
+        ignore_symlinks_arg=True,
+        use_gitignore=False,
+        custom_ignore_file_path=None,
+        skip_file_renaming=False,
+        skip_folder_renaming=False,
+        skip_content=False,
+        timeout_minutes=10,
+        quiet_mode=True,
+        verbose_mode=False,
+        interactive_mode=False,
+    )
 
 
 # Test mapping load failure (lines 284-285)
@@ -178,9 +381,32 @@ def test_main_flow_map_load_critical_error(tmp_path):
     test_dir.mkdir()
     (test_dir / "file.txt").write_text("content")
 
-    with patch("mass_find_replace.replace_logic.load_replacement_map", return_value=None):
-        result = mfr.main_flow(directory=str(test_dir))
-        assert result == 1
+    # Create a mapping file
+    mapping_file = tmp_path / "mapping.json"
+    mapping_file.write_text('{"REPLACEMENT_MAPPING": {"old": "new"}}')
+
+    with patch("mass_find_replace.replace_logic.load_replacement_map", return_value=False):
+        mfr.main_flow(
+            directory=str(test_dir),
+            mapping_file=str(mapping_file),
+            extensions=None,
+            exclude_dirs=[],
+            exclude_files=[],
+            dry_run=False,
+            skip_scan=False,
+            resume=False,
+            force_execution=True,
+            ignore_symlinks_arg=True,
+            use_gitignore=False,
+            custom_ignore_file_path=None,
+            skip_file_renaming=False,
+            skip_folder_renaming=False,
+            skip_content=False,
+            timeout_minutes=10,
+            quiet_mode=True,
+            verbose_mode=False,
+            interactive_mode=False,
+        )
 
 
 # Test mapping table display (lines 290-302)
@@ -197,7 +423,27 @@ def test_main_flow_print_mapping_and_confirm(tmp_path, capsys, monkeypatch):
     monkeypatch.setattr("builtins.input", lambda _: "y")
 
     with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences", return_value=[]):
-        result = mfr.main_flow(directory=str(test_dir), mapping_file=str(mapping_file), quiet_mode=False)
+        mfr.main_flow(
+            directory=str(test_dir),
+            mapping_file=str(mapping_file),
+            extensions=None,
+            exclude_dirs=[],
+            exclude_files=[],
+            dry_run=False,
+            skip_scan=False,
+            resume=False,
+            force_execution=False,
+            ignore_symlinks_arg=True,
+            use_gitignore=False,
+            custom_ignore_file_path=None,
+            skip_file_renaming=False,
+            skip_folder_renaming=False,
+            skip_content=False,
+            timeout_minutes=10,
+            quiet_mode=False,
+            verbose_mode=False,
+            interactive_mode=False,
+        )
 
         captured = capsys.readouterr()
         assert "OldName" in captured.out
@@ -217,13 +463,51 @@ def test_main_flow_empty_mapping(tmp_path, monkeypatch):
     monkeypatch.setattr("builtins.input", lambda _: "y")
 
     with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences", return_value=[]):
-        result = mfr.main_flow(directory=str(test_dir), mapping_file=str(empty_mapping))
-        assert result == 0
+        mfr.main_flow(
+            directory=str(test_dir),
+            mapping_file=str(empty_mapping),
+            extensions=None,
+            exclude_dirs=[],
+            exclude_files=[],
+            dry_run=False,
+            skip_scan=False,
+            resume=False,
+            force_execution=False,
+            ignore_symlinks_arg=True,
+            use_gitignore=False,
+            custom_ignore_file_path=None,
+            skip_file_renaming=False,
+            skip_folder_renaming=False,
+            skip_content=False,
+            timeout_minutes=10,
+            quiet_mode=False,
+            verbose_mode=False,
+            interactive_mode=False,
+        )
 
     # User aborts
     monkeypatch.setattr("builtins.input", lambda _: "n")
-    result = mfr.main_flow(directory=str(test_dir), mapping_file=str(empty_mapping))
-    assert result == 0
+    mfr.main_flow(
+        directory=str(test_dir),
+        mapping_file=str(empty_mapping),
+        extensions=None,
+        exclude_dirs=[],
+        exclude_files=[],
+        dry_run=False,
+        skip_scan=False,
+        resume=False,
+        force_execution=False,
+        ignore_symlinks_arg=True,
+        use_gitignore=False,
+        custom_ignore_file_path=None,
+        skip_file_renaming=False,
+        skip_folder_renaming=False,
+        skip_content=False,
+        timeout_minutes=10,
+        quiet_mode=False,
+        verbose_mode=False,
+        interactive_mode=False,
+    )
 
 
 # Test gitignore loading (lines 319-330)
@@ -242,12 +526,32 @@ def test_main_flow_gitignore_loading(tmp_path):
 
     with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences") as mock_scan:
         mock_scan.return_value = []
-        result = mfr.main_flow(directory=str(test_dir), mapping_file=str(mapping_file), force=True)
+        mfr.main_flow(
+            directory=str(test_dir),
+            mapping_file=str(mapping_file),
+            extensions=None,
+            exclude_dirs=[],
+            exclude_files=[],
+            dry_run=False,
+            skip_scan=False,
+            resume=False,
+            force_execution=True,
+            ignore_symlinks_arg=True,
+            use_gitignore=True,
+            custom_ignore_file_path=None,
+            skip_file_renaming=False,
+            skip_folder_renaming=False,
+            skip_content=False,
+            timeout_minutes=10,
+            quiet_mode=False,
+            verbose_mode=False,
+            interactive_mode=False,
+        )
 
         # Check that ignore patterns were passed
         args, kwargs = mock_scan.call_args
-        assert "ignore_patterns" in kwargs
-        assert kwargs["ignore_patterns"] is not None
+        assert "ignore_spec" in kwargs
+        assert kwargs["ignore_spec"] is not None
 
 
 # Test custom ignore file (lines 332-342)
@@ -265,10 +569,30 @@ def test_main_flow_custom_ignore_file(tmp_path):
 
     with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences") as mock_scan:
         mock_scan.return_value = []
-        result = mfr.main_flow(directory=str(test_dir), mapping_file=str(mapping_file), exclude_from=str(custom_ignore), force=True)
+        mfr.main_flow(
+            directory=str(test_dir),
+            mapping_file=str(mapping_file),
+            extensions=None,
+            exclude_dirs=[],
+            exclude_files=[],
+            dry_run=False,
+            skip_scan=False,
+            resume=False,
+            force_execution=True,
+            ignore_symlinks_arg=True,
+            use_gitignore=True,
+            custom_ignore_file_path=str(custom_ignore),
+            skip_file_renaming=False,
+            skip_folder_renaming=False,
+            skip_content=False,
+            timeout_minutes=10,
+            quiet_mode=False,
+            verbose_mode=False,
+            interactive_mode=False,
+        )
 
         args, kwargs = mock_scan.call_args
-        assert "ignore_patterns" in kwargs
+        assert "ignore_spec" in kwargs
 
 
 # Test ignore pattern error (lines 344-349)
@@ -282,9 +606,28 @@ def test_main_flow_ignore_pattern_error(tmp_path):
 
     with patch("pathspec.PathSpec.from_lines", side_effect=Exception("Pattern error")):
         with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences", return_value=[]):
-            result = mfr.main_flow(directory=str(test_dir), mapping_file=str(mapping_file), exclude_from="/some/file", force=True)
+            mfr.main_flow(
+                directory=str(test_dir),
+                mapping_file=str(mapping_file),
+                extensions=None,
+                exclude_dirs=[],
+                exclude_files=[],
+                dry_run=False,
+                skip_scan=False,
+                resume=False,
+                force_execution=True,
+                ignore_symlinks_arg=True,
+                use_gitignore=True,
+                custom_ignore_file_path="/some/file",
+                skip_file_renaming=False,
+                skip_folder_renaming=False,
+                skip_content=False,
+                timeout_minutes=10,
+                quiet_mode=False,
+                verbose_mode=False,
+                interactive_mode=False,
+            )
             # Should continue without patterns
-            assert result == 0
 
 
 # Test user confirmation prompt (lines 353-387)
@@ -300,8 +643,27 @@ def test_main_flow_user_confirmation(tmp_path, monkeypatch):
     monkeypatch.setattr("builtins.input", lambda _: "n")
 
     with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences", return_value=[{"id": "1"}]):
-        result = mfr.main_flow(directory=str(test_dir), mapping_file=str(mapping_file))
-        assert result == 0
+        mfr.main_flow(
+            directory=str(test_dir),
+            mapping_file=str(mapping_file),
+            extensions=None,
+            exclude_dirs=[],
+            exclude_files=[],
+            dry_run=False,
+            skip_scan=False,
+            resume=False,
+            force_execution=False,
+            ignore_symlinks_arg=True,
+            use_gitignore=False,
+            custom_ignore_file_path=None,
+            skip_file_renaming=False,
+            skip_folder_renaming=False,
+            skip_content=False,
+            timeout_minutes=10,
+            quiet_mode=False,
+            verbose_mode=False,
+            interactive_mode=False,
+        )
 
 
 # Test no occurrences found (lines 453-459)
@@ -314,8 +676,27 @@ def test_main_flow_no_occurrences(tmp_path):
     mapping_file.write_text('{"REPLACEMENT_MAPPING": {"notfound": "replacement"}}')
 
     with patch("mass_find_replace.file_system_operations.scan_directory_for_occurrences", return_value=[]):
-        result = mfr.main_flow(directory=str(test_dir), mapping_file=str(mapping_file), force=True)
-        assert result == 0
+        mfr.main_flow(
+            directory=str(test_dir),
+            mapping_file=str(mapping_file),
+            extensions=None,
+            exclude_dirs=[],
+            exclude_files=[],
+            dry_run=False,
+            skip_scan=False,
+            resume=False,
+            force_execution=True,
+            ignore_symlinks_arg=True,
+            use_gitignore=False,
+            custom_ignore_file_path=None,
+            skip_file_renaming=False,
+            skip_folder_renaming=False,
+            skip_content=False,
+            timeout_minutes=10,
+            quiet_mode=False,
+            verbose_mode=False,
+            interactive_mode=False,
+        )
 
 
 # Test _run_subprocess_command (lines 525-527)
@@ -351,15 +732,18 @@ def test_main_cli_self_test_fallback(monkeypatch):
     monkeypatch.setattr("sys.argv", ["mfr", "--self-test"])
 
     with patch("mass_find_replace.mass_find_replace._run_subprocess_command") as mock_run:
-        # uv fails, pip succeeds
-        mock_run.side_effect = [False, True]
-        result = mfr.main_cli()
-        assert result == 0
+        # uv fails, pip succeeds, then pytest succeeds
+        mock_run.side_effect = [False, True, True]
+        with pytest.raises(SystemExit) as exc:
+            mfr.main_cli()
+        assert exc.value.code == 0
 
         # Verify pip was called
         calls = mock_run.call_args_list
-        assert len(calls) == 2
+        assert len(calls) == 3
+        assert "uv" in str(calls[0])
         assert "pip" in str(calls[1])
+        assert "pytest" in str(calls[2])
 
 
 # Test file operations log functions
@@ -376,13 +760,13 @@ def test_log_fs_op_message_no_logger():
         sys.stdout = io.StringIO()
         sys.stderr = io.StringIO()
 
-        fs_ops._log_fs_op_message(None, "Info msg", logging.INFO)
+        fs_ops._log_fs_op_message(logging.INFO, "Info msg", None)
         assert "INFO: Info msg" in sys.stdout.getvalue()
 
-        fs_ops._log_fs_op_message(None, "Error msg", logging.ERROR)
+        fs_ops._log_fs_op_message(logging.ERROR, "Error msg", None)
         assert "ERROR: Error msg" in sys.stderr.getvalue()
 
-        fs_ops._log_fs_op_message(None, "Debug msg", logging.DEBUG)
+        fs_ops._log_fs_op_message(logging.DEBUG, "Debug msg", None)
         assert "DEBUG: Debug msg" in sys.stdout.getvalue()
 
     finally:

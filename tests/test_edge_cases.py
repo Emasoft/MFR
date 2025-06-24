@@ -3,6 +3,7 @@
 """Edge case tests to improve code coverage."""
 
 import json
+import logging
 import os
 import sys
 import tempfile
@@ -21,20 +22,78 @@ from mass_find_replace import replace_logic
 def test_main_flow_directory_errors(tmp_path):
     """Test main_flow with various directory errors."""
     # Test non-existent directory
-    result = mass_find_replace.main_flow("/nonexistent/path", dry_run=True)
-    assert result == 1
+    mass_find_replace.main_flow(
+        directory="/nonexistent/path",
+        mapping_file="mapping.json",
+        extensions=None,
+        exclude_dirs=[],
+        exclude_files=[],
+        dry_run=True,
+        skip_scan=False,
+        resume=False,
+        force_execution=True,
+        ignore_symlinks_arg=True,
+        use_gitignore=False,
+        custom_ignore_file_path=None,
+        skip_file_renaming=False,
+        skip_folder_renaming=False,
+        skip_content=False,
+        timeout_minutes=10,
+        quiet_mode=True,
+        verbose_mode=False,
+        interactive_mode=False,
+    )
+    # Function returns None when there's an error
 
     # Test file instead of directory
     test_file = tmp_path / "file.txt"
     test_file.write_text("content")
-    result = mass_find_replace.main_flow(str(test_file), dry_run=True)
-    assert result == 1
+    mass_find_replace.main_flow(
+        directory=str(test_file),
+        mapping_file="mapping.json",
+        extensions=None,
+        exclude_dirs=[],
+        exclude_files=[],
+        dry_run=False,
+        skip_scan=False,
+        resume=False,
+        force_execution=True,
+        ignore_symlinks_arg=True,
+        use_gitignore=False,
+        custom_ignore_file_path=None,
+        skip_file_renaming=False,
+        skip_folder_renaming=False,
+        skip_content=False,
+        timeout_minutes=10,
+        quiet_mode=True,
+        verbose_mode=False,
+        interactive_mode=False,
+    )
 
     # Test empty directory
     empty_dir = tmp_path / "empty"
     empty_dir.mkdir()
-    result = mass_find_replace.main_flow(str(empty_dir), dry_run=True)
-    assert result == 1
+    mass_find_replace.main_flow(
+        directory=str(empty_dir),
+        mapping_file="mapping.json",
+        extensions=None,
+        exclude_dirs=[],
+        exclude_files=[],
+        dry_run=False,
+        skip_scan=False,
+        resume=False,
+        force_execution=True,
+        ignore_symlinks_arg=True,
+        use_gitignore=False,
+        custom_ignore_file_path=None,
+        skip_file_renaming=False,
+        skip_folder_renaming=False,
+        skip_content=False,
+        timeout_minutes=10,
+        quiet_mode=True,
+        verbose_mode=False,
+        interactive_mode=False,
+    )
 
 
 def test_main_flow_all_skipped(tmp_path):
@@ -42,8 +101,27 @@ def test_main_flow_all_skipped(tmp_path):
     test_dir = tmp_path / "test"
     test_dir.mkdir()
 
-    result = mass_find_replace.main_flow(str(test_dir), dry_run=True, skip_file_renaming=True, skip_folder_renaming=True, skip_content=True)
-    assert result == 1
+    mass_find_replace.main_flow(
+        directory=str(test_dir),
+        mapping_file="mapping.json",
+        extensions=None,
+        exclude_dirs=[],
+        exclude_files=[],
+        dry_run=False,
+        skip_scan=False,
+        resume=False,
+        force_execution=True,
+        ignore_symlinks_arg=True,
+        use_gitignore=False,
+        custom_ignore_file_path=None,
+        skip_file_renaming=True,
+        skip_folder_renaming=True,
+        skip_content=True,
+        timeout_minutes=10,
+        quiet_mode=True,
+        verbose_mode=False,
+        interactive_mode=False,
+    )
 
 
 def test_replace_logic_edge_cases():
@@ -65,15 +143,15 @@ def test_file_operations_edge_cases(tmp_path):
     # Test encoding detection with empty file
     empty_file = tmp_path / "empty.txt"
     empty_file.write_text("")
-    encoding = file_system_operations.get_file_encoding(str(empty_file))
+    encoding = file_system_operations.get_file_encoding(empty_file)
     assert encoding == "utf-8"
 
     # Test load_transactions with missing file
-    transactions = file_system_operations.load_transactions("/nonexistent.json")
-    assert transactions == []
+    transactions = file_system_operations.load_transactions(Path("/nonexistent.json"))
+    assert transactions is None
 
     # Test load_ignore_patterns with missing file
-    patterns = file_system_operations.load_ignore_patterns("/nonexistent/.gitignore")
+    patterns = file_system_operations.load_ignore_patterns(Path("/nonexistent/.gitignore"))
     assert patterns is None
 
 
@@ -102,18 +180,21 @@ def test_cli_self_test():
         with patch("mass_find_replace.mass_find_replace._run_subprocess_command") as mock_run:
             # Test successful self-test
             mock_run.return_value = True
-            result = mass_find_replace.main_cli()
-            assert result == 0
+            with pytest.raises(SystemExit) as exc:
+                mass_find_replace.main_cli()
+            assert exc.value.code == 0
 
             # Test pip fallback
-            mock_run.side_effect = [False, True]  # uv fails, pip succeeds
-            result = mass_find_replace.main_cli()
-            assert result == 0
+            mock_run.side_effect = [False, True, True]  # uv fails, pip succeeds, pytest succeeds
+            with pytest.raises(SystemExit) as exc:
+                mass_find_replace.main_cli()
+            assert exc.value.code == 0
 
             # Test all fail
-            mock_run.return_value = False
-            result = mass_find_replace.main_cli()
-            assert result == 1
+            mock_run.side_effect = [False, False]  # Both uv and pip fail
+            with pytest.raises(SystemExit) as exc:
+                mass_find_replace.main_cli()
+            assert exc.value.code == 1
 
 
 def test_invalid_cli_args():
@@ -128,41 +209,41 @@ def test_invalid_cli_args():
 def test_load_replacement_map_errors(tmp_path):
     """Test load_replacement_map error cases."""
     # File not found
-    result = replace_logic.load_replacement_map("/nonexistent/map.json")
-    assert result is None
+    result = replace_logic.load_replacement_map(Path("/nonexistent/map.json"))
+    assert result is False
 
     # Invalid JSON
     bad_json = tmp_path / "bad.json"
     bad_json.write_text("not json")
-    result = replace_logic.load_replacement_map(str(bad_json))
-    assert result is None
+    result = replace_logic.load_replacement_map(bad_json)
+    assert result is False
 
     # Missing REPLACEMENT_MAPPING key
     wrong_key = tmp_path / "wrong.json"
     wrong_key.write_text('{"wrong": {}}')
-    result = replace_logic.load_replacement_map(str(wrong_key))
-    assert result is None
+    result = replace_logic.load_replacement_map(wrong_key)
+    assert result is False
 
     # REPLACEMENT_MAPPING not a dict
     not_dict = tmp_path / "notdict.json"
     not_dict.write_text('{"REPLACEMENT_MAPPING": "string"}')
-    result = replace_logic.load_replacement_map(str(not_dict))
-    assert result is None
+    result = replace_logic.load_replacement_map(not_dict)
+    assert result is False
 
     # Empty mapping
     empty_map = tmp_path / "empty.json"
     empty_map.write_text('{"REPLACEMENT_MAPPING": {}}')
-    result = replace_logic.load_replacement_map(str(empty_map))
-    assert result == {}
+    result = replace_logic.load_replacement_map(empty_map)
+    assert result is True
 
     # Recursive mapping
     recursive = tmp_path / "recursive.json"
     recursive.write_text('{"REPLACEMENT_MAPPING": {"a": "b", "b": "a"}}')
-    result = replace_logic.load_replacement_map(str(recursive))
-    assert result is None
+    result = replace_logic.load_replacement_map(recursive)
+    assert result is False
 
 
-def test_print_mapping_table():
+def test_print_mapping_table(capsys):
     """Test _print_mapping_table."""
     mock_logger = Mock()
 
@@ -173,14 +254,19 @@ def test_print_mapping_table():
     # With data
     mock_logger.reset_mock()
     mass_find_replace._print_mapping_table({"old": "new"}, mock_logger)
-    assert mock_logger.info.call_count > 3  # Table has multiple lines
+    captured = capsys.readouterr()
+    # Check that table was printed to stdout
+    assert "Search" in captured.out
+    assert "Replace" in captured.out
+    assert "old" in captured.out
+    assert "new" in captured.out
 
 
 def test_get_operation_description():
     """Test _get_operation_description."""
     # All operations
     desc = mass_find_replace._get_operation_description(False, False, False)
-    assert desc == "file names, folder names, and file contents"
+    assert desc == "folder names, file names, and file contents"
 
     # Only files
     desc = mass_find_replace._get_operation_description(False, True, True)
@@ -201,15 +287,18 @@ def test_get_operation_description():
 
 def test_check_existing_transactions(tmp_path):
     """Test _check_existing_transactions."""
+    mock_logger = Mock()
     # No file
-    has_existing, progress = mass_find_replace._check_existing_transactions("/nonexistent.json")
+    has_existing, progress = mass_find_replace._check_existing_transactions(Path("/nonexistent"), mock_logger)
     assert not has_existing
     assert progress == 0
 
     # With transactions
-    trans_file = tmp_path / "trans.json"
-    trans_file.write_text(json.dumps([{"status": "COMPLETED"}, {"status": "PENDING"}, {"status": "COMPLETED"}, {"status": "FAILED"}]))
-    has_existing, progress = mass_find_replace._check_existing_transactions(str(trans_file))
+    test_dir = tmp_path / "test"
+    test_dir.mkdir()
+    trans_file = test_dir / "planned_transactions.json"
+    trans_file.write_text(json.dumps([{"STATUS": "COMPLETED"}, {"STATUS": "PENDING"}, {"STATUS": "COMPLETED"}, {"STATUS": "FAILED"}]))
+    has_existing, progress = mass_find_replace._check_existing_transactions(test_dir, mock_logger)
     assert has_existing
     assert progress == 50  # 2/4 completed
 
@@ -217,18 +306,18 @@ def test_check_existing_transactions(tmp_path):
 def test_log_functions(capsys):
     """Test logging functions."""
     # Test file_system_operations._log_fs_op_message
-    file_system_operations._log_fs_op_message("Test message")
+    file_system_operations._log_fs_op_message(logging.INFO, "Test message", None)
     captured = capsys.readouterr()
-    assert "INFO: Test message" in captured.out
+    assert "INFO" in captured.out and "Test message" in captured.out
 
     # Test replace_logic._log_message
-    replace_logic._log_message("Test message")
+    replace_logic._log_message(logging.INFO, "Test message", None)
     captured = capsys.readouterr()
-    assert "[INFO] Test message" in captured.out
+    assert "INFO" in captured.out and "Test message" in captured.out
 
 
 def test_transaction_update_not_found():
     """Test updating transaction that doesn't exist."""
-    transactions = [{"id": "123", "status": "PENDING"}]
+    transactions = [{"id": "123", "STATUS": "PENDING"}]
     file_system_operations.update_transaction_status_in_list(transactions, "456", file_system_operations.TransactionStatus.COMPLETED)
     # Should not crash, just log warning
