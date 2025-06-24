@@ -671,25 +671,25 @@ class TestFileOperations:
         # Empty file
         empty = tmp_path / "empty.txt"
         empty.write_text("")
-        assert get_file_encoding(str(empty)) == "utf-8"
+        assert get_file_encoding(empty) == "utf-8"
 
         # RTF file
-        assert get_file_encoding(str(rtf_file)) == "rtf"
+        assert get_file_encoding(rtf_file) == "rtf"
 
         # UTF-8 file
         utf8_file = tmp_path / "utf8.txt"
         utf8_file.write_text("Hello 世界", encoding="utf-8")
-        assert get_file_encoding(str(utf8_file)) == "utf-8"
+        assert get_file_encoding(utf8_file) == "utf-8"
 
         # Latin-1 file
         latin1_file = tmp_path / "latin1.txt"
         latin1_file.write_bytes("Café".encode("latin-1"))
         with patch("chardet.detect", return_value={"encoding": "latin-1", "confidence": 0.9}):
-            assert get_file_encoding(str(latin1_file)) == "latin-1"
+            assert get_file_encoding(latin1_file) == "latin-1"
 
         # Read error
         with patch("builtins.open", side_effect=OSError("Permission denied")):
-            assert get_file_encoding("/some/file") == "utf-8"
+            assert get_file_encoding(Path("/some/file")) == "utf-8"
 
     def test_save_and_load_transactions(self, tmp_path):
         """Test save and load transactions."""
@@ -697,37 +697,37 @@ class TestFileOperations:
         transactions = [{"id": "1", "status": "PENDING"}, {"id": "2", "status": "COMPLETED"}]
 
         # Save
-        save_transactions(transactions, str(trans_file))
+        save_transactions(transactions, trans_file)
         assert trans_file.exists()
 
         # Load
-        loaded = load_transactions(str(trans_file))
+        loaded = load_transactions(trans_file)
         assert len(loaded) == 2
         assert loaded[0]["id"] == "1"
 
         # Load non-existent
-        assert load_transactions("/nonexistent.json") is None
+        assert load_transactions(Path("/nonexistent.json")) is None
 
         # Load invalid JSON
         bad_json = tmp_path / "bad.json"
         bad_json.write_text("not json")
-        assert load_transactions(str(bad_json)) is None
+        assert load_transactions(bad_json) is None
 
         # Load non-list
         not_list = tmp_path / "notlist.json"
         not_list.write_text('{"not": "list"}')
-        assert load_transactions(str(not_list)) is None
+        assert load_transactions(not_list) is None
 
         # Save empty with warning
         import logging
 
         with patch("mass_find_replace.file_system_operations.logger") as mock_logger:
-            save_transactions([], str(trans_file))
+            save_transactions([], trans_file)
             mock_logger.warning.assert_called()
 
         # Save with OS error
         with patch("builtins.open", side_effect=OSError("No space")):
-            save_transactions(transactions, "/invalid/path.json")  # Should not crash
+            save_transactions(transactions, Path("/invalid/path.json"))  # Should not crash
 
     def test_update_transaction_status(self):
         """Test update_transaction_status_in_list."""
@@ -777,7 +777,7 @@ class TestScanAndExecute:
     def test_scan_directory_with_transactions(self, temp_dir, mapping_file):
         """Test scan_directory_for_occurrences."""
         # Load mapping first
-        mapping = load_replacement_map(str(mapping_file))
+        mapping = load_replacement_map(mapping_file)
         assert mapping is not None
 
         # Test basic scan
@@ -795,7 +795,7 @@ class TestScanAndExecute:
     def test_scan_with_binary_file(self, temp_dir, binary_file, mapping_file):
         """Test scanning with binary files."""
         # Load mapping
-        load_replacement_map(str(mapping_file))
+        load_replacement_map(mapping_file)
 
         # Mock binary log file
         with patch("builtins.open", mock_open()) as mock_file:
@@ -807,7 +807,7 @@ class TestScanAndExecute:
 
     def test_scan_with_large_file(self, temp_dir, large_file, mapping_file):
         """Test scanning with large files."""
-        load_replacement_map(str(mapping_file))
+        load_replacement_map(mapping_file)
 
         # Temporarily reduce threshold
         original_threshold = fs_ops.LARGE_FILE_SIZE_THRESHOLD
@@ -955,7 +955,7 @@ class TestScanAndExecute:
         large_file.write_text("".join(content))
 
         # Load mapping
-        load_replacement_map(str(mapping_file))
+        load_replacement_map(mapping_file)
 
         transactions = [
             {
@@ -1039,7 +1039,7 @@ class TestScanAndExecute:
         (tmp_path / "file.txt").write_text("old text")
 
         # Load transactions
-        transactions = load_transactions(str(transaction_file))
+        transactions = load_transactions(transaction_file)
 
         # Mock user input for interactive mode
         with patch("builtins.input", return_value="y"):
@@ -1128,30 +1128,30 @@ class TestReplaceLogic:
     def test_load_replacement_map_all_errors(self, tmp_path):
         """Test all error scenarios in load_replacement_map."""
         # File not found
-        result = load_replacement_map("/nonexistent/map.json")
+        result = load_replacement_map(Path("/nonexistent/map.json"))
         assert result is False  # Returns False on error
 
         # Read error
         with patch("builtins.open", side_effect=Exception("Read error")):
-            result = load_replacement_map("some_file.json")
+            result = load_replacement_map(Path("some_file.json"))
             assert result is False
 
         # Invalid JSON
         bad_json = tmp_path / "bad.json"
         bad_json.write_text("not json")
-        result = load_replacement_map(str(bad_json))
+        result = load_replacement_map(bad_json)
         assert result is False
 
         # Missing REPLACEMENT_MAPPING key
         wrong_key = tmp_path / "wrong_key.json"
         wrong_key.write_text('{"wrong": {}}')
-        result = load_replacement_map(str(wrong_key))
+        result = load_replacement_map(wrong_key)
         assert result is False
 
         # REPLACEMENT_MAPPING not a dict
         not_dict = tmp_path / "not_dict.json"
         not_dict.write_text('{"REPLACEMENT_MAPPING": "string"}')
-        result = load_replacement_map(str(not_dict))
+        result = load_replacement_map(not_dict)
         assert result is False
 
         # Invalid key-value pairs
@@ -1166,7 +1166,7 @@ class TestReplaceLogic:
             }
             valid_map = tmp_path / "mixed.json"
             valid_map.write_text("{}")
-            result = load_replacement_map(str(valid_map))
+            result = load_replacement_map(valid_map)
             # Should load only valid pairs
             assert result == {"valid": "replacement"}
 
@@ -1182,19 +1182,19 @@ class TestReplaceLogic:
                 }
             )
         )
-        result = load_replacement_map(str(empty_key))
+        result = load_replacement_map(empty_key)
         assert result == {"valid": "replacement"}
 
         # Empty value
         empty_value = tmp_path / "empty_value.json"
         empty_value.write_text(json.dumps({"REPLACEMENT_MAPPING": {"key": "", "valid": "replacement"}}))
-        result = load_replacement_map(str(empty_value))
+        result = load_replacement_map(empty_value)
         assert result == {"valid": "replacement"}
 
         # No valid rules
         no_valid = tmp_path / "no_valid.json"
         no_valid.write_text(json.dumps({"REPLACEMENT_MAPPING": {"": "empty_key", "empty_value": ""}}))
-        result = load_replacement_map(str(no_valid))
+        result = load_replacement_map(no_valid)
         assert result is False
 
         # Recursive mapping
@@ -1210,14 +1210,14 @@ class TestReplaceLogic:
                 }
             )
         )
-        result = load_replacement_map(str(recursive))
+        result = load_replacement_map(recursive)
         assert result is False
 
         # Regex compilation error
         with patch("re.compile", side_effect=re.error("Invalid regex")):
             good_map = tmp_path / "good.json"
             good_map.write_text(json.dumps({"REPLACEMENT_MAPPING": {"test": "replacement"}}))
-            result = load_replacement_map(str(good_map))
+            result = load_replacement_map(good_map)
             assert result is False
 
     def test_get_key_characters_and_size(self):
