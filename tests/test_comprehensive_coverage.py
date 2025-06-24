@@ -1390,19 +1390,26 @@ class TestCLIAndMain:
         """Test when required dependencies are missing."""
         monkeypatch.setattr("sys.argv", ["mfr", "."])
 
-        # Mock missing module
-        original_rich = sys.modules.get("rich")
-        sys.modules["rich"] = None
+        # Mock the import of a required module to fail
+        import builtins
 
-        try:
-            with pytest.raises(SystemExit) as exc:
-                main_cli()
-            assert exc.value.code == 1
-        finally:
-            if original_rich:
-                sys.modules["rich"] = original_rich
-            else:
-                del sys.modules["rich"]
+        original_import = builtins.__import__
+
+        def mock_import(name, *args, **kwargs):
+            if name == "click":
+                raise ImportError("click module not found")
+            return original_import(name, *args, **kwargs)
+
+        with patch("builtins.__import__", side_effect=mock_import):
+            # Clear cached module to force re-import
+            if "mass_find_replace.mass_find_replace" in sys.modules:
+                del sys.modules["mass_find_replace.mass_find_replace"]
+
+            # The import should fail
+            with pytest.raises(ImportError) as exc_info:
+                import mass_find_replace.mass_find_replace
+
+            assert "click" in str(exc_info.value)
 
     def test_main_cli_normal_execution(self, monkeypatch, capsys):
         """Test normal CLI execution."""

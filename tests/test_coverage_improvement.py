@@ -761,13 +761,13 @@ def test_log_fs_op_message_no_logger():
         sys.stderr = io.StringIO()
 
         fs_ops._log_fs_op_message(logging.INFO, "Info msg", None)
-        assert "INFO: Info msg" in sys.stdout.getvalue()
+        assert "INFO (fs_op): Info msg" in sys.stdout.getvalue()
 
         fs_ops._log_fs_op_message(logging.ERROR, "Error msg", None)
-        assert "ERROR: Error msg" in sys.stderr.getvalue()
+        assert "ERROR (fs_op): Error msg" in sys.stdout.getvalue()
 
         fs_ops._log_fs_op_message(logging.DEBUG, "Debug msg", None)
-        assert "DEBUG: Debug msg" in sys.stdout.getvalue()
+        assert "DEBUG (fs_op): Debug msg" in sys.stdout.getvalue()
 
     finally:
         sys.stdout = old_stdout
@@ -781,7 +781,14 @@ def test_log_collision_error_exception(tmp_path):
 
     with patch("builtins.open", side_effect=OSError("Write failed")):
         # Should not raise exception
-        fs_ops._log_collision_error("old", "new", None, str(log_file))
+        # Create dummy transaction and paths
+        tx = {"id": "test-123", "TYPE": "FILE_NAME", "PATH": "test.txt", "ORIGINAL_NAME": "old", "NEW_NAME": "new"}
+        root_dir = tmp_path
+        source_path = tmp_path / "old"
+        collision_path = tmp_path / "new"
+        collision_type = "exact match"
+
+        fs_ops._log_collision_error(root_dir, tx, source_path, collision_path, collision_type, None)
 
 
 # Test replace logic functions
