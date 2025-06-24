@@ -37,10 +37,18 @@ import errno
 from striprtf.striprtf import rtf_to_text
 from isbinary import is_binary_file
 import logging
+import sys
+import contextlib
 
 from prefect import flow
 
 from . import replace_logic
+
+# Platform-specific imports for file locking
+if sys.platform == "win32":
+    import msvcrt
+else:
+    import fcntl
 
 # Type alias for logger types to avoid repetition
 # Note: LoggerAdapter is not generic in Python 3.10, so we use Any
@@ -83,6 +91,44 @@ RETRYABLE_OS_ERRORNOS = {
     errno.ETXTBSY,
 }
 
+
+def open_file_with_encoding(
+    file_path: Path,
+    mode: str = "r",
+    encoding: str | None = None,
+    logger: LoggerType = None,
+) -> Any:
+    """Open a file with proper encoding detection and error handling.
+
+    Args:
+        file_path: Path to the file
+        mode: File open mode
+        encoding: Encoding to use (if None, will detect)
+        logger: Optional logger instance
+
+    Returns:
+        File handle
+
+    Raises:
+        IOError: If file cannot be opened
+    """
+    if encoding is None and "b" not in mode:
+        encoding = get_file_encoding(file_path, logger=logger)
+
+    try:
+        if "b" in mode:
+            return open(file_path, mode)
+        else:
+            return open(file_path, mode, encoding=encoding, errors="surrogateescape", newline="")
+    except OSError as e:
+        _log_fs_op_message(
+            logging.ERROR,
+            f"Cannot open file {file_path} in mode '{mode}' with encoding '{encoding}': {e}",
+            logger,
+        )
+        raise
+
+
 # ANSI escape codes for interactive mode
 GREEN_FG = "\033[32m"
 YELLOW_FG = "\033[33m"
@@ -93,6 +139,61 @@ RED_FG = "\033[31m"
 DIM_STYLE = "\033[2m"
 BOLD_STYLE = "\033[1m"
 RESET_STYLE = "\033[0m"
+
+
+@contextlib.contextmanager
+def file_lock(file_handle: Any, exclusive: bool = True, timeout: float = 10.0) -> Iterator[Any]:
+    """Cross-platform file locking context manager.
+
+    Args:
+        file_handle: Open file handle to lock
+        exclusive: If True, acquire exclusive lock; if False, shared lock
+        timeout: Maximum seconds to wait for lock
+
+    Raises:
+        TimeoutError: If lock cannot be acquired within timeout
+    """
+    locked = False
+    start_time = time.time()
+
+    try:
+        while True:
+            try:
+                if sys.platform == "win32":
+                    # Windows file locking
+                    if exclusive:
+                        msvcrt.locking(file_handle.fileno(), msvcrt.LK_NBLCK, 1)
+                    else:
+                        # Windows doesn't have shared locks, use exclusive
+                        msvcrt.locking(file_handle.fileno(), msvcrt.LK_NBLCK, 1)
+                else:
+                    # Unix file locking
+                    if exclusive:
+                        fcntl.flock(file_handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    else:
+                        fcntl.flock(file_handle.fileno(), fcntl.LOCK_SH | fcntl.LOCK_NB)
+                locked = True
+                break
+            except (IOError, OSError) as e:
+                if e.errno in (errno.EAGAIN, errno.EACCES, errno.EWOULDBLOCK):
+                    # Lock is held by another process
+                    if time.time() - start_time > timeout:
+                        raise TimeoutError(f"Could not acquire file lock within {timeout} seconds")
+                    time.sleep(0.1)  # Brief pause before retry
+                else:
+                    raise
+
+        yield file_handle
+
+    finally:
+        if locked:
+            try:
+                if sys.platform == "win32":
+                    msvcrt.locking(file_handle.fileno(), msvcrt.LK_UNLCK, 1)
+                else:
+                    fcntl.flock(file_handle.fileno(), fcntl.LOCK_UN)
+            except (IOError, OSError):
+                pass  # Best effort unlock
 
 
 class TransactionType(str, Enum):
@@ -111,7 +212,13 @@ class TransactionStatus(str, Enum):
 
 
 def _log_fs_op_message(level: int, message: str, logger: LoggerType = None) -> None:
-    """Helper to log messages using provided logger or print as fallback for fs_operations."""
+    """Helper to log messages using provided logger or print as fallback for fs_operations.
+
+    Args:
+        level: Logging level (e.g., logging.INFO, logging.ERROR)
+        message: Message to log
+        logger: Optional logger instance. If None, prints to stdout/stderr
+    """
     if logger:
         logger.log(level, message)
     else:
@@ -135,7 +242,16 @@ def _log_collision_error(
     collision_type: str | None,
     logger: LoggerType = None,
 ) -> None:
-    """Log collision errors to a dedicated file."""
+    """Log collision errors to a dedicated file.
+
+    Args:
+        root_dir: Root directory of the project
+        tx: Transaction dictionary containing rename information
+        source_path: Source path that would be renamed
+        collision_path: Path that already exists causing the collision
+        collision_type: Type of collision (e.g., "exact match", "case-insensitive match")
+        logger: Optional logger instance
+    """
     collision_log_path = root_dir / COLLISIONS_ERRORS_LOG_FILE
 
     try:
@@ -297,10 +413,50 @@ def _walk_for_scan(
     Yields:
         Paths to process
     """
+    # Track visited symlinks to prevent loops
+    visited_symlinks: set[Path] = set()
+
     for item_path_from_rglob in root_dir.rglob("*"):
         try:
-            if ignore_symlinks and item_path_from_rglob.is_symlink():
-                continue
+            # Check for symlink loops
+            if item_path_from_rglob.is_symlink():
+                if ignore_symlinks:
+                    continue
+
+                # Resolve symlink to detect loops
+                try:
+                    real_path = item_path_from_rglob.resolve(strict=False)
+                    # Check if we've already visited this real path via another symlink
+                    if real_path in visited_symlinks:
+                        _log_fs_op_message(
+                            logging.WARNING,
+                            f"Symlink loop detected: {item_path_from_rglob} -> {real_path}. Skipping.",
+                            logger,
+                        )
+                        continue
+                    visited_symlinks.add(real_path)
+
+                    # Also check if symlink points to a parent directory (would cause infinite recursion)
+                    try:
+                        root_real = root_dir.resolve(strict=False)
+                        if root_real in real_path.parents:
+                            _log_fs_op_message(
+                                logging.WARNING,
+                                f"Symlink points to parent directory: {item_path_from_rglob} -> {real_path}. Skipping.",
+                                logger,
+                            )
+                            continue
+                    except (OSError, ValueError):
+                        pass  # Continue if we can't resolve paths
+
+                except Exception as e:
+                    _log_fs_op_message(
+                        logging.WARNING,
+                        f"Could not resolve symlink {item_path_from_rglob}: {e}. Skipping.",
+                        logger,
+                    )
+                    continue
+
             is_excluded_by_dir_arg = any(item_path_from_rglob == ex_dir or (ex_dir.is_dir() and str(item_path_from_rglob).startswith(str(ex_dir) + os.sep)) for ex_dir in excluded_dirs_abs)
             if is_excluded_by_dir_arg:
                 continue
@@ -592,26 +748,65 @@ def scan_directory_for_occurrences(
                         )
                         if raw_keys_for_binary_search:
                             try:
+                                # Process binary file in chunks to avoid memory exhaustion
+                                BINARY_CHUNK_SIZE = 1_048_576  # 1MB chunks
                                 with open(item_abs_path, "rb") as bf:
-                                    content_bytes = bf.read()
-                                for key_str in raw_keys_for_binary_search:
-                                    try:
-                                        key_bytes = key_str.encode("utf-8")
-                                    except UnicodeEncodeError:
+                                    # Pre-encode keys for efficiency
+                                    encoded_keys = []
+                                    for key_str in raw_keys_for_binary_search:
+                                        try:
+                                            encoded_keys.append((key_str, key_str.encode("utf-8")))
+                                        except UnicodeEncodeError:
+                                            continue
+
+                                    if not encoded_keys:
                                         continue
-                                    offset = 0
+
+                                    # Track global offset for reporting
+                                    global_offset = 0
+                                    overlap_size = max(len(kb[1]) for kb in encoded_keys) - 1
+
+                                    # Process file in chunks with overlap
                                     while True:
-                                        idx = content_bytes.find(key_bytes, offset)
-                                        if idx == -1:
+                                        chunk = bf.read(BINARY_CHUNK_SIZE)
+                                        if not chunk:
                                             break
-                                        # Ensure relative path is used in log
-                                        if not Path(relative_path_str).is_absolute():
-                                            log_path_str = relative_path_str
+
+                                        # For subsequent chunks, prepend overlap from previous chunk
+                                        if global_offset > 0 and overlap_size > 0:
+                                            # Seek back to get overlap
+                                            bf.seek(global_offset - overlap_size)
+                                            overlap_chunk = bf.read(overlap_size)
+                                            chunk = overlap_chunk + chunk
+                                            search_offset = -overlap_size
                                         else:
-                                            log_path_str = str(item_abs_path.relative_to(root_dir)).replace("\\", "/")
-                                        with open(binary_log_path, "a", encoding="utf-8") as log_f:
-                                            log_f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - MATCH: File: {log_path_str}, Key: '{key_str}', Offset: {idx}\n")
-                                        offset = idx + len(key_bytes)
+                                            search_offset = 0
+
+                                        # Search for each key in this chunk
+                                        for key_str, key_bytes in encoded_keys:
+                                            offset = 0
+                                            while True:
+                                                idx = chunk.find(key_bytes, offset)
+                                                if idx == -1:
+                                                    break
+                                                # Only report if match is not in overlap region of subsequent chunks
+                                                if idx >= search_offset:
+                                                    actual_offset = global_offset + idx - (0 if search_offset >= 0 else -search_offset)
+                                                    # Ensure relative path is used in log
+                                                    if not Path(relative_path_str).is_absolute():
+                                                        log_path_str = relative_path_str
+                                                    else:
+                                                        log_path_str = str(item_abs_path.relative_to(root_dir)).replace("\\", "/")
+                                                    with open(binary_log_path, "a", encoding="utf-8") as log_f:
+                                                        log_f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - MATCH: File: {log_path_str}, Key: '{key_str}', Offset: {actual_offset}\n")
+                                                offset = idx + len(key_bytes)
+
+                                        # Update global offset
+                                        global_offset += len(chunk) - (0 if search_offset >= 0 else -search_offset)
+
+                                        # If we read less than chunk size, we're at EOF
+                                        if len(chunk) < BINARY_CHUNK_SIZE + (overlap_size if global_offset > BINARY_CHUNK_SIZE else 0):
+                                            break
                             except OSError as e_bin_read:
                                 _log_fs_op_message(
                                     logging.WARNING,
@@ -663,25 +858,12 @@ def scan_directory_for_occurrences(
                     else:
                         file_encoding = get_file_encoding(item_abs_path, logger=logger) or DEFAULT_ENCODING_FALLBACK
                         try:
-                            with open(
-                                item_abs_path,
-                                "r",
-                                encoding=file_encoding,
-                                errors="surrogateescape",
-                                newline="",
-                            ) as f_scan:
+                            with open_file_with_encoding(item_abs_path, "r", file_encoding, logger) as f_scan:
                                 file_content_for_scan = f_scan.read()
                         except OSError as e_txt_read:
                             _log_fs_op_message(
                                 logging.WARNING,
-                                f"OS error reading text file {item_abs_path} (enc:{file_encoding}): {e_txt_read}",
-                                logger,
-                            )
-                            continue
-                        except Exception as e_txt_proc:  # Catch other errors like LookupError for encoding
-                            _log_fs_op_message(
-                                logging.WARNING,
-                                f"Error reading text file {item_abs_path} (enc:{file_encoding}): {e_txt_proc}",
+                                f"OS error reading text file {item_abs_path}: {e_txt_read}",
                                 logger,
                             )
                             continue
@@ -748,7 +930,7 @@ def save_transactions(
     logger: LoggerType = None,
 ) -> None:
     """
-    Save the list of transactions to a JSON file atomically.
+    Save the list of transactions to a JSON file atomically with file locking.
 
     Args:
         transactions: List of transaction dictionaries
@@ -762,9 +944,18 @@ def save_transactions(
     temp_file_path = transactions_file_path.with_suffix(f".tmp.{uuid.uuid4().hex[:8]}")
     try:
         with open(temp_file_path, "w", encoding="utf-8") as f:
-            json.dump(transactions, f, indent=2, ensure_ascii=False)
+            with file_lock(f, exclusive=True):
+                json.dump(transactions, f, indent=2, ensure_ascii=False)
         # Atomically replace original file
         os.replace(temp_file_path, transactions_file_path)
+    except TimeoutError as e:
+        _log_fs_op_message(logging.ERROR, f"Could not acquire lock to save transactions: {e}", logger)
+        try:
+            if temp_file_path.exists():
+                os.remove(temp_file_path)
+        except (IOError, OSError):
+            pass
+        raise
     except Exception as e:
         _log_fs_op_message(logging.ERROR, f"Error saving transactions: {e}", logger)
         try:
@@ -781,7 +972,7 @@ def save_transactions(
 
 def load_transactions(transactions_file_path: Path, logger: LoggerType = None) -> list[dict[str, Any]] | None:
     """
-    Load transactions from a JSON file.
+    Load transactions from a JSON file with file locking.
 
     Args:
         transactions_file_path: Path to the transactions file
@@ -799,7 +990,8 @@ def load_transactions(transactions_file_path: Path, logger: LoggerType = None) -
         return None
     try:
         with open(transactions_file_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
+            with file_lock(f, exclusive=False):  # Shared lock for reading
+                data = json.load(f)
         if not isinstance(data, list):
             _log_fs_op_message(
                 logging.ERROR,
@@ -808,6 +1000,13 @@ def load_transactions(transactions_file_path: Path, logger: LoggerType = None) -
             )
             return None
         return data
+    except TimeoutError as e:
+        _log_fs_op_message(
+            logging.ERROR,
+            f"Could not acquire lock to read transactions: {e}",
+            logger,
+        )
+        return None
     except Exception as e:
         _log_fs_op_message(
             logging.ERROR,
@@ -824,9 +1023,17 @@ def update_transaction_status_in_list(
     error_message: str | None = None,
     logger: LoggerType = None,
 ) -> bool:
-    """
-    Update the status and optional error message of a transaction in the list by id.
-    Returns True if updated, False if not found.
+    """Update the status and optional error message of a transaction in the list by id.
+
+    Args:
+        transactions: List of transaction dictionaries to update
+        transaction_id: ID of the transaction to update
+        new_status: New status to set
+        error_message: Optional error message to add
+        logger: Optional logger instance
+
+    Returns:
+        True if transaction was found and updated, False otherwise
     """
     for tx in transactions:
         if tx.get("id") == transaction_id:
@@ -865,7 +1072,7 @@ def _execute_rename_transaction(
         return TransactionStatus.FAILED, f"Path not found: {current_abs_path}", False
 
     if new_name == original_name:
-        return TransactionStatus.SKIPPED, "No change needed", False
+        return TransactionStatus.SKIPPED, f"No change needed: '{original_name}' would remain the same", False
 
     new_abs_path = current_abs_path.parent / new_name
 
@@ -960,13 +1167,7 @@ def _execute_content_line_transaction(
         current_abs_path = _get_current_absolute_path(relative_path_str, root_dir, path_translation_map, path_cache, dry_run=False)
 
         # Read file with original encoding
-        with open(
-            current_abs_path,
-            "r",
-            encoding=file_encoding,
-            errors="surrogateescape",
-            newline="",
-        ) as f:
+        with open_file_with_encoding(current_abs_path, "r", file_encoding, logger) as f:
             lines = f.readlines()  # Preserve line endings
 
         if line_no - 1 < 0 or line_no - 1 >= len(lines):
@@ -987,13 +1188,7 @@ def _execute_content_line_transaction(
         lines[line_no - 1] = new_line_content
 
         # Write back with same encoding
-        with open(
-            current_abs_path,
-            "w",
-            encoding=file_encoding,
-            errors="surrogateescape",
-            newline="",
-        ) as f:
+        with open_file_with_encoding(current_abs_path, "w", file_encoding, logger) as f:
             f.writelines(lines)
 
         return (TransactionStatus.COMPLETED, "", True)
@@ -1015,7 +1210,7 @@ def _execute_file_content_batch(
         if not abs_filepath.exists():
             for tx in transactions:
                 tx["STATUS"] = TransactionStatus.FAILED.value
-                tx["ERROR_MESSAGE"] = "File not found"
+                tx["ERROR_MESSAGE"] = f"File not found: {abs_filepath}"
             return (0, 0, len(transactions))
 
         file_encoding = transactions[0].get("ORIGINAL_ENCODING", DEFAULT_ENCODING_FALLBACK)
@@ -1026,13 +1221,7 @@ def _execute_file_content_batch(
                 tx["ERROR_MESSAGE"] = "RTF content modification not supported"
             return (0, 0, len(transactions))
 
-        with open(
-            abs_filepath,
-            "r",
-            encoding=file_encoding,
-            errors="surrogateescape",
-            newline="",
-        ) as f:
+        with open_file_with_encoding(abs_filepath, "r", file_encoding, logger) as f:
             lines = f.readlines()
 
         # Apply replacements
@@ -1051,13 +1240,7 @@ def _execute_file_content_batch(
                 tx["ERROR_MESSAGE"] = f"Line number {line_no} out of range"
 
         # Write back
-        with open(
-            abs_filepath,
-            "w",
-            encoding=file_encoding,
-            errors="surrogateescape",
-            newline="",
-        ) as f:
+        with open_file_with_encoding(abs_filepath, "w", file_encoding, logger) as f:
             f.writelines(lines)
 
         completed = sum(1 for tx in transactions if tx.get("STATUS") == TransactionStatus.COMPLETED.value)
@@ -1110,20 +1293,8 @@ def process_large_file_content(
     temp_file = abs_filepath.with_suffix(f".tmp.{uuid.uuid4().hex[:8]}")
 
     try:
-        with open(
-            abs_filepath,
-            "r",
-            encoding=file_encoding,
-            errors="surrogateescape",
-            newline="",
-        ) as src_file:
-            with open(
-                temp_file,
-                "w",
-                encoding=file_encoding,
-                errors="surrogateescape",
-                newline="",
-            ) as dst_file:
+        with open_file_with_encoding(abs_filepath, "r", file_encoding, logger) as src_file:
+            with open_file_with_encoding(temp_file, "w", file_encoding, logger) as dst_file:
                 # Track state between lines
                 current_line = 1
 
@@ -1226,7 +1397,7 @@ def process_large_file_content(
         try:
             if temp_file.exists():
                 os.remove(temp_file)
-        except Exception:
+        except (IOError, OSError):
             pass
 
 
@@ -1239,7 +1410,20 @@ def group_and_process_file_transactions(
     skip_content: bool,
     logger: LoggerType = None,
 ) -> None:
-    """Group transactions by file and process them efficiently"""
+    """Group transactions by file and process them efficiently.
+
+    Groups content line transactions by their target file and processes
+    each file once, applying all changes in a single pass for efficiency.
+
+    Args:
+        transactions: List of FILE_CONTENT_LINE transactions to process
+        root_dir: Root directory of the project
+        path_translation_map: Map of original paths to renamed paths
+        path_cache: Cache of resolved paths
+        dry_run: If True, simulate without actual changes
+        skip_content: If True, skip all content modifications
+        logger: Optional logger instance
+    """
     # Group transactions by file path
     file_groups = {}
     for tx in transactions:
@@ -1640,17 +1824,19 @@ def execute_all_transactions(
                 finished = True
 
     # After rename and individual transaction processing, process content transactions grouped by file
+    # Only process content transactions that are still pending (not already handled in dry-run)
     content_txs = [tx for tx in transactions if tx["TYPE"] == TransactionType.FILE_CONTENT_LINE.value and tx["STATUS"] == TransactionStatus.PENDING.value]
 
-    group_and_process_file_transactions(
-        content_txs,
-        root_dir,
-        path_translation_map,
-        path_cache,
-        dry_run,
-        skip_content,
-        logger,
-    )
+    if content_txs:  # Only process if there are pending content transactions
+        group_and_process_file_transactions(
+            content_txs,
+            root_dir,
+            path_translation_map,
+            path_cache,
+            dry_run,
+            skip_content,
+            logger,
+        )
 
     # Update stats for content transactions after batch processing
     stats["completed"] += sum(1 for tx in content_txs if tx.get("STATUS") == TransactionStatus.COMPLETED.value)
