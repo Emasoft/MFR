@@ -209,12 +209,17 @@ class TestGetLogger:
         logger = logging.getLogger("mass_find_replace")
         logger.handlers.clear()
 
-        with patch.dict("sys.modules"):
-            # Remove prefect modules
-            for key in list(sys.modules.keys()):
-                if key.startswith("prefect"):
-                    del sys.modules[key]
+        # Mock the import to raise ImportError when importing prefect
+        import builtins
 
+        original_import = builtins.__import__
+
+        def mock_import(name, *args, **kwargs):
+            if name == "prefect" or name.startswith("prefect."):
+                raise ImportError(f"No module named '{name}'")
+            return original_import(name, *args, **kwargs)
+
+        with patch("builtins.__import__", side_effect=mock_import):
             logger = _get_logger(verbose_mode=True)
             assert isinstance(logger, logging.Logger)
             assert logger.level == logging.DEBUG
