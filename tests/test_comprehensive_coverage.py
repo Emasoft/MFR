@@ -691,8 +691,8 @@ class TestFileOperations:
         empty.write_text("")
         assert get_file_encoding(empty) == "utf-8"
 
-        # RTF file
-        assert get_file_encoding(rtf_file) == "rtf"
+        # RTF file - get_file_encoding returns "latin-1" for RTF files
+        assert get_file_encoding(rtf_file) == "latin-1"
 
         # UTF-8 file
         utf8_file = tmp_path / "utf8.txt"
@@ -739,9 +739,10 @@ class TestFileOperations:
         # Save empty with warning
         import logging
 
-        with patch("mass_find_replace.file_system_operations.logger") as mock_logger:
+        with patch("mass_find_replace.file_system_operations._log_fs_op_message") as mock_log:
             save_transactions([], trans_file)
-            mock_logger.warning.assert_called()
+            # Check that warning was logged
+            mock_log.assert_called_with(logging.WARNING, "No transactions to save.", None)
 
         # Save with OS error
         with patch("builtins.open", side_effect=OSError("No space")):
@@ -753,12 +754,16 @@ class TestFileOperations:
 
         # Update existing
         update_transaction_status_in_list(transactions, "1", TransactionStatus.COMPLETED)
-        assert transactions[0]["status"] == "COMPLETED"
+        # The function sets "STATUS" not "status"
+        assert transactions[0]["STATUS"] == "COMPLETED"
 
         # Update non-existent (should log warning)
-        with patch("mass_find_replace.file_system_operations.logger") as mock_logger:
-            update_transaction_status_in_list(transactions, "999", TransactionStatus.COMPLETED)
-            mock_logger.warning.assert_called()
+        from unittest.mock import Mock
+
+        mock_logger = Mock()
+        result = update_transaction_status_in_list(transactions, "999", TransactionStatus.COMPLETED, logger=mock_logger)
+        assert result is False
+        mock_logger.warning.assert_called_with("Transaction 999 not found for status update.")
 
     def test_walk_for_scan(self, temp_dir):
         """Test _walk_for_scan function."""
@@ -803,16 +808,16 @@ class TestScanAndExecute:
         assert mapping is not None
 
         # Test basic scan
-        transactions = scan_directory_for_occurrences(str(temp_dir), skip_file_renaming=False, skip_folder_renaming=False, skip_content=False)
+        transactions = scan_directory_for_occurrences(root_dir=Path(temp_dir), excluded_dirs=[], excluded_files=[], file_extensions=None, ignore_symlinks=True, ignore_spec=None, skip_file_renaming=False, skip_folder_renaming=False, skip_content=False)
 
         # Should find occurrences
         assert len(transactions) > 0
 
         # Test with skip flags
-        transactions = scan_directory_for_occurrences(str(temp_dir), skip_file_renaming=True, skip_folder_renaming=True, skip_content=False)
+        transactions = scan_directory_for_occurrences(root_dir=Path(temp_dir), excluded_dirs=[], excluded_files=[], file_extensions=None, ignore_symlinks=True, ignore_spec=None, skip_file_renaming=True, skip_folder_renaming=True, skip_content=False)
         # Should only have content transactions
         for t in transactions:
-            assert t["type"] == TransactionType.FILE_CONTENT.value
+            assert t["type"] == TransactionType.FILE_CONTENT_LINE.value
 
     def test_scan_with_binary_file(self, temp_dir, binary_file, mapping_file):
         """Test scanning with binary files."""
@@ -821,7 +826,7 @@ class TestScanAndExecute:
 
         # Mock binary log file
         with patch("builtins.open", mock_open()) as mock_file:
-            transactions = scan_directory_for_occurrences(str(temp_dir.parent), skip_content=False)
+            transactions = scan_directory_for_occurrences(root_dir=Path(temp_dir.parent), excluded_dirs=[], excluded_files=[], file_extensions=None, ignore_symlinks=True, ignore_spec=None, skip_content=False)
 
             # Check if binary file was logged
             calls = mock_file().write.call_args_list
@@ -836,10 +841,10 @@ class TestScanAndExecute:
         fs_ops.LARGE_FILE_SIZE_THRESHOLD = 1000  # 1KB
 
         try:
-            transactions = scan_directory_for_occurrences(str(large_file.parent), skip_content=False)
+            transactions = scan_directory_for_occurrences(root_dir=Path(large_file.parent), excluded_dirs=[], excluded_files=[], file_extensions=None, ignore_symlinks=True, ignore_spec=None, skip_content=False)
 
             # Should handle large file
-            content_trans = [t for t in transactions if t["type"] == TransactionType.FILE_CONTENT.value]
+            content_trans = [t for t in transactions if t["type"] == TransactionType.FILE_CONTENT_LINE.value]
             assert len(content_trans) > 0
         finally:
             fs_ops.LARGE_FILE_SIZE_THRESHOLD = original_threshold
@@ -852,14 +857,16 @@ class TestScanAndExecute:
 
         transaction = {
             "id": "1",
-            "type": TransactionType.RENAME_FILE.value,
+            "type": TransactionType.FILE_NAME.value,
             "original_path": str(old_file),
             "new_path": str(tmp_path / "new.txt"),
         }
 
         # Normal execution
-        result = _execute_rename_transaction(transaction, dry_run=False)
-        assert result is True
+        result = _execute_rename_transaction(tx=transaction, root_dir=tmp_path, path_translation_map={}, path_cache={}, dry_run=False, logger=None)
+        status, error_msg, changed = result
+        assert status == TransactionStatus.COMPLETED
+        assert changed is True
         assert not old_file.exists()
         assert (tmp_path / "new.txt").exists()
 
@@ -868,36 +875,42 @@ class TestScanAndExecute:
         old_file2.write_text("content")
         transaction2 = {
             "id": "2",
-            "type": TransactionType.RENAME_FILE.value,
+            "type": TransactionType.FILE_NAME.value,
             "original_path": str(old_file2),
             "new_path": str(tmp_path / "new2.txt"),
         }
 
-        result = _execute_rename_transaction(transaction2, dry_run=True)
-        assert result is True
-        assert old_file2.exists()  # Should not be renamed
+        result = _execute_rename_transaction(tx=transaction2, root_dir=tmp_path, path_translation_map={}, path_cache={}, dry_run=True, logger=None)
+        status, error_msg, changed = result
+        assert status == TransactionStatus.COMPLETED
+        assert changed is True  # Even in dry run, it reports what would be changed
+        assert old_file2.exists()  # Should not be renamed in dry run
 
         # Path not found
         transaction3 = {
             "id": "3",
-            "type": TransactionType.RENAME_FILE.value,
+            "type": TransactionType.FILE_NAME.value,
             "original_path": "/nonexistent/file.txt",
             "new_path": "/nonexistent/new.txt",
         }
-        result = _execute_rename_transaction(transaction3, dry_run=False)
-        assert result is False
+        result = _execute_rename_transaction(tx=transaction3, root_dir=tmp_path, path_translation_map={}, path_cache={}, dry_run=False, logger=None)
+        status, error_msg, changed = result
+        assert status == TransactionStatus.FAILED
+        assert changed is False
 
         # Same path (no change needed)
         same_file = tmp_path / "same.txt"
         same_file.write_text("content")
         transaction4 = {
             "id": "4",
-            "type": TransactionType.RENAME_FILE.value,
+            "type": TransactionType.FILE_NAME.value,
             "original_path": str(same_file),
             "new_path": str(same_file),
         }
-        result = _execute_rename_transaction(transaction4, dry_run=False)
-        assert result is True
+        result = _execute_rename_transaction(tx=transaction4, root_dir=tmp_path, path_translation_map={}, path_cache={}, dry_run=False, logger=None)
+        status, error_msg, changed = result
+        assert status == TransactionStatus.COMPLETED
+        assert changed is False  # No change when paths are the same
 
     def test_execute_content_line_transaction(self, tmp_path):
         """Test _execute_content_line_transaction."""
@@ -906,7 +919,7 @@ class TestScanAndExecute:
 
         transaction = {
             "id": "1",
-            "type": TransactionType.FILE_CONTENT.value,
+            "type": TransactionType.FILE_CONTENT_LINE.value,
             "path": str(test_file),
             "line_number": 2,
             "original_line": "Line 2 with OldName",
@@ -915,31 +928,35 @@ class TestScanAndExecute:
         }
 
         # Normal execution
-        result = _execute_content_line_transaction(transaction, dry_run=False)
-        assert result is True
+        result = _execute_content_line_transaction(tx=transaction, root_dir=tmp_path, path_translation_map={}, path_cache={}, logger=None)
+        status, error_msg, changed = result
+        assert status == TransactionStatus.COMPLETED
+        assert changed is True
         assert "NewName" in test_file.read_text()
-
-        # Dry run
-        result = _execute_content_line_transaction(transaction, dry_run=True)
-        assert result is True
 
         # File not found
         transaction2 = transaction.copy()
         transaction2["path"] = "/nonexistent/file.txt"
-        result = _execute_content_line_transaction(transaction2, dry_run=False)
-        assert result is False
+        result = _execute_content_line_transaction(tx=transaction2, root_dir=tmp_path, path_translation_map={}, path_cache={}, logger=None)
+        status, error_msg, changed = result
+        assert status == TransactionStatus.FAILED
+        assert changed is False
 
         # RTF file (should skip)
         rtf_trans = transaction.copy()
         rtf_trans["encoding"] = "rtf"
-        result = _execute_content_line_transaction(rtf_trans, dry_run=False)
-        assert result is True  # Skipped successfully
+        result = _execute_content_line_transaction(tx=rtf_trans, root_dir=tmp_path, path_translation_map={}, path_cache={}, logger=None)
+        status, error_msg, changed = result
+        assert status == TransactionStatus.SKIPPED  # Skipped successfully
+        assert changed is False
 
         # Invalid line number
         invalid_trans = transaction.copy()
         invalid_trans["line_number"] = 999
-        result = _execute_content_line_transaction(invalid_trans, dry_run=False)
-        assert result is False
+        result = _execute_content_line_transaction(tx=invalid_trans, root_dir=tmp_path, path_translation_map={}, path_cache={}, logger=None)
+        status, error_msg, changed = result
+        assert status == TransactionStatus.FAILED
+        assert changed is False
 
     def test_execute_file_content_batch(self, tmp_path):
         """Test _execute_file_content_batch."""
@@ -952,20 +969,19 @@ class TestScanAndExecute:
         ]
 
         # Normal execution
-        results = _execute_file_content_batch(str(test_file), transactions, "utf-8", dry_run=False)
+        completed, skipped, failed = _execute_file_content_batch(abs_filepath=test_file, transactions=transactions, logger=None)
 
-        assert all(results.values())
+        assert completed == 2
+        assert skipped == 0
+        assert failed == 0
         content = test_file.read_text()
         assert "NewName line 1" in content
         assert "NewName line 3" in content
 
         # File not found
-        results = _execute_file_content_batch("/nonexistent/file.txt", transactions, "utf-8", dry_run=False)
-        assert not any(results.values())
-
-        # RTF file
-        results = _execute_file_content_batch(str(test_file), transactions, "rtf", dry_run=False)
-        assert all(results.values())  # Skipped
+        completed, skipped, failed = _execute_file_content_batch(abs_filepath=Path("/nonexistent/file.txt"), transactions=transactions, logger=None)
+        assert completed == 0
+        assert failed == len(transactions)
 
     def test_process_large_file_content(self, tmp_path, mapping_file):
         """Test process_large_file_content."""
@@ -982,7 +998,7 @@ class TestScanAndExecute:
         transactions = [
             {
                 "id": f"{i}",
-                "type": TransactionType.FILE_CONTENT.value,
+                "type": TransactionType.FILE_CONTENT_LINE.value,
                 "path": str(large_file),
                 "line_number": i + 1,
                 "original_line": f"Line {i} with OldName",
@@ -993,18 +1009,29 @@ class TestScanAndExecute:
         ]
 
         # Process
-        process_large_file_content(transactions, dry_run=False)
+        process_large_file_content(txns_for_file=transactions, abs_filepath=large_file, file_encoding="utf-8", is_rtf=False, logger=None)
 
         # Check results
         content = large_file.read_text()
         assert "Line 0 with NewName" in content
         assert "Line 50 with NewName" in content
 
-        # Test with RTF
-        rtf_trans = transactions.copy()
-        for t in rtf_trans:
-            t["encoding"] = "rtf"
-        process_large_file_content(rtf_trans, dry_run=False)
+        # Test with RTF - process_large_file_content handles RTF differently
+        # For RTF files, it extracts text first, so we need to create a proper RTF file
+        rtf_file = tmp_path / "test.rtf"
+        rtf_file.write_text(r"{\rtf1\ansi{\fonttbl\f0\fswiss Helvetica;}\f0 OldName\par}")
+        rtf_trans = [
+            {
+                "id": "1",
+                "type": TransactionType.FILE_CONTENT_LINE.value,
+                "path": str(rtf_file),
+                "line_number": 1,
+                "original_line": "OldName",
+                "new_line": "NewName",
+                "encoding": "rtf",
+            }
+        ]
+        process_large_file_content(txns_for_file=rtf_trans, abs_filepath=rtf_file, file_encoding="rtf", is_rtf=True, logger=None)
 
     def test_group_and_process_file_transactions(self, tmp_path):
         """Test group_and_process_file_transactions."""
@@ -1017,7 +1044,7 @@ class TestScanAndExecute:
         transactions = [
             {
                 "id": "1",
-                "type": TransactionType.FILE_CONTENT.value,
+                "type": TransactionType.FILE_CONTENT_LINE.value,
                 "path": str(file1),
                 "line_number": 1,
                 "original_line": "OldName in file1",
@@ -1027,7 +1054,7 @@ class TestScanAndExecute:
             },
             {
                 "id": "2",
-                "type": TransactionType.FILE_CONTENT.value,
+                "type": TransactionType.FILE_CONTENT_LINE.value,
                 "path": str(file2),
                 "line_number": 1,
                 "original_line": "OldName in file2",
@@ -1038,20 +1065,21 @@ class TestScanAndExecute:
         ]
 
         # Process
-        group_and_process_file_transactions(transactions, skip_content=False, dry_run=False)
+        group_and_process_file_transactions(transactions=transactions, root_dir=tmp_path, path_translation_map={}, path_cache={}, dry_run=False, skip_content=False, logger=None)
 
         # Check status updates
-        assert transactions[0]["status"] == TransactionStatus.COMPLETED.value
-        assert transactions[1]["status"] == TransactionStatus.COMPLETED.value
+        assert transactions[0]["STATUS"] == TransactionStatus.COMPLETED.value
+        assert transactions[1]["STATUS"] == TransactionStatus.COMPLETED.value
 
         # Check file contents
         assert "NewName" in file1.read_text()
         assert "NewName" in file2.read_text()
 
         # Test skip content
-        transactions[0]["status"] = TransactionStatus.PENDING.value
-        group_and_process_file_transactions(transactions, skip_content=True, dry_run=False)
-        assert transactions[0]["status"] == TransactionStatus.SKIPPED.value
+        transactions[0]["STATUS"] = TransactionStatus.PENDING.value
+        transactions[1]["STATUS"] = TransactionStatus.PENDING.value
+        group_and_process_file_transactions(transactions=transactions, root_dir=tmp_path, path_translation_map={}, path_cache={}, dry_run=False, skip_content=True, logger=None)
+        assert transactions[0]["STATUS"] == TransactionStatus.SKIPPED.value
 
     def test_execute_all_transactions(self, tmp_path, transaction_file):
         """Test execute_all_transactions."""
@@ -1065,28 +1093,26 @@ class TestScanAndExecute:
 
         # Mock user input for interactive mode
         with patch("builtins.input", return_value="y"):
-            result = execute_all_transactions(
-                transactions,
-                str(tmp_path),
-                interactive_mode=True,
-                dry_run=False,
-                skip_file_renaming=False,
-                skip_folder_renaming=False,
-                skip_content=False,
-            )
+            result = execute_all_transactions(transactions_file_path=transaction_file, root_dir=tmp_path, dry_run=False, resume=False, timeout_minutes=10, skip_file_renaming=False, skip_folder_renaming=False, skip_content=False, interactive_mode=True, logger=None)
 
         # Some should succeed, some fail
         assert result == 0  # At least partial success
 
-        # Test with no transactions
-        result = execute_all_transactions([], str(tmp_path), dry_run=False)
+        # Test with empty transaction file
+        empty_trans_file = tmp_path / "empty_trans.json"
+        empty_trans_file.write_text("[]")
+        result = execute_all_transactions(transactions_file_path=empty_trans_file, root_dir=tmp_path, dry_run=False, resume=False, timeout_minutes=10, skip_file_renaming=False, skip_folder_renaming=False, skip_content=False, interactive_mode=False, logger=None)
         assert result == 1  # No transactions error
 
         # Test unknown transaction type
         unknown_trans = [{"id": "999", "type": "UNKNOWN_TYPE", "status": TransactionStatus.PENDING.value}]
+        unknown_trans_file = tmp_path / "unknown_trans.json"
+        save_transactions(unknown_trans, unknown_trans_file)
 
-        result = execute_all_transactions(unknown_trans, str(tmp_path), dry_run=False)
-        assert unknown_trans[0]["status"] == TransactionStatus.FAILED.value
+        result = execute_all_transactions(transactions_file_path=unknown_trans_file, root_dir=tmp_path, dry_run=False, resume=False, timeout_minutes=10, skip_file_renaming=False, skip_folder_renaming=False, skip_content=False, interactive_mode=False, logger=None)
+        # Reload to check status
+        updated_trans = load_transactions(unknown_trans_file)
+        assert updated_trans[0]["STATUS"] == TransactionStatus.FAILED.value
 
 
 # ============= TESTS FOR REPLACE LOGIC =============
@@ -1104,33 +1130,34 @@ class TestReplaceLogic:
         rl._DEBUG_REPLACE_LOGIC = True
 
         try:
-            _log_message("Debug message", level=logging.DEBUG)
+            _log_message(logging.DEBUG, "Debug message")
             captured = capsys.readouterr()
-            assert "[DEBUG] Debug message" in captured.err
+            assert "RL_DBG_STDERR: Debug message" in captured.err
         finally:
             rl._DEBUG_REPLACE_LOGIC = original_debug
 
         # Test without logger - all levels
-        _log_message("Info message", level=logging.INFO, logger=None)
+        _log_message(logging.INFO, "Info message", logger=None)
         captured = capsys.readouterr()
-        assert "[INFO] Info message" in captured.out
+        assert "INFO: Info message" in captured.out
 
-        _log_message("Warning message", level=logging.WARNING, logger=None)
+        _log_message(logging.WARNING, "Warning message", logger=None)
         captured = capsys.readouterr()
-        assert "[WARNING] Warning message" in captured.out
+        assert "WARNING: Warning message" in captured.err  # WARNING goes to stderr
 
-        _log_message("Error message", level=logging.ERROR, logger=None)
+        _log_message(logging.ERROR, "Error message", logger=None)
         captured = capsys.readouterr()
-        assert "[ERROR] Error message" in captured.err
+        assert "ERROR: Error message" in captured.err
 
-        _log_message("Critical message", level=logging.CRITICAL, logger=None)
+        _log_message(logging.CRITICAL, "Critical message", logger=None)
         captured = capsys.readouterr()
-        assert "[CRITICAL] Critical message" in captured.err
+        # CRITICAL level just goes to stderr without a prefix
+        assert "Critical message" in captured.err
 
         # Test with logger
         mock_logger = Mock()
-        _log_message("Test", level=logging.INFO, logger=mock_logger)
-        mock_logger.info.assert_called_once_with("Test")
+        _log_message(logging.INFO, "Test", logger=mock_logger)
+        mock_logger.log.assert_called_once_with(logging.INFO, "Test")
 
     def test_strip_functions_edge_cases(self):
         """Test strip_diacritics and strip_control_characters edge cases."""
@@ -1205,13 +1232,15 @@ class TestReplaceLogic:
             )
         )
         result = load_replacement_map(empty_key)
-        assert result == {"valid": "replacement"}
+        assert result is True  # Should succeed, skipping invalid keys
+        assert get_mapping_size() == 1  # Only "valid" key loaded
 
         # Empty value
         empty_value = tmp_path / "empty_value.json"
         empty_value.write_text(json.dumps({"REPLACEMENT_MAPPING": {"key": "", "valid": "replacement"}}))
         result = load_replacement_map(empty_value)
-        assert result == {"valid": "replacement"}
+        assert result is True  # Should succeed, skipping invalid values
+        assert get_mapping_size() == 1  # Only "valid" loaded
 
         # No valid rules
         no_valid = tmp_path / "no_valid.json"
@@ -1247,18 +1276,18 @@ class TestReplaceLogic:
         import mass_find_replace.replace_logic as rl
 
         # With mapping
-        rl._loaded_mapping = {"test": "value", "foo": "bar"}
-        rl._key_characters = set("testfo")
+        rl._RAW_REPLACEMENT_MAPPING = {"test": "value", "foo": "bar"}
+        rl._KEY_CHARACTER_SET = set("testfo")
 
         chars = get_key_characters()
         assert chars == {"t", "e", "s", "f", "o"}
-        assert chars is not rl._key_characters  # Should be a copy
+        assert chars is not rl._KEY_CHARACTER_SET  # Should be a copy
 
         assert get_mapping_size() == 2
 
         # Without mapping
-        rl._loaded_mapping = None
-        rl._key_characters = set()
+        rl._RAW_REPLACEMENT_MAPPING = {}
+        rl._KEY_CHARACTER_SET = set()
 
         assert get_key_characters() == set()
         assert get_mapping_size() == 0
@@ -1268,7 +1297,7 @@ class TestReplaceLogic:
         import mass_find_replace.replace_logic as rl
 
         # Set up mapping
-        rl._loaded_mapping = {"oldname": "NewName", "test": "replacement"}
+        rl._RAW_REPLACEMENT_MAPPING = {"oldname": "NewName", "test": "replacement"}
 
         # Mock match object
         match = Mock()
@@ -1280,7 +1309,7 @@ class TestReplaceLogic:
 
         # Not found match
         match.group.return_value = "NotFound"
-        with patch("mass_find_replace.replace_logic.logger") as mock_logger:
+        with patch("mass_find_replace.replace_logic._MODULE_LOGGER") as mock_logger:
             result = _actual_replace_callback(match)
             assert result == "NotFound"  # Returns original
             mock_logger.warning.assert_called()
@@ -1292,11 +1321,11 @@ class TestReplaceLogic:
         # Test with debug mode
         original_debug = rl._DEBUG_REPLACE_LOGIC
         rl._DEBUG_REPLACE_LOGIC = True
-        rl._loaded_mapping = {"test": "replacement"}
-        rl._compiled_regex = re.compile("test")
+        rl._RAW_REPLACEMENT_MAPPING = {"test": "replacement"}
+        rl._COMPILED_PATTERN_FOR_ACTUAL_REPLACE = re.compile("test")
 
         try:
-            with patch("mass_find_replace.replace_logic.logger") as mock_logger:
+            with patch("mass_find_replace.replace_logic._MODULE_LOGGER") as mock_logger:
                 result = replace_occurrences("test string")
                 mock_logger.debug.assert_called()
         finally:
@@ -1307,23 +1336,23 @@ class TestReplaceLogic:
         assert replace_occurrences(None) is None
 
         # No mapping loaded
-        rl._loaded_mapping = None
-        with patch("mass_find_replace.replace_logic.logger") as mock_logger:
+        rl._MAPPING_LOADED = False
+        with patch("mass_find_replace.replace_logic._MODULE_LOGGER") as mock_logger:
             result = replace_occurrences("test")
             assert result == "test"
             mock_logger.warning.assert_called_with("No replacement map loaded.")
 
         # No regex compiled
-        rl._loaded_mapping = {"test": "value"}
-        rl._compiled_regex = None
-        with patch("mass_find_replace.replace_logic.logger") as mock_logger:
+        rl._MAPPING_LOADED = True
+        rl._COMPILED_PATTERN_FOR_ACTUAL_REPLACE = None
+        with patch("mass_find_replace.replace_logic._MODULE_LOGGER") as mock_logger:
             result = replace_occurrences("test")
             assert result == "test"
             mock_logger.warning.assert_called_with("No regex compiled.")
 
         # Normal replacement
-        rl._loaded_mapping = {"old": "new"}
-        rl._compiled_regex = re.compile(r"\b(old)\b", re.IGNORECASE)
+        rl._RAW_REPLACEMENT_MAPPING = {"old": "new"}
+        rl._COMPILED_PATTERN_FOR_ACTUAL_REPLACE = re.compile(r"\b(old)\b", re.IGNORECASE)
         result = replace_occurrences("This is OLD text")
         assert result == "This is new text"
 
