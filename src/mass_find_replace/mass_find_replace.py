@@ -16,7 +16,7 @@ from __future__ import annotations
 import logging
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Final
 
 from prefect import flow
 
@@ -30,16 +30,16 @@ from .file_system_operations import (
     COLLISIONS_ERRORS_LOG_FILE,
 )
 
-SCRIPT_NAME = "MFR - Mass Find Replace - A script to safely rename things in your project"
-MAIN_TRANSACTION_FILE_NAME = "planned_transactions.json"
-DEFAULT_REPLACEMENT_MAPPING_FILE = "replacement_mapping.json"
+SCRIPT_NAME: Final[str] = "MFR - Mass Find Replace - A script to safely rename things in your project"
+MAIN_TRANSACTION_FILE_NAME: Final[str] = "planned_transactions.json"
+DEFAULT_REPLACEMENT_MAPPING_FILE: Final[str] = "replacement_mapping.json"
 
-GREEN = "\033[92m"
-RED = "\033[91m"
-RESET = "\033[0m"
-YELLOW = "\033[93m"
-BLUE = "\033[94m"
-DIM = "\033[2m"
+GREEN: Final[str] = "\033[92m"
+RED: Final[str] = "\033[91m"
+RESET: Final[str] = "\033[0m"
+YELLOW: Final[str] = "\033[93m"
+BLUE: Final[str] = "\033[94m"
+DIM: Final[str] = "\033[2m"
 
 
 def _get_logger(

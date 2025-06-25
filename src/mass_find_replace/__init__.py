@@ -13,9 +13,11 @@
 
 """Mass Find Replace - Surgical find-and-replace operations."""
 
-__version__ = "0.3.0-alpha"
-__author__ = "Emasoft"
-__email__ = "713559+Emasoft@users.noreply.github.com"
+from typing import Final
+
+__version__: Final[str] = "0.3.0-alpha"
+__author__: Final[str] = "Emasoft"
+__email__: Final[str] = "713559+Emasoft@users.noreply.github.com"
 
 from .mass_find_replace import main_cli as main
 

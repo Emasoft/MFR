@@ -26,6 +26,7 @@ from typing import (
     Any,
     Optional,
     Union,
+    Final,
 )
 from collections.abc import Iterator  # Keep Any if specifically needed for dynamic parts
 from enum import Enum
@@ -55,20 +56,20 @@ else:
 LoggerType = Union[logging.Logger, Any, None]
 
 # Constants for file size thresholds
-SMALL_FILE_SIZE_THRESHOLD = 1_048_576  # 1 MB - files smaller than this are read entirely
-LARGE_FILE_SIZE_THRESHOLD = 100_000_000  # 100 MB - files larger than this are skipped for content scan
-DEFAULT_ENCODING_SAMPLE_SIZE = 10240  # 10 KB - sample size for encoding detection
+SMALL_FILE_SIZE_THRESHOLD: Final[int] = 1_048_576  # 1 MB - files smaller than this are read entirely
+LARGE_FILE_SIZE_THRESHOLD: Final[int] = 100_000_000  # 100 MB - files larger than this are skipped for content scan
+DEFAULT_ENCODING_SAMPLE_SIZE: Final[int] = 10240  # 10 KB - sample size for encoding detection
 
 # Constants for retry logic
-QUICK_RETRY_COUNT = 3  # Number of quick retries with short delay
-QUICK_RETRY_DELAY = 1  # Seconds between quick retries
-MAX_RETRY_WAIT_TIME = 30  # Maximum wait time between retries in seconds
-RETRY_BACKOFF_MULTIPLIER = 5  # Multiplier for exponential backoff
+QUICK_RETRY_COUNT: Final[int] = 3  # Number of quick retries with short delay
+QUICK_RETRY_DELAY: Final[int] = 1  # Seconds between quick retries
+MAX_RETRY_WAIT_TIME: Final[int] = 30  # Maximum wait time between retries in seconds
+RETRY_BACKOFF_MULTIPLIER: Final[int] = 5  # Multiplier for exponential backoff
 
 # Constants for large file processing
-SAFE_LINE_LENGTH_THRESHOLD = 1000  # Characters - lines longer than this use chunked processing
-CHUNK_SIZE = 1000  # Characters - chunk size for processing long lines
-FALLBACK_CHUNK_SIZE = 1000  # Characters - fallback chunk size if no safe split found
+SAFE_LINE_LENGTH_THRESHOLD: Final[int] = 1000  # Characters - lines longer than this use chunked processing
+CHUNK_SIZE: Final[int] = 1000  # Characters - chunk size for processing long lines
+FALLBACK_CHUNK_SIZE: Final[int] = 1000  # Characters - fallback chunk size if no safe split found
 
 
 class SandboxViolationError(Exception):
@@ -79,13 +80,13 @@ class MockableRetriableError(OSError):
     pass
 
 
-DEFAULT_ENCODING_FALLBACK = "utf-8"
-TRANSACTION_FILE_BACKUP_EXT = ".bak"
-SELF_TEST_ERROR_FILE_BASENAME = "error_file_test.txt"
-BINARY_MATCHES_LOG_FILE = "binary_files_matches.log"
-COLLISIONS_ERRORS_LOG_FILE = "collisions_errors.log"
+DEFAULT_ENCODING_FALLBACK: Final[str] = "utf-8"
+TRANSACTION_FILE_BACKUP_EXT: Final[str] = ".bak"
+SELF_TEST_ERROR_FILE_BASENAME: Final[str] = "error_file_test.txt"
+BINARY_MATCHES_LOG_FILE: Final[str] = "binary_files_matches.log"
+COLLISIONS_ERRORS_LOG_FILE: Final[str] = "collisions_errors.log"
 
-RETRYABLE_OS_ERRORNOS = {
+RETRYABLE_OS_ERRORNOS: Final[set[int]] = {
     errno.EACCES,
     errno.EBUSY,
     errno.ETXTBSY,
@@ -129,15 +130,15 @@ def open_file_with_encoding(
 
 
 # ANSI escape codes for interactive mode
-GREEN_FG = "\033[32m"
-YELLOW_FG = "\033[33m"
-BLUE_FG = "\033[94m"
-MAGENTA_FG = "\033[35m"
-CYAN_FG = "\033[36m"
-RED_FG = "\033[31m"
-DIM_STYLE = "\033[2m"
-BOLD_STYLE = "\033[1m"
-RESET_STYLE = "\033[0m"
+GREEN_FG: Final[str] = "\033[32m"
+YELLOW_FG: Final[str] = "\033[33m"
+BLUE_FG: Final[str] = "\033[94m"
+MAGENTA_FG: Final[str] = "\033[35m"
+CYAN_FG: Final[str] = "\033[36m"
+RED_FG: Final[str] = "\033[31m"
+DIM_STYLE: Final[str] = "\033[2m"
+BOLD_STYLE: Final[str] = "\033[1m"
+RESET_STYLE: Final[str] = "\033[0m"
 
 
 @contextlib.contextmanager
