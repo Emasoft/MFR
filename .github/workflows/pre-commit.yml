@@ -41,9 +41,9 @@ jobs:
 
     - name: Install actionlint
       run: |
-        # Install actionlint binary
+        # Install actionlint binary using jq for JSON parsing
         VERSION=$(curl -s https://api.github.com/repos/rhysd/actionlint/releases/latest | \
-          grep '"tag_name"' | sed -E 's/.*"tag_name": "([^"]+)".*/\1/')
+          jq -r '.tag_name')
         VERSION_NUM=${VERSION#v}
         DL_URL="https://github.com/rhysd/actionlint/releases/download/${VERSION}/"
         DL_URL="${DL_URL}actionlint_${VERSION_NUM}_linux_amd64.tar.gz"
