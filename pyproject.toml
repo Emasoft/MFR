@@ -59,10 +59,12 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
-packages = ["src/mass_find_replace"]
+# Configure source directory
+sources = ["src"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/mass_find_replace"]
+# Configure wheel to include the package from src directory
+sources = ["src"]
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -109,3 +111,7 @@ skips = ["B101"]  # Skip assert_used test
 dev = [
     "types-chardet>=5.0.4.6",
 ]
+
+[tool.uv]
+# Ensure package is built properly
+package = true
