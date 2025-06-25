@@ -163,7 +163,7 @@ pydantic-core==2.23.4
     #   pydantic
 pydantic-extra-types==2.10.5
     # via prefect
-pydantic-settings==2.9.1
+pydantic-settings==2.10.0
     # via prefect
 pygments==2.19.1
     # via rich
