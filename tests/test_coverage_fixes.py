@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Fixed tests to improve coverage with correct function signatures."""
 
 import json
@@ -966,7 +965,7 @@ if __name__ == "__main__":
 
     import subprocess
 
-    result = subprocess.run([sys.executable, "-c", test_script], capture_output=True)
+    result = subprocess.run([sys.executable, "-c", test_script], check=False, capture_output=True)
     assert result.returncode == 1
 
 

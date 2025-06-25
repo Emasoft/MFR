@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Comprehensive tests with fixtures to achieve maximum coverage."""
 
 import json
@@ -1570,7 +1569,7 @@ if __name__ == "__main__":
         f.flush()
 
         # Run the script
-        result = subprocess.run([sys.executable, f.name], capture_output=True, text=True)
+        result = subprocess.run([sys.executable, f.name], check=False, capture_output=True, text=True)
 
         assert result.returncode == 1
         assert "Test exception in main" in result.stderr

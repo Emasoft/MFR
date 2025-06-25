@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Targeted tests to improve coverage by focusing on uncovered lines."""
 
 import json

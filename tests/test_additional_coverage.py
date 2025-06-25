@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Additional tests to improve coverage of uncovered lines."""
 
 import json
@@ -771,7 +770,7 @@ sys.exit(0)
 
     import subprocess
 
-    result = subprocess.run([sys.executable, "-c", test_code], capture_output=True)
+    result = subprocess.run([sys.executable, "-c", test_code], check=False, capture_output=True)
     assert result.returncode == 0
 
 
@@ -793,7 +792,7 @@ except Exception as e:
 
     import subprocess
 
-    result = subprocess.run([sys.executable, "-c", test_code], capture_output=True, text=True)
+    result = subprocess.run([sys.executable, "-c", test_code], check=False, capture_output=True, text=True)
     assert result.returncode == 1
     assert "An unexpected error occurred in __main__" in result.stderr
     assert "Test error" in result.stderr

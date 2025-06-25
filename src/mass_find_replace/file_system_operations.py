@@ -118,8 +118,7 @@ def open_file_with_encoding(
     try:
         if "b" in mode:
             return open(file_path, mode)
-        else:
-            return open(file_path, mode, encoding=encoding, errors="surrogateescape", newline="")
+        return open(file_path, mode, encoding=encoding, errors="surrogateescape", newline="")
     except OSError as e:
         _log_fs_op_message(
             logging.ERROR,
@@ -166,15 +165,14 @@ def file_lock(file_handle: Any, exclusive: bool = True, timeout: float = 10.0) -
                     else:
                         # Windows doesn't have shared locks, use exclusive
                         msvcrt.locking(file_handle.fileno(), msvcrt.LK_NBLCK, 1)
+                # Unix file locking
+                elif exclusive:
+                    fcntl.flock(file_handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
                 else:
-                    # Unix file locking
-                    if exclusive:
-                        fcntl.flock(file_handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-                    else:
-                        fcntl.flock(file_handle.fileno(), fcntl.LOCK_SH | fcntl.LOCK_NB)
+                    fcntl.flock(file_handle.fileno(), fcntl.LOCK_SH | fcntl.LOCK_NB)
                 locked = True
                 break
-            except (IOError, OSError) as e:
+            except OSError as e:
                 if e.errno in (errno.EAGAIN, errno.EACCES, errno.EWOULDBLOCK):
                     # Lock is held by another process
                     if time.time() - start_time > timeout:
@@ -192,7 +190,7 @@ def file_lock(file_handle: Any, exclusive: bool = True, timeout: float = 10.0) -
                     msvcrt.locking(file_handle.fileno(), msvcrt.LK_UNLCK, 1)
                 else:
                     fcntl.flock(file_handle.fileno(), fcntl.LOCK_UN)
-            except (IOError, OSError):
+            except OSError:
                 pass  # Best effort unlock
 
 
@@ -954,7 +952,7 @@ def save_transactions(
         try:
             if temp_file_path.exists():
                 os.remove(temp_file_path)
-        except (IOError, OSError):
+        except OSError:
             pass
         raise
     except Exception as e:
@@ -1398,7 +1396,7 @@ def process_large_file_content(
         try:
             if temp_file.exists():
                 os.remove(temp_file)
-        except (IOError, OSError):
+        except OSError:
             pass
 
 
