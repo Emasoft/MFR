@@ -1,0 +1,7 @@
+{
+  "REPLACEMENT_MAPPING": {
+    "old_function_name": "new_function_name",
+    "OldClassName": "NewClassName",
+    "deprecated_api": "modern_api"
+  }
+}

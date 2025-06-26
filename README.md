@@ -1,11 +1,5 @@
 <div align="center">
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Emasoft/MFR/main/docs/assets/logo-dark.png">
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/Emasoft/MFR/main/docs/assets/logo-light.png">
-  <img alt="MFR Logo" src="https://raw.githubusercontent.com/Emasoft/MFR/main/docs/assets/logo-light.png" width="200">
-</picture>
-
 # Mass Find Replace (MFR)
 
 **Surgical precision for your codebase transformations**
