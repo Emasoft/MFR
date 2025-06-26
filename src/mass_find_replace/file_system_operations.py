@@ -10,6 +10,8 @@
 # - Added checks before dictionary accesses to avoid KeyError.
 # - Added comments and improved logging for clarity.
 # - Minor performance improvements in large file processing.
+# - Added SurrogateHandlingEncoder to handle surrogate characters in JSON serialization.
+# - Enhanced encoding detection to properly identify UTF-16 files without BOM.
 #
 # Copyright (c) 2024 Emasoft
 #
@@ -21,6 +23,7 @@ from __future__ import annotations
 import os
 import json
 import uuid
+import base64
 from pathlib import Path
 from typing import (
     Any,
@@ -90,6 +93,62 @@ RETRYABLE_OS_ERRORNOS: Final[set[int]] = {
     errno.EBUSY,
     errno.ETXTBSY,
 }
+
+
+# ====================== JSON ENCODER FOR SURROGATES =======================
+
+
+class SurrogateHandlingEncoder(json.JSONEncoder):
+    """Custom JSON encoder that handles surrogate characters by encoding to base64."""
+
+    def encode(self, obj: Any) -> str:
+        """Encode object to JSON, handling surrogates in strings."""
+        if isinstance(obj, str):
+            try:
+                # Try normal encoding first
+                return super().encode(obj)
+            except UnicodeEncodeError:
+                # If it fails, encode as base64
+                return super().encode({"__surrogate_escaped__": True, "data": base64.b64encode(obj.encode("utf-8", errors="surrogateescape")).decode("ascii")})
+        return super().encode(obj)
+
+    def iterencode(self, obj: Any, _one_shot: bool = False) -> Iterator[str]:
+        """Encode object to JSON iteratively, handling surrogates in strings."""
+        return super().iterencode(self._process_item(obj), _one_shot)
+
+    def _process_item(self, obj: Any) -> Any:
+        """Recursively process an item, encoding strings with surrogates."""
+        if isinstance(obj, str):
+            try:
+                # Test if the string can be encoded to UTF-8
+                obj.encode("utf-8")
+                return obj
+            except UnicodeEncodeError:
+                # Contains surrogates, encode as base64
+                return {"__surrogate_escaped__": True, "data": base64.b64encode(obj.encode("utf-8", errors="surrogateescape")).decode("ascii")}
+        elif isinstance(obj, dict):
+            return {k: self._process_item(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [self._process_item(item) for item in obj]
+        elif isinstance(obj, tuple):
+            return tuple(self._process_item(item) for item in obj)
+        else:
+            return obj
+
+
+def decode_surrogate_escaped_json(obj: Any) -> Any:
+    """Decode JSON objects that were encoded with SurrogateHandlingEncoder."""
+    if isinstance(obj, dict):
+        if obj.get("__surrogate_escaped__") and "data" in obj:
+            # Decode base64 back to bytes, then decode with surrogateescape
+            encoded_bytes = base64.b64decode(obj["data"])
+            return encoded_bytes.decode("utf-8", errors="surrogateescape")
+        else:
+            return {k: decode_surrogate_escaped_json(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [decode_surrogate_escaped_json(item) for item in obj]
+    else:
+        return obj
 
 
 def open_file_with_encoding(
@@ -290,28 +349,69 @@ def get_file_encoding(file_path: Path, sample_size: int = DEFAULT_ENCODING_SAMPL
     try:
         file_size = file_path.stat().st_size
 
-        # For small files, try reading the entire file with UTF-8 decoding first
+        # Read the file or sample
         if file_size <= SMALL_FILE_SIZE_THRESHOLD:
-            try:
-                raw_data = file_path.read_bytes()
-                raw_data.decode("utf-8", errors="strict")  # Try strict UTF-8
-                return "utf-8"
-            except (UnicodeDecodeError, FileNotFoundError):
-                pass  # Not UTF-8, fall through to chardet
-            except Exception as e:
-                _log_fs_op_message(
-                    logging.WARNING,
-                    f"Unexpected error decoding small file {file_path} as UTF-8: {e}",
-                    logger,
-                )
-
-        with open(file_path, "rb") as f:
-            raw_data = f.read(sample_size)
+            raw_data = file_path.read_bytes()
+        else:
+            with open(file_path, "rb") as f:
+                raw_data = f.read(sample_size)
 
         if not raw_data:
             return DEFAULT_ENCODING_FALLBACK
 
-        # 1. Try UTF-8 for all files regardless of size
+        # 1. Check for BOM markers first
+        if raw_data.startswith(b"\xff\xfe"):
+            return "utf-16-le"
+        elif raw_data.startswith(b"\xfe\xff"):
+            return "utf-16-be"
+        elif raw_data.startswith(b"\xff\xfe\x00\x00"):
+            return "utf-32-le"
+        elif raw_data.startswith(b"\x00\x00\xfe\xff"):
+            return "utf-32-be"
+        elif raw_data.startswith(b"\xef\xbb\xbf"):
+            return "utf-8-sig"
+
+        # 2. Check for UTF-16 patterns (null bytes pattern)
+        # UTF-16 typically has alternating null bytes
+        if len(raw_data) >= 4:
+            # Check for UTF-16 LE pattern (ASCII chars followed by \x00)
+            null_count = raw_data.count(b"\x00")
+            total_bytes = len(raw_data)
+            null_ratio = null_count / total_bytes if total_bytes > 0 else 0
+
+            # If ~50% of bytes are null, likely UTF-16
+            if 0.3 < null_ratio < 0.7:
+                # Try to determine byte order
+                even_nulls = sum(1 for i in range(0, min(len(raw_data), 100), 2) if i < len(raw_data) and raw_data[i] == 0)
+                odd_nulls = sum(1 for i in range(1, min(len(raw_data), 100), 2) if i < len(raw_data) and raw_data[i] == 0)
+
+                if odd_nulls > even_nulls:
+                    # Null bytes mostly at odd positions = UTF-16 LE
+                    try:
+                        raw_data.decode("utf-16-le", errors="strict")
+                        return "utf-16-le"
+                    except UnicodeDecodeError:
+                        pass
+                elif even_nulls > odd_nulls:
+                    # Null bytes mostly at even positions = UTF-16 BE
+                    try:
+                        raw_data.decode("utf-16-be", errors="strict")
+                        return "utf-16-be"
+                    except UnicodeDecodeError:
+                        pass
+                else:
+                    # Equal nulls, try both
+                    try:
+                        raw_data.decode("utf-16-le", errors="strict")
+                        return "utf-16-le"
+                    except UnicodeDecodeError:
+                        try:
+                            raw_data.decode("utf-16-be", errors="strict")
+                            return "utf-16-be"
+                        except UnicodeDecodeError:
+                            pass
+
+        # 3. Try UTF-8 for all files regardless of size
         try:
             if file_path.suffix.lower() != ".rtf":
                 raw_data.decode("utf-8", errors="strict")
@@ -323,7 +423,7 @@ def get_file_encoding(file_path: Path, sample_size: int = DEFAULT_ENCODING_SAMPL
         if file_path.suffix.lower() == ".rtf":
             return "latin-1"
 
-        # 2. Use chardet detection
+        # 4. Use chardet detection
         detected = chardet.detect(raw_data)
         encoding = detected.get("encoding") or DEFAULT_ENCODING_FALLBACK
         confidence = detected.get("confidence", 0)
@@ -342,7 +442,7 @@ def get_file_encoding(file_path: Path, sample_size: int = DEFAULT_ENCODING_SAMPL
             except (UnicodeDecodeError, LookupError):
                 pass
 
-        # 3. Fallback explicit checks if UTF-8 and chardet's primary suggestion failed or wasn't definitive
+        # 5. Fallback explicit checks if UTF-8 and chardet's primary suggestion failed or wasn't definitive
         for enc_try in ["cp1252", "latin1", "iso-8859-1"]:
             try:
                 if encoding != enc_try:
@@ -721,22 +821,32 @@ def scan_directory_for_occurrences(
                         continue
 
                     is_rtf = item_abs_path.suffix.lower() == ".rtf"
-                    try:
-                        is_bin = is_binary_file(str(item_abs_path))
-                    except FileNotFoundError:
-                        _log_fs_op_message(
-                            logging.WARNING,
-                            f"File not found for binary check: {item_abs_path}. Skipping content scan.",
-                            logger,
-                        )
-                        continue
-                    except Exception as e_isbin:
-                        _log_fs_op_message(
-                            logging.WARNING,
-                            f"Could not determine if {item_abs_path} is binary: {e_isbin}. Skipping content scan.",
-                            logger,
-                        )
-                        continue
+
+                    # First check if file has a text extension - if so, always treat as text
+                    text_extensions = {".txt", ".log", ".md", ".py", ".js", ".java", ".c", ".cpp", ".h", ".hpp", ".cs", ".rb", ".go", ".rs", ".php", ".sh", ".bat", ".ps1", ".yml", ".yaml", ".json", ".xml", ".html", ".htm", ".css", ".scss", ".sql", ".r", ".m", ".swift", ".kt", ".scala", ".pl", ".lua"}
+
+                    has_text_extension = item_abs_path.suffix.lower() in text_extensions
+
+                    # Only use binary detection for files without known text extensions
+                    if has_text_extension:
+                        is_bin = False
+                    else:
+                        try:
+                            is_bin = is_binary_file(str(item_abs_path))
+                        except FileNotFoundError:
+                            _log_fs_op_message(
+                                logging.WARNING,
+                                f"File not found for binary check: {item_abs_path}. Skipping content scan.",
+                                logger,
+                            )
+                            continue
+                        except Exception as e_isbin:
+                            _log_fs_op_message(
+                                logging.WARNING,
+                                f"Could not determine if {item_abs_path} is binary: {e_isbin}. Skipping content scan.",
+                                logger,
+                            )
+                            continue
 
                     if is_bin and not is_rtf:
                         # Skip binary files but log them
@@ -944,7 +1054,7 @@ def save_transactions(
     try:
         with open(temp_file_path, "w", encoding="utf-8") as f:
             with file_lock(f, exclusive=True):
-                json.dump(transactions, f, indent=2, ensure_ascii=False)
+                json.dump(transactions, f, indent=2, ensure_ascii=False, cls=SurrogateHandlingEncoder)
         # Atomically replace original file
         os.replace(temp_file_path, transactions_file_path)
     except TimeoutError as e:
@@ -998,7 +1108,11 @@ def load_transactions(transactions_file_path: Path, logger: LoggerType = None) -
                 logger,
             )
             return None
-        return data
+        # Decode any surrogate-escaped strings
+        decoded_data = decode_surrogate_escaped_json(data)
+        # Type assertion - we know this is a list from the check above
+        assert isinstance(decoded_data, list)
+        return decoded_data
     except TimeoutError as e:
         _log_fs_op_message(
             logging.ERROR,
