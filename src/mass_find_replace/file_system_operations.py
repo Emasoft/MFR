@@ -101,15 +101,20 @@ RETRYABLE_OS_ERRORNOS: Final[set[int]] = {
 class SurrogateHandlingEncoder(json.JSONEncoder):
     """Custom JSON encoder that handles surrogate characters by encoding to base64."""
 
+    def _encode_with_surrogate_handling(self, text: str) -> str | dict[str, Any]:
+        """Single method to handle surrogate encoding."""
+        try:
+            text.encode("utf-8")
+            return text
+        except UnicodeEncodeError:
+            # Contains surrogates, encode as base64
+            return {"__surrogate_escaped__": True, "data": base64.b64encode(text.encode("utf-8", errors="surrogateescape")).decode("ascii")}
+
     def encode(self, obj: Any) -> str:
         """Encode object to JSON, handling surrogates in strings."""
         if isinstance(obj, str):
-            try:
-                # Try normal encoding first
-                return super().encode(obj)
-            except UnicodeEncodeError:
-                # If it fails, encode as base64
-                return super().encode({"__surrogate_escaped__": True, "data": base64.b64encode(obj.encode("utf-8", errors="surrogateescape")).decode("ascii")})
+            processed = self._encode_with_surrogate_handling(obj)
+            return super().encode(processed)
         return super().encode(obj)
 
     def iterencode(self, obj: Any, _one_shot: bool = False) -> Iterator[str]:
@@ -119,13 +124,7 @@ class SurrogateHandlingEncoder(json.JSONEncoder):
     def _process_item(self, obj: Any) -> Any:
         """Recursively process an item, encoding strings with surrogates."""
         if isinstance(obj, str):
-            try:
-                # Test if the string can be encoded to UTF-8
-                obj.encode("utf-8")
-                return obj
-            except UnicodeEncodeError:
-                # Contains surrogates, encode as base64
-                return {"__surrogate_escaped__": True, "data": base64.b64encode(obj.encode("utf-8", errors="surrogateescape")).decode("ascii")}
+            return self._encode_with_surrogate_handling(obj)
         elif isinstance(obj, dict):
             return {k: self._process_item(v) for k, v in obj.items()}
         elif isinstance(obj, list):
@@ -371,45 +370,39 @@ def get_file_encoding(file_path: Path, sample_size: int = DEFAULT_ENCODING_SAMPL
         elif raw_data.startswith(b"\xef\xbb\xbf"):
             return "utf-8-sig"
 
-        # 2. Check for UTF-16 patterns (null bytes pattern)
-        # UTF-16 typically has alternating null bytes
+        # 2. Check for UTF-16 patterns by analyzing byte patterns
         if len(raw_data) >= 4:
-            # Check for UTF-16 LE pattern (ASCII chars followed by \x00)
-            null_count = raw_data.count(b"\x00")
-            total_bytes = len(raw_data)
-            null_ratio = null_count / total_bytes if total_bytes > 0 else 0
+            # Look for alternating null bytes with ASCII characters
+            # Check up to 500 bytes for more reliable detection
+            check_len = min(len(raw_data), 500)
 
-            # If ~50% of bytes are null, likely UTF-16
-            if 0.3 < null_ratio < 0.7:
-                # Try to determine byte order
-                even_nulls = sum(1 for i in range(0, min(len(raw_data), 100), 2) if i < len(raw_data) and raw_data[i] == 0)
-                odd_nulls = sum(1 for i in range(1, min(len(raw_data), 100), 2) if i < len(raw_data) and raw_data[i] == 0)
+            # Count ASCII characters with null bytes in UTF-16 LE pattern
+            le_ascii_chars = 0
+            be_ascii_chars = 0
 
-                if odd_nulls > even_nulls:
-                    # Null bytes mostly at odd positions = UTF-16 LE
-                    try:
-                        raw_data.decode("utf-16-le", errors="strict")
-                        return "utf-16-le"
-                    except UnicodeDecodeError:
-                        pass
-                elif even_nulls > odd_nulls:
-                    # Null bytes mostly at even positions = UTF-16 BE
-                    try:
-                        raw_data.decode("utf-16-be", errors="strict")
-                        return "utf-16-be"
-                    except UnicodeDecodeError:
-                        pass
-                else:
-                    # Equal nulls, try both
-                    try:
-                        raw_data.decode("utf-16-le", errors="strict")
-                        return "utf-16-le"
-                    except UnicodeDecodeError:
-                        try:
-                            raw_data.decode("utf-16-be", errors="strict")
-                            return "utf-16-be"
-                        except UnicodeDecodeError:
-                            pass
+            for i in range(0, check_len - 1, 2):
+                # UTF-16 LE: ASCII byte followed by null
+                if 0x20 <= raw_data[i] <= 0x7E and raw_data[i + 1] == 0:
+                    le_ascii_chars += 1
+                # UTF-16 BE: null followed by ASCII byte
+                if raw_data[i] == 0 and 0x20 <= raw_data[i + 1] <= 0x7E:
+                    be_ascii_chars += 1
+
+            # If we found significant ASCII patterns, it's likely UTF-16
+            min_ascii_threshold = 5  # At least 5 ASCII chars to be confident
+
+            if le_ascii_chars > min_ascii_threshold and le_ascii_chars > be_ascii_chars:
+                try:
+                    raw_data.decode("utf-16-le", errors="strict")
+                    return "utf-16-le"
+                except UnicodeDecodeError:
+                    pass
+            elif be_ascii_chars > min_ascii_threshold:
+                try:
+                    raw_data.decode("utf-16-be", errors="strict")
+                    return "utf-16-be"
+                except UnicodeDecodeError:
+                    pass
 
         # 3. Try UTF-8 for all files regardless of size
         try:
@@ -823,7 +816,81 @@ def scan_directory_for_occurrences(
                     is_rtf = item_abs_path.suffix.lower() == ".rtf"
 
                     # First check if file has a text extension - if so, always treat as text
-                    text_extensions = {".txt", ".log", ".md", ".py", ".js", ".java", ".c", ".cpp", ".h", ".hpp", ".cs", ".rb", ".go", ".rs", ".php", ".sh", ".bat", ".ps1", ".yml", ".yaml", ".json", ".xml", ".html", ".htm", ".css", ".scss", ".sql", ".r", ".m", ".swift", ".kt", ".scala", ".pl", ".lua"}
+                    text_extensions = {
+                        # Documentation/Config
+                        ".txt",
+                        ".log",
+                        ".md",
+                        ".rst",
+                        ".ini",
+                        ".cfg",
+                        ".conf",
+                        ".toml",
+                        ".env",
+                        ".properties",
+                        ".bib",
+                        ".tex",
+                        ".adoc",
+                        # Programming languages
+                        ".py",
+                        ".js",
+                        ".ts",
+                        ".jsx",
+                        ".tsx",
+                        ".java",
+                        ".c",
+                        ".cpp",
+                        ".cc",
+                        ".cxx",
+                        ".h",
+                        ".hpp",
+                        ".hh",
+                        ".hxx",
+                        ".cs",
+                        ".rb",
+                        ".go",
+                        ".rs",
+                        ".php",
+                        ".sh",
+                        ".bat",
+                        ".ps1",
+                        ".swift",
+                        ".kt",
+                        ".scala",
+                        ".pl",
+                        ".lua",
+                        ".r",
+                        ".m",
+                        ".jl",
+                        ".clj",
+                        ".elm",
+                        ".ex",
+                        ".exs",
+                        ".dart",
+                        ".vue",
+                        ".svelte",
+                        # Web/Markup
+                        ".html",
+                        ".htm",
+                        ".xml",
+                        ".css",
+                        ".scss",
+                        ".sass",
+                        ".less",
+                        # Data formats
+                        ".json",
+                        ".yml",
+                        ".yaml",
+                        ".csv",
+                        ".sql",
+                        # Build/Project files
+                        ".gradle",
+                        ".sbt",
+                        ".cmake",
+                        ".make",
+                        ".dockerfile",
+                        ".gitignore",
+                    }
 
                     has_text_extension = item_abs_path.suffix.lower() in text_extensions
 
