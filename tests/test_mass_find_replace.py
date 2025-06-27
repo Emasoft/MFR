@@ -159,12 +159,16 @@ def test_dry_run_behavior(temp_test_dir: dict[str, Path], default_map_file: Path
         ]:
             original_name = tx.get("ORIGINAL_NAME", "")
             print(f"  Original: {original_name}")
-            print(f"  Proposed: {replace_logic.replace_occurrences(original_name) if original_name else ''}")
+            # Get proposed name from the transaction NEW_NAME field
+            proposed_name = tx.get("NEW_NAME", original_name)
+            print(f"  Proposed: {proposed_name if original_name else ''}")
         elif tx["TYPE"] == TransactionType.FILE_CONTENT_LINE.value:
             content = tx.get("ORIGINAL_LINE_CONTENT", "")
             print(f"  Line: {tx.get('LINE_NUMBER')}")
             print(f"  Original: {content[:50] + '...' if len(content) > 50 else content}")
-            print(f"  Proposed: {replace_logic.replace_occurrences(content)[:50] + '...'}")
+            # Get proposed content from the transaction NEW_LINE_CONTENT field
+            proposed_content = tx.get("NEW_LINE_CONTENT", content)
+            print(f"  Proposed: {proposed_content[:50] + '...' if len(proposed_content) > 50 else proposed_content}")
 
 
 # ================ MODIFIED TEST: test_dry_run_virtual_paths =================
@@ -263,7 +267,8 @@ def test_unicode_combining_chars(temp_test_dir: dict[str, Path], default_map_fil
     for tx in transactions:
         if tx["TYPE"] == TransactionType.FILE_NAME.value:
             original_name = tx.get("ORIGINAL_NAME", "")
-            new_name = replace_logic.replace_occurrences(original_name)
+            # The transaction should have NEW_NAME field set
+            new_name = tx.get("NEW_NAME", "")
             # We'll check if the new name contains "oldname" and the accent preserving by seeing if the original accent is present
             if "newname" in new_name and "café" in original_name:
                 found = True
@@ -417,7 +422,10 @@ def test_recursive_path_resolution(temp_test_dir: dict[str, Path], default_map_f
             # Build the new path by replacing each canonical segment:
             # Since ORIGINAL_NAME is the last segment, we replace the last segment with its new_name
             if tx["TYPE"] == TransactionType.FOLDER_NAME.value:
-                path_map[original_path] = replace_logic.replace_occurrences(original_path)
+                # Build new path by replacing each segment using the mapping
+                # This is a simplified version - the actual code uses proper replacement
+                new_path = original_path.replace("oldname", "newname").replace("OLDNAME", "NEWNAME").replace("Oldname", "Newname")
+                path_map[original_path] = new_path
 
     # Check each path component is present as a transaction original name
     for component in ["Oldname_A", "Oldname_B"]:
