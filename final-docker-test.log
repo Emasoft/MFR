@@ -1,0 +1,78 @@
+[37m⠋[0m [2mPreparing packages...[0m (0/0)
+[2K[37m⠋[0m [2mPreparing packages...[0m (0/1)
+[2K[37m⠙[0m [2mPreparing packages...[0m (0/1)
+[2K   [36m[1mBuilding[0m[39m mass-find-replace[2m @ file:///app[0m
+[37m⠙[0m [2mPreparing packages...[0m (0/1)                                                   [1A
+[2K[1B
+[2K[1A   [36m[1mBuilding[0m[39m mass-find-replace[2m @ file:///app[0m
+[37m⠹[0m [2mPreparing packages...[0m (0/1)                                                   [1A
+[2K[1B
+[2K[1A   [36m[1mBuilding[0m[39m mass-find-replace[2m @ file:///app[0m
+[37m⠸[0m [2mPreparing packages...[0m (0/1)                                                   [1A
+[2K[1B
+[2K[1A      [32m[1mBuilt[0m[39m mass-find-replace[2m @ file:///app[0m
+[37m⠸[0m [2mPreparing packages...[0m (0/1)
+[2K[37m⠸[0m [2m[0m (1/1)
+[2K[2mUninstalled [1m1 package[0m [2min 7ms[0m[0m
+░░░░░░░░░░░░░░░░░░░░ [0/0] [2mInstalling wheels...                                 [0m
+[2K░░░░░░░░░░░░░░░░░░░░ [0/1] [2mInstalling wheels...                                 [0m
+[2K░░░░░░░░░░░░░░░░░░░░ [0/1] [2mmass-find-replace==0.3.0a0 (from file:///app)        [0m
+[2K████████████████████ [1/1] [2mmass-find-replace==0.3.0a0 (from file:///app)        [0m
+[2K[2mInstalled [1m1 package[0m [2min 0.58ms[0m[0m
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.11.13, pytest-8.4.1, pluggy-1.6.0 -- /app/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /app
+configfile: pyproject.toml
+plugins: cov-6.2.1, anyio-4.9.0
+[1mcollecting ... [0m[1m
+collecting 11 items                                                            [0m[1m
+collected 13 items                                                             [0m
+
+tests/test_surgical_replacements.py::TestSurgicalReplacements::test_preserves_trailing_spaces [32mPASSED[0m[32m [  7%][0m
+tests/test_surgical_replacements.py::TestSurgicalReplacements::test_preserves_line_endings [32mPASSED[0m[32m [ 15%][0m
+tests/test_surgical_replacements.py::TestSurgicalReplacements::test_preserves_encoding_errors [32mPASSED[0m[32m [ 23%][0m
+tests/test_surgical_replacements.py::TestSurgicalReplacements::test_preserves_different_encodings [32mPASSED[0m[32m [ 30%][0m
+tests/test_surgical_replacements.py::TestSurgicalReplacements::test_preserves_null_bytes [32mPASSED[0m[32m [ 38%][0m
+tests/test_surgical_replacements.py::TestSurgicalReplacements::test_preserves_corrupt_test_files [32mPASSED[0m[32m [ 46%][0m
+tests/test_surgical_replacements.py::TestSurgicalReplacements::test_very_long_lines [32mPASSED[0m[32m [ 53%][0m
+tests/test_surgical_replacements.py::TestSurgicalReplacements::test_unicode_edge_cases [32mPASSED[0m[32m [ 61%][0m
+tests/test_surgical_replacements.py::TestSurgicalReplacements::test_empty_files_and_edge_cases [32mPASSED[0m[32m [ 69%][0m
+tests/test_surgical_replacements.py::TestSurgicalReplacements::test_concurrent_patterns [32mPASSED[0m[32m [ 76%][0m
+tests/test_surgical_replacements.py::TestSurgicalReplacements::test_file_permissions_preserved [32mPASSED[0m[32m [ 84%][0m
+tests/test_surgical_replacements.py::TestErrorHandling::test_handles_read_only_files [32mPASSED[0m[32m [ 92%][0m
+tests/test_surgical_replacements.py::TestErrorHandling::test_handles_files_with_no_newline_at_end [32mPASSED[0m[32m [100%][0m
+
+[32m============================= [32m[1m13 passed[0m[32m in 16.70s[0m[32m ==============================[0m
+--- Logging error ---
+Traceback (most recent call last):
+  File "/app/.venv/lib/python3.11/site-packages/prefect/logging/handlers.py", line 337, in emit
+    self.console.print(message, soft_wrap=True)
+  File "/app/.venv/lib/python3.11/site-packages/rich/console.py", line 1692, in print
+    with self:
+  File "/app/.venv/lib/python3.11/site-packages/rich/console.py", line 866, in __exit__
+    self._exit_buffer()
+  File "/app/.venv/lib/python3.11/site-packages/rich/console.py", line 824, in _exit_buffer
+    self._check_buffer()
+  File "/app/.venv/lib/python3.11/site-packages/rich/console.py", line 2033, in _check_buffer
+    self._write_buffer()
+  File "/app/.venv/lib/python3.11/site-packages/rich/console.py", line 2102, in _write_buffer
+    self.file.write(text)
+ValueError: I/O operation on closed file.
+Call stack:
+  File "/app/.venv/lib/python3.11/site-packages/prefect/server/api/server.py", line 917, in stop
+    subprocess_server_logger.info(
+  File "/usr/local/lib/python3.11/logging/__init__.py", line 1489, in info
+    self._log(INFO, msg, args, **kwargs)
+  File "/usr/local/lib/python3.11/logging/__init__.py", line 1634, in _log
+    self.handle(record)
+  File "/usr/local/lib/python3.11/logging/__init__.py", line 1644, in handle
+    self.callHandlers(record)
+  File "/usr/local/lib/python3.11/logging/__init__.py", line 1706, in callHandlers
+    hdlr.handle(record)
+  File "/usr/local/lib/python3.11/logging/__init__.py", line 978, in handle
+    self.emit(record)
+  File "/app/.venv/lib/python3.11/site-packages/prefect/logging/handlers.py", line 343, in emit
+    self.handleError(record)
+Message: 'Stopping temporary server on http://127.0.0.1:8558'
+Arguments: ()

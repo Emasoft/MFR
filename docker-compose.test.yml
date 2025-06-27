@@ -1,0 +1,114 @@
+version: '3.8'
+
+services:
+  # Base test service with common configuration
+  test-base:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.test
+      args:
+        PYTHON_VERSION: "${PYTHON_VERSION:-3.11}"
+    image: mfr-test:base
+    environment:
+    - UV_SYSTEM_PYTHON=1
+    - PYTHONDONTWRITEBYTECODE=1
+    - PYTHONUNBUFFERED=1
+    volumes:
+    - .:/app
+    - test-cache:/app/.pytest_cache
+    - uv-cache:/root/.cache/uv
+    working_dir: /app
+    networks:
+    - test-network
+
+  # Local testing profile - full features, verbose output
+  test-local:
+    extends: test-base
+    environment:
+    - TEST_PROFILE=local
+    - MAX_RETRIES=${LOCAL_MAX_RETRIES:-10}
+    - TIMEOUT_SECONDS=${LOCAL_TIMEOUT_SECONDS:-60}
+    - API_ENDPOINT=${LOCAL_API_ENDPOINT:-http://localhost:8080}
+    - ENABLE_COVERAGE=${LOCAL_ENABLE_COVERAGE:-true}
+    - VERBOSE_LOGGING=${LOCAL_VERBOSE_LOGGING:-true}
+    - CI=false
+    command: >
+      bash -c "
+        echo '🏠 Running tests with LOCAL profile...' &&
+        uv sync --frozen --extra dev &&
+        uv run pytest tests/ -v --tb=short --cov=src/mass_find_replace --cov-report=html --cov-report=term
+      "
+
+  # Remote/CI testing profile - optimized for speed
+  test-remote:
+    extends: test-base
+    environment:
+    - TEST_PROFILE=remote
+    - MAX_RETRIES=${REMOTE_MAX_RETRIES:-2}
+    - TIMEOUT_SECONDS=${REMOTE_TIMEOUT_SECONDS:-5}
+    - API_ENDPOINT=${REMOTE_API_ENDPOINT:-https://api.example.com}
+    - ENABLE_COVERAGE=${REMOTE_ENABLE_COVERAGE:-false}
+    - VERBOSE_LOGGING=${REMOTE_VERBOSE_LOGGING:-false}
+    - CI=true
+    - GITHUB_ACTIONS=true
+    command: >
+      bash -c "
+        echo '☁️  Running tests with REMOTE/CI profile...' &&
+        uv sync --frozen --extra dev &&
+        uv run pytest tests/ -v --tb=short -x
+      "
+
+  # GitHub repo clone and build test
+  test-github-clone:
+    extends: test-base
+    environment:
+    - TEST_PROFILE=github-clone
+    - GH_TOKEN=${GH_TOKEN:-}
+    volumes:
+    - ./test-repos:/test-repos
+    - uv-cache:/root/.cache/uv
+    command: >
+      bash -c "
+        echo '🐙 Testing GitHub repo clone and build...' &&
+        uv sync --frozen --extra dev &&
+        uv run python /app/tests/test_github_integration.py
+      "
+
+  # Interactive debugging container
+  test-debug:
+    extends: test-base
+    stdin_open: true
+    tty: true
+    command: /bin/bash
+
+  # Linting and code quality checks
+  test-lint:
+    extends: test-base
+    command: >
+      bash -c "
+        echo '🔍 Running linters and code quality checks...' &&
+        uv sync --frozen --extra dev &&
+        uv run ruff check . &&
+        uv run ruff format --check . &&
+        uv run mypy --strict src/
+      "
+
+  # Security scanning
+  test-security:
+    extends: test-base
+    command: >
+      bash -c "
+        echo '🔒 Running security checks...' &&
+        uv sync --frozen --extra dev &&
+        uv run bandit -r src/ &&
+        uv run pip-audit &&
+        gitleaks detect --source=/app --verbose
+      "
+
+volumes:
+  test-cache:
+  uv-cache:
+
+networks:
+  test-network:
+    driver: bridge

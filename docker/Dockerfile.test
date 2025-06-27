@@ -1,0 +1,68 @@
+# Comprehensive test Dockerfile for Mass Find Replace
+ARG PYTHON_VERSION=3.11
+FROM python:${PYTHON_VERSION}-slim AS base
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    make \
+    build-essential \
+    openssh-client \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install GitHub CLI for repo testing
+RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
+    apt-get update && \
+    apt-get install -y gh && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install gitleaks for security scanning
+RUN cd /tmp && \
+    curl -L https://github.com/gitleaks/gitleaks/releases/download/v8.22.1/gitleaks_8.22.1_linux_x64.tar.gz | tar xz && \
+    mv gitleaks /usr/local/bin/ && \
+    chmod +x /usr/local/bin/gitleaks && \
+    rm -f *.md *.txt LICENSE
+
+WORKDIR /app
+
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+# Environment setup
+ENV UV_SYSTEM_PYTHON=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app/src:$PYTHONPATH
+
+# Create directories for test artifacts
+RUN mkdir -p /app/test-results /app/coverage /app/test-repos
+
+# Copy dependency files first for better caching
+COPY pyproject.toml uv.lock README.md ./
+
+# Install base dependencies
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-install-project
+
+# Copy source code
+COPY src ./src
+COPY tests ./tests
+COPY replacement_mapping.json ./
+COPY scripts ./scripts
+
+# Install project with all extras
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --extra dev
+
+# Create non-root user for security
+RUN useradd -m -u 1000 testuser && \
+    chown -R testuser:testuser /app
+
+# Switch to non-root user
+USER testuser
+
+# Default command shows available test commands
+CMD ["bash", "-c", "echo 'Available commands:\n  test-local: Run with local profile\n  test-remote: Run with CI profile\n  test-github: Test GitHub integration\n  test-all: Run all test suites\n\nUse: docker-compose run <service>'"]
