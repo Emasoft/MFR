@@ -236,7 +236,7 @@ class TestMainFlow:
         test_file.write_text("old content")
 
         txn_file = tmp_path / "planned_transactions.json"
-        transactions = [{"ID": "1", "id": "1", "TYPE": TransactionType.FILE_CONTENT_CHANGE.value, "FILE_PATH": str(test_file), "PATH": str(test_file), "STATUS": TransactionStatus.COMPLETED.value, "ERROR_MESSAGE": "DRY_RUN", "EXPECTED_CHANGES": 1}]
+        transactions = [{"ID": "1", "id": "1", "TYPE": TransactionType.FILE_CONTENT_LINE.value, "FILE_PATH": str(test_file), "PATH": str(test_file), "STATUS": TransactionStatus.COMPLETED.value, "ERROR_MESSAGE": "DRY_RUN", "EXPECTED_CHANGES": 1}]
         txn_file.write_text(json.dumps(transactions))
 
         result = self._run_main_flow(tmp_path, skip_scan=True, dry_run=False)
@@ -315,7 +315,7 @@ class TestExecuteTransactions:
         test_file = tmp_path / "test.txt"
         test_file.write_text("old content")
 
-        transaction = {"ID": "1", "TYPE": TransactionType.FILE_CONTENT_CHANGE.value, "FILE_PATH": str(test_file), "STATUS": TransactionStatus.PENDING.value, "EXPECTED_CHANGES": 1}
+        transaction = {"ID": "1", "TYPE": TransactionType.FILE_CONTENT_LINE.value, "FILE_PATH": str(test_file), "STATUS": TransactionStatus.PENDING.value, "EXPECTED_CHANGES": 1}
 
         logger = MagicMock()
 
@@ -332,7 +332,7 @@ class TestExecuteTransactions:
         test_file = tmp_path / "test.txt"
         test_file.write_text("old content")
 
-        transaction = {"ID": "1", "TYPE": TransactionType.FILE_CONTENT_CHANGE.value, "FILE_PATH": str(test_file), "STATUS": TransactionStatus.PENDING.value, "EXPECTED_CHANGES": 1}
+        transaction = {"ID": "1", "TYPE": TransactionType.FILE_CONTENT_LINE.value, "FILE_PATH": str(test_file), "STATUS": TransactionStatus.PENDING.value, "EXPECTED_CHANGES": 1}
 
         logger = MagicMock()
 
@@ -350,7 +350,7 @@ class TestExecuteTransactions:
 
         transaction = {
             "ID": "1",
-            "TYPE": TransactionType.FILE_CONTENT_CHANGE.value,
+            "TYPE": TransactionType.FILE_CONTENT_LINE.value,
             "FILE_PATH": str(test_file),
             "STATUS": TransactionStatus.RETRY_LATER.value,
             "RETRY_COUNT": 50,  # High retry count

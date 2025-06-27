@@ -254,7 +254,7 @@ class TestTransactionProcessing:
         test_file = tmp_path / "test.txt"
         test_file.write_text("content")
 
-        transaction = {"ID": "1", "TYPE": TransactionType.FILE_RENAME.value, "OLD_PATH": str(test_file), "NEW_PATH": str(tmp_path / "new.txt"), "STATUS": TransactionStatus.PENDING.value}
+        transaction = {"ID": "1", "TYPE": TransactionType.FILE_NAME.value, "OLD_PATH": str(test_file), "NEW_PATH": str(tmp_path / "new.txt"), "STATUS": TransactionStatus.PENDING.value}
 
         logger = MagicMock()
 
@@ -272,7 +272,7 @@ class TestTransactionProcessing:
 
         transaction = {
             "ID": "1",
-            "TYPE": TransactionType.FILE_CONTENT_CHANGE.value,
+            "TYPE": TransactionType.FILE_CONTENT_LINE.value,
             "FILE_PATH": str(test_file),
             "STATUS": TransactionStatus.PENDING.value,
             "EXPECTED_CHANGES": 1,  # Expects changes but none will occur
