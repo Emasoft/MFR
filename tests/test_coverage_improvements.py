@@ -72,8 +72,10 @@ class TestMainCLI:
             with patch("subprocess.run", return_value=mock_result):
                 from mass_find_replace.mass_find_replace import main_cli
 
-                result = main_cli()
-                assert result == 1
+                # main_cli doesn't return a value, it exits with sys.exit(1)
+                with pytest.raises(SystemExit) as exc_info:
+                    main_cli()
+                assert exc_info.value.code == 1
 
     def test_main_cli_force_interactive_conflict(self, capsys):
         """Test conflicting --force and --interactive flags."""

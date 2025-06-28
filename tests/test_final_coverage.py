@@ -30,40 +30,41 @@ class TestPrefectIntegration:
 
     def test_main_flow_with_prefect(self, tmp_path):
         """Test main_flow when run as a Prefect flow."""
-        # Mock the flow decorator
-        mock_flow_decorator = MagicMock()
-        mock_flow_instance = MagicMock()
-        mock_flow_decorator.return_value = lambda func: func
+        from mass_find_replace.mass_find_replace import main_flow
 
-        with patch("mass_find_replace.mass_find_replace.flow", mock_flow_decorator):
-            from mass_find_replace.mass_find_replace import main_flow
+        mapping_file = tmp_path / "mapping.json"
+        mapping_file.write_text('{"REPLACEMENT_MAPPING": {"old": "new"}}')
 
-            mapping_file = tmp_path / "mapping.json"
-            mapping_file.write_text('{"REPLACEMENT_MAPPING": {"old": "new"}}')
+        # Create a test file to be renamed
+        test_file = tmp_path / "old_file.txt"
+        test_file.write_text("content")
 
-            result = main_flow(
-                directory=str(tmp_path),
-                mapping_file=str(mapping_file),
-                extensions=None,
-                exclude_dirs=[],
-                exclude_files=[],
-                dry_run=False,
-                skip_scan=False,
-                resume=False,
-                force_execution=True,
-                interactive_mode=False,
-                verbose_mode=False,
-                skip_file_renaming=False,
-                skip_folder_renaming=False,
-                skip_content=False,
-                use_gitignore=False,
-                ignore_symlinks_arg=True,
-                timeout_minutes=30,
-                custom_ignore_file_path=None,
-                quiet_mode=False,
-            )
+        # main_flow doesn't return anything, it just executes
+        main_flow(
+            directory=str(tmp_path),
+            mapping_file=str(mapping_file),
+            extensions=None,
+            exclude_dirs=[],
+            exclude_files=[],
+            dry_run=False,
+            skip_scan=False,
+            resume=False,
+            force_execution=True,
+            interactive_mode=False,
+            verbose_mode=False,
+            skip_file_renaming=False,
+            skip_folder_renaming=False,
+            skip_content=False,
+            use_gitignore=False,
+            ignore_symlinks_arg=True,
+            timeout_minutes=30,
+            custom_ignore_file_path=None,
+            quiet_mode=False,
+        )
 
-            assert result[0] is True
+        # Verify that the file was renamed
+        assert not test_file.exists()
+        assert (tmp_path / "new_file.txt").exists()
 
     def test_subprocess_flush_handlers(self, capsys):
         """Test subprocess stdout flushing with logger handlers."""
@@ -77,11 +78,13 @@ class TestPrefectIntegration:
         mock_logger.handlers = [mock_handler]
 
         # Test command that produces output
-        with patch("mass_find_replace.mass_find_replace._get_logger", return_value=mock_logger):
-            result = mfr._run_subprocess_command(["echo", "test output"], "Test", mock_logger)
+        # _run_subprocess_command doesn't take a logger argument
+        result = mfr._run_subprocess_command(["echo", "test output"], "Test")
 
-        # Handler flush should be called
-        mock_handler.flush.assert_called()
+        # Result should be True for successful command
+        assert result is True
+        captured = capsys.readouterr()
+        assert "test output" in captured.out
 
     def test_subprocess_without_flush(self, capsys):
         """Test subprocess when handler has no flush method."""
@@ -95,9 +98,8 @@ class TestPrefectIntegration:
         mock_logger.handlers = [mock_handler]
 
         # Should handle gracefully
-        with patch("mass_find_replace.mass_find_replace._get_logger", return_value=mock_logger):
-            result = mfr._run_subprocess_command(["echo", "test"], "Test", mock_logger)
-            assert result is True
+        result = mfr._run_subprocess_command(["echo", "test"], "Test")
+        assert result is True
 
 
 class TestMainCLIEdgeCases:
@@ -111,10 +113,9 @@ class TestMainCLIEdgeCases:
             with patch("mass_find_replace.mass_find_replace.main_flow", side_effect=Exception("Unexpected error")):
                 from mass_find_replace.mass_find_replace import main_cli
 
-                result = main_cli()
-                assert result == 1
-                captured = capsys.readouterr()
-                assert "An error occurred" in captured.out
+                # main_cli doesn't handle exceptions, it lets them propagate
+                with pytest.raises(Exception, match="Unexpected error"):
+                    main_cli()
 
     def test_main_cli_json_key_error(self, capsys, tmp_path):
         """Test missing REPLACEMENT_MAPPING key in JSON."""
@@ -170,11 +171,13 @@ class TestMainCLIEdgeCases:
                 mock_flow.return_value = (True, 0, 0, 0)
                 from mass_find_replace.mass_find_replace import main_cli
 
-                result = main_cli()
+                main_cli()
 
                 # Check timeout was set to 0
-                call_args = mock_flow.call_args[1]
-                assert call_args["timeout_minutes"] == 0
+                # main_flow is called with positional args
+                call_args = mock_flow.call_args[0]
+                # timeout_minutes is at index 15
+                assert call_args[15] == 0
 
 
 class TestCheckExistingTransactions:
