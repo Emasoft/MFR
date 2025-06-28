@@ -573,7 +573,7 @@ class TestUtilityFunctions:
         mapping = {"content": "new content"}
         logger = MagicMock()
 
-        processed = group_and_process_file_transactions(transactions, mapping, tmp_path, logger, dry_run=True)
+        processed = group_and_process_file_transactions(transactions, mapping, tmp_path, logger, dry_run=True, skip_content=False)
 
         assert len(processed) > 0
 
