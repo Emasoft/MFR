@@ -531,12 +531,14 @@ class TestUtilityFunctions:
 
         # Empty transaction list
         transactions = []
-        update_transaction_status_in_list(transactions, "1", TransactionStatus.COMPLETED, "", logger)
-        logger.warning.assert_called_with("Transaction ID 1 not found in the transaction list.")
+        result = update_transaction_status_in_list(transactions, "1", TransactionStatus.COMPLETED, "", logger)
+        assert result is False
+        logger.warning.assert_called_with("Transaction 1 not found for status update.")
 
         # Transaction without ID field
         transactions = [{"data": "no id"}]
-        update_transaction_status_in_list(transactions, "1", TransactionStatus.COMPLETED, "", logger)
+        result = update_transaction_status_in_list(transactions, "1", TransactionStatus.COMPLETED, "", logger)
+        assert result is False
 
     def test_open_file_with_encoding_edge_cases(self, tmp_path):
         """Test file opening with various encodings."""

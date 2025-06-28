@@ -322,7 +322,7 @@ def test_symlink_name_processing(temp_test_dir: dict[str, Path], default_map_fil
     target_path.mkdir()
     symlink_path.symlink_to(target_path, target_is_directory=True)
 
-    run_main_flow_for_test(context_dir, default_map_file, process_symlink_names=True, dry_run=True)
+    run_main_flow_for_test(context_dir, default_map_file, ignore_symlinks_arg=False, dry_run=True)
 
     transactions = load_transactions(context_dir / MAIN_TRANSACTION_FILE_NAME)
     assert transactions is not None

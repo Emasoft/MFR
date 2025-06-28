@@ -251,7 +251,7 @@ class TestMainFlow:
 
         # Mock input to approve changes
         with patch("builtins.input", return_value="y"):
-            result = self._run_main_flow(tmp_path, interactive=True)
+            result = self._run_main_flow(tmp_path, interactive_mode=True)
             success, completed, failed, skipped = result
             assert success is True
 
@@ -321,7 +321,7 @@ class TestExecuteTransactions:
 
         # Test 'n' (skip) response
         with patch("builtins.input", return_value="n"):
-            stats = execute_all_transactions([transaction], {"old": "new"}, tmp_path, logger, dry_run=False, interactive=True, process_symlink_names=False, timeout_minutes=30)
+            stats = execute_all_transactions([transaction], {"old": "new"}, tmp_path, logger, dry_run=False, interactive_mode=True, ignore_symlinks_arg=True, timeout_minutes=30)
         assert stats["skipped"] == 1
         assert stats["completed"] == 0
 
@@ -338,7 +338,7 @@ class TestExecuteTransactions:
 
         # Test 'a' (apply all) response
         with patch("builtins.input", return_value="a"):
-            stats = execute_all_transactions([transaction], {"old": "new"}, tmp_path, logger, dry_run=False, interactive=True, process_symlink_names=False, timeout_minutes=30)
+            stats = execute_all_transactions([transaction], {"old": "new"}, tmp_path, logger, dry_run=False, interactive_mode=True, ignore_symlinks_arg=True, timeout_minutes=30)
         assert stats["completed"] == 1
 
     def test_transaction_with_high_retry_count(self, tmp_path):
@@ -366,8 +366,8 @@ class TestExecuteTransactions:
             tmp_path,
             logger,
             dry_run=False,
-            interactive=False,
-            process_symlink_names=False,
+            interactive_mode=False,
+            ignore_symlinks_arg=True,
             timeout_minutes=0.01,  # Very short timeout
         )
 
@@ -543,14 +543,16 @@ class TestFileOperations:
         from mass_find_replace.file_system_operations import update_transaction_status_in_list, TransactionStatus
 
         logger = MagicMock()
-        transactions = [{"ID": "1", "STATUS": TransactionStatus.PENDING.value}, {"ID": "2", "STATUS": TransactionStatus.PENDING.value}]
+        transactions = [{"id": "1", "STATUS": TransactionStatus.PENDING.value}, {"id": "2", "STATUS": TransactionStatus.PENDING.value}]
 
         # Update existing
-        update_transaction_status_in_list(transactions, "1", TransactionStatus.COMPLETED, "", logger)
+        result = update_transaction_status_in_list(transactions, "1", TransactionStatus.COMPLETED, "", logger)
+        assert result is True
         assert transactions[0]["STATUS"] == TransactionStatus.COMPLETED.value
 
         # Update non-existent
-        update_transaction_status_in_list(transactions, "999", TransactionStatus.FAILED, "error", logger)
+        result = update_transaction_status_in_list(transactions, "999", TransactionStatus.FAILED, "error", logger)
+        assert result is False
         logger.warning.assert_called()
 
     def test_load_ignore_patterns(self, tmp_path):
@@ -575,11 +577,11 @@ class TestFileOperations:
         old_dir.mkdir()
         new_dir.mkdir()  # Target already exists
 
-        transaction = {"ID": "1", "TYPE": TransactionType.FOLDER_RENAME.value, "OLD_PATH": str(old_dir), "NEW_PATH": str(new_dir), "STATUS": TransactionStatus.PENDING.value}
+        transaction = {"ID": "1", "TYPE": TransactionType.FOLDER_NAME.value, "OLD_PATH": str(old_dir), "NEW_PATH": str(new_dir), "STATUS": TransactionStatus.PENDING.value}
 
         logger = MagicMock()
 
-        stats = execute_all_transactions([transaction], {}, tmp_path, logger, dry_run=False, interactive=False, process_symlink_names=False, timeout_minutes=30)
+        stats = execute_all_transactions([transaction], {}, tmp_path, logger, dry_run=False, interactive_mode=False, ignore_symlinks_arg=True, timeout_minutes=30)
 
         assert stats["failed"] == 1
 
