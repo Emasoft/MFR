@@ -24,6 +24,7 @@ import shutil
 from typing import Any, Callable, Generator, Tuple
 import sys
 import logging
+import os
 
 
 @pytest.fixture
@@ -103,31 +104,51 @@ def assert_file_content() -> Callable[[Path, str], None]:
     return _assert
 
 
-@pytest.fixture(autouse=True)
-def cleanup_prefect_logging():
-    """Clean up Prefect logging handlers to avoid 'I/O operation on closed file' errors."""
-    yield
-    # After each test, flush and remove any Prefect logging handlers
-    try:
-        # Get all loggers
-        for logger_name in list(logging.Logger.manager.loggerDict.keys()):
-            if "prefect" in logger_name.lower():
-                logger = logging.getLogger(logger_name)
-                # Remove all handlers to avoid closed file issues
-                for handler in logger.handlers[:]:
-                    try:
-                        handler.flush()
-                        handler.close()
-                    except (ValueError, OSError):
-                        pass  # Ignore if already closed
-                    logger.removeHandler(handler)
+@pytest.fixture(autouse=True, scope="session")
+def disable_prefect_rich_output():
+    """Disable Prefect's Rich console output to avoid 'I/O operation on closed file' errors."""
+    # Disable Rich output in Prefect during tests
+    os.environ["PREFECT__LOGGING__ENABLE_RICH_LOGS"] = "false"
+    os.environ["PREFECT_LOGGING_ENABLE_RICH_LOGS"] = "false"
 
-        # Also flush root logger handlers
+    # Also disable ANSI colors
+    os.environ["NO_COLOR"] = "1"
+
+    yield
+
+    # Cleanup is not needed as environment variables are process-local
+
+
+@pytest.fixture(autouse=True)
+def cleanup_logging_handlers():
+    """Clean up logging handlers after each test to avoid file handle issues."""
+    yield
+
+    # After each test, ensure all handlers are properly closed
+    try:
+        # Force garbage collection to clean up any remaining objects
+        import gc
+
+        gc.collect()
+
+        # Get all loggers and clean them up
+        for logger_name in list(logging.Logger.manager.loggerDict.keys()):
+            logger = logging.getLogger(logger_name)
+            for handler in logger.handlers[:]:
+                try:
+                    handler.flush()
+                    handler.close()
+                except Exception:
+                    pass  # Ignore any errors
+                logger.removeHandler(handler)
+
+        # Clean root logger as well
         root_logger = logging.getLogger()
         for handler in root_logger.handlers[:]:
             try:
                 handler.flush()
-            except (ValueError, OSError):
-                pass  # Ignore if already closed
+                handler.close()
+            except Exception:
+                pass
     except Exception:
         pass  # Ignore any errors during cleanup
