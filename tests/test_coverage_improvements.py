@@ -564,11 +564,14 @@ class TestFileOperations:
         ignore_file = tmp_path / ".customignore"
         ignore_file.write_text("*.pyc\n__pycache__/\n# Comment\n\n*.log")
 
-        patterns = load_ignore_patterns(str(ignore_file))
-        assert "*.pyc" in patterns
-        assert "__pycache__/" in patterns
-        assert "*.log" in patterns
-        assert len(patterns) == 3
+        # load_ignore_patterns expects a Path object
+        patterns_spec = load_ignore_patterns(ignore_file)
+        assert patterns_spec is not None
+        # Check that patterns are loaded (PathSpec doesn't allow direct pattern access)
+        assert patterns_spec.match_file("test.pyc") is True
+        assert patterns_spec.match_file("__pycache__/test.py") is True
+        assert patterns_spec.match_file("test.log") is True
+        assert patterns_spec.match_file("test.txt") is False
 
     def test_folder_rename_collision(self, tmp_path):
         """Test folder rename when target exists."""
