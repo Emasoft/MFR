@@ -111,6 +111,15 @@ def disable_prefect_rich_output():
     os.environ["PREFECT__LOGGING__ENABLE_RICH_LOGS"] = "false"
     os.environ["PREFECT_LOGGING_ENABLE_RICH_LOGS"] = "false"
 
+    # Disable Prefect's server communication during tests
+    os.environ["PREFECT__TESTING_MODE"] = "true"
+    os.environ["PREFECT__SERVER__ANALYTICS_ENABLED"] = "false"
+    os.environ["PREFECT__TELEMETRY__ENABLED"] = "false"
+
+    # Use simpler logging
+    os.environ["PREFECT__LOGGING__LEVEL"] = "WARNING"
+    os.environ["PREFECT__LOGGING__COLORS"] = "false"
+
     # Also disable ANSI colors
     os.environ["NO_COLOR"] = "1"
 
