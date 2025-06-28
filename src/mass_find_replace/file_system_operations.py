@@ -2023,6 +2023,9 @@ def execute_all_transactions(
     stats["skipped"] += sum(1 for tx in content_txs if tx.get("STATUS") == TransactionStatus.SKIPPED.value)
     stats["failed"] += sum(1 for tx in content_txs if tx.get("STATUS") == TransactionStatus.FAILED.value)
 
+    # Count all RETRY_LATER transactions in the final stats
+    stats["retry_later"] = sum(1 for tx in transactions if tx.get("STATUS") == TransactionStatus.RETRY_LATER.value)
+
     save_transactions(transactions, transactions_file_path, logger=logger)
     if logger:
         logger.info(f"Execution phase complete. Stats: {stats}")

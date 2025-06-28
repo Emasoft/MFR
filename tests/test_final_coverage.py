@@ -195,8 +195,8 @@ class TestCheckExistingTransactions:
         # Create transaction file with all completed
         txn_file = tmp_path / "planned_transactions.json"
         transactions = [
-            {"id": "1", "STATUS": TransactionStatus.COMPLETED.value},
-            {"id": "2", "STATUS": TransactionStatus.COMPLETED.value},
+            {"id": "1", "TYPE": "FILE_CONTENT_LINE", "PATH": "test.txt", "LINE_NUMBER": 1, "STATUS": TransactionStatus.COMPLETED.value},
+            {"id": "2", "TYPE": "FILE_CONTENT_LINE", "PATH": "test.txt", "LINE_NUMBER": 2, "STATUS": TransactionStatus.COMPLETED.value},
         ]
         txn_file.write_text(json.dumps(transactions))
 
@@ -366,10 +366,11 @@ class TestLoggerFunctions:
         # Test that key functions exist
         assert hasattr(rl, "strip_control_characters")
         assert hasattr(rl, "strip_diacritics")
-        assert hasattr(rl, "canonicalize_text")
-        assert hasattr(rl, "generate_replacement_function")
+        # canonicalize_text doesn't exist - the functionality is achieved by combining strip_control_characters, strip_diacritics, and NFC normalization
+        # generate_replacement_function doesn't exist - replacements are done by replace_occurrences
         assert hasattr(rl, "validate_replacement_mapping_structure")
         assert hasattr(rl, "load_replacement_map")
+        assert hasattr(rl, "replace_occurrences")  # The main replacement function
 
 
 class TestStringProcessing:

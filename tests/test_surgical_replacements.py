@@ -70,7 +70,8 @@ class TestSurgicalReplacements:
         test_file = tmp_path / "spaces.txt"
         # Create content with various trailing spaces
         original_content = "Line with no trailing space\n" "Line with one trailing space \n" "Line with multiple trailing spaces   \n" "Line with OLDNAME and trailing spaces   \n" "Line with tabs\t\t\n" "Line with OLDNAME and tabs\t\t\n" "Last line without newline and spaces   "
-        test_file.write_text(original_content)
+        # Write as binary to control exact bytes
+        test_file.write_bytes(original_content.encode("utf-8"))
 
         # Run MFR
         mapping = {"OLDNAME": "NEWNAME"}
@@ -78,11 +79,12 @@ class TestSurgicalReplacements:
 
         # Verify exact preservation except for OLDNAME -> NEWNAME
         expected_content = original_content.replace("OLDNAME", "NEWNAME")
-        actual_content = test_file.read_text()
+        actual_bytes = test_file.read_bytes()
+        expected_bytes = expected_content.encode("utf-8")
 
-        assert actual_content == expected_content
-        # Verify byte-by-byte for extra safety
-        assert test_file.read_bytes() == expected_content.encode("utf-8")
+        # On Windows, Python may normalize line endings when reading/writing text
+        # So compare the actual bytes
+        assert actual_bytes == expected_bytes
 
     def test_preserves_line_endings(self, tmp_path):
         """Test that various line ending styles are preserved."""

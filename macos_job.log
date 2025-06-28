@@ -1,0 +1,992 @@
+﻿2025-06-28T22:40:15.3420880Z Current runner version: '2.325.0'
+2025-06-28T22:40:15.3435480Z ##[group]Operating System
+2025-06-28T22:40:15.3435900Z macOS
+2025-06-28T22:40:15.3436180Z 14.7.6
+2025-06-28T22:40:15.3436450Z 23H626
+2025-06-28T22:40:15.3436730Z ##[endgroup]
+2025-06-28T22:40:15.3437020Z ##[group]Runner Image
+2025-06-28T22:40:15.3437340Z Image: macos-14-arm64
+2025-06-28T22:40:15.3437650Z Version: 20250623.1617
+2025-06-28T22:40:15.3438300Z Included Software: https://github.com/actions/runner-images/blob/macos-14-arm64/20250623.1617/images/macos/macos-14-arm64-Readme.md
+2025-06-28T22:40:15.3439190Z Image Release: https://github.com/actions/runner-images/releases/tag/macos-14-arm64%2F20250623.1617
+2025-06-28T22:40:15.3439740Z ##[endgroup]
+2025-06-28T22:40:15.3440030Z ##[group]Runner Image Provisioner
+2025-06-28T22:40:15.3440390Z 2.0.437.1+b8a73daf41ec39b19236c1d542c9f2348c5b7c2d
+2025-06-28T22:40:15.3440760Z ##[endgroup]
+2025-06-28T22:40:15.3441370Z ##[group]GITHUB_TOKEN Permissions
+2025-06-28T22:40:15.3442240Z Contents: read
+2025-06-28T22:40:15.3442530Z Metadata: read
+2025-06-28T22:40:15.3442800Z Packages: read
+2025-06-28T22:40:15.3443080Z ##[endgroup]
+2025-06-28T22:40:15.3444200Z Secret source: Actions
+2025-06-28T22:40:15.3444550Z Prepare workflow directory
+2025-06-28T22:40:15.3687460Z Prepare all required actions
+2025-06-28T22:40:15.3712800Z Getting action download info
+2025-06-28T22:40:15.7177330Z ##[group]Download immutable action package 'actions/checkout@v4'
+2025-06-28T22:40:15.7178140Z Version: 4.2.2
+2025-06-28T22:40:15.7178880Z Digest: sha256:ccb2698953eaebd21c7bf6268a94f9c26518a7e38e27e0b83c1fe1ad049819b1
+2025-06-28T22:40:15.7179910Z Source commit SHA: 11bd71901bbe5b1630ceea73d27597364c9af683
+2025-06-28T22:40:15.7180460Z ##[endgroup]
+2025-06-28T22:40:16.0371710Z Download action repository 'astral-sh/setup-uv@v6' (SHA:bd01e18f51369d5a26f1651c3cb451d3417e3bba)
+2025-06-28T22:40:17.3047140Z Download action repository 'codecov/codecov-action@v5' (SHA:18283e04ce6e62d37312384ff67231eb8fd56d24)
+2025-06-28T22:40:18.1091270Z Getting action download info
+2025-06-28T22:40:18.2434840Z ##[group]Download immutable action package 'actions/github-script@v7'
+2025-06-28T22:40:18.2435340Z Version: 7.0.1
+2025-06-28T22:40:18.2435780Z Digest: sha256:bce02966afe3a75123f766b765abe432fac5464b74976015dc06b811ac9054c7
+2025-06-28T22:40:18.2436400Z Source commit SHA: 60a0d83039c74a4aee543508d2ffcb1c3799cdea
+2025-06-28T22:40:18.2436820Z ##[endgroup]
+2025-06-28T22:40:18.9196170Z Complete job name: Test Python 3.11 on macos-latest
+2025-06-28T22:40:18.9561610Z ##[group]Run actions/checkout@v4
+2025-06-28T22:40:18.9562540Z with:
+2025-06-28T22:40:18.9562970Z   repository: Emasoft/MFR
+2025-06-28T22:40:18.9563630Z   token: ***
+2025-06-28T22:40:18.9564060Z   ssh-strict: true
+2025-06-28T22:40:18.9564510Z   ssh-user: git
+2025-06-28T22:40:18.9564970Z   persist-credentials: true
+2025-06-28T22:40:18.9565480Z   clean: true
+2025-06-28T22:40:18.9565960Z   sparse-checkout-cone-mode: true
+2025-06-28T22:40:18.9566510Z   fetch-depth: 1
+2025-06-28T22:40:18.9566950Z   fetch-tags: false
+2025-06-28T22:40:18.9567430Z   show-progress: true
+2025-06-28T22:40:18.9567930Z   lfs: false
+2025-06-28T22:40:18.9568360Z   submodules: false
+2025-06-28T22:40:18.9568830Z   set-safe-directory: true
+2025-06-28T22:40:18.9569440Z env:
+2025-06-28T22:40:18.9569840Z   UV_VERSION: 0.7.13
+2025-06-28T22:40:18.9570310Z   DEFAULT_PYTHON: 3.11
+2025-06-28T22:40:18.9570790Z   GIT_AUTHOR_NAME: Emasoft
+2025-06-28T22:40:18.9571420Z   GIT_AUTHOR_EMAIL: 713559+Emasoft@users.noreply.github.com
+2025-06-28T22:40:18.9572160Z   GIT_COMMITTER_NAME: Emasoft
+2025-06-28T22:40:18.9572840Z   GIT_COMMITTER_EMAIL: 713559+Emasoft@users.noreply.github.com
+2025-06-28T22:40:18.9573560Z ##[endgroup]
+2025-06-28T22:40:19.2450020Z Syncing repository: Emasoft/MFR
+2025-06-28T22:40:19.2451700Z ##[group]Getting Git version info
+2025-06-28T22:40:19.2452480Z Working directory is '/Users/runner/work/MFR/MFR'
+2025-06-28T22:40:19.2453540Z [command]/opt/homebrew/bin/git version
+2025-06-28T22:40:19.3285690Z git version 2.50.0
+2025-06-28T22:40:19.3309940Z ##[endgroup]
+2025-06-28T22:40:19.3320470Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/a4506ee5-24ab-43f6-ae83-e5fc55cba454/.gitconfig'
+2025-06-28T22:40:19.3326360Z Temporarily overriding HOME='/Users/runner/work/_temp/a4506ee5-24ab-43f6-ae83-e5fc55cba454' before making global git config changes
+2025-06-28T22:40:19.3328160Z Adding repository directory to the temporary git global config as a safe directory
+2025-06-28T22:40:19.3329870Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/MFR/MFR
+2025-06-28T22:40:19.3406980Z Deleting the contents of '/Users/runner/work/MFR/MFR'
+2025-06-28T22:40:19.3409200Z ##[group]Initializing the repository
+2025-06-28T22:40:19.3413600Z [command]/opt/homebrew/bin/git init /Users/runner/work/MFR/MFR
+2025-06-28T22:40:19.3716080Z hint: Using 'master' as the name for the initial branch. This default branch name
+2025-06-28T22:40:19.3717300Z hint: is subject to change. To configure the initial branch name to use in all
+2025-06-28T22:40:19.3718430Z hint: of your new repositories, which will suppress this warning, call:
+2025-06-28T22:40:19.3719230Z hint:
+2025-06-28T22:40:19.3719790Z hint: 	git config --global init.defaultBranch <name>
+2025-06-28T22:40:19.3720450Z hint:
+2025-06-28T22:40:19.3721100Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2025-06-28T22:40:19.3722170Z hint: 'development'. The just-created branch can be renamed via this command:
+2025-06-28T22:40:19.3723000Z hint:
+2025-06-28T22:40:19.3723440Z hint: 	git branch -m <name>
+2025-06-28T22:40:19.3723930Z hint:
+2025-06-28T22:40:19.3724620Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2025-06-28T22:40:19.3725710Z Initialized empty Git repository in /Users/runner/work/MFR/MFR/.git/
+2025-06-28T22:40:19.3727670Z [command]/opt/homebrew/bin/git remote add origin https://github.com/Emasoft/MFR
+2025-06-28T22:40:19.3799050Z ##[endgroup]
+2025-06-28T22:40:19.3799900Z ##[group]Disabling automatic garbage collection
+2025-06-28T22:40:19.3801210Z [command]/opt/homebrew/bin/git config --local gc.auto 0
+2025-06-28T22:40:19.3839760Z ##[endgroup]
+2025-06-28T22:40:19.3840690Z ##[group]Setting up auth
+2025-06-28T22:40:19.3844460Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-06-28T22:40:19.3886020Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-06-28T22:40:19.4435630Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-06-28T22:40:19.4478000Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-06-28T22:40:19.5135840Z [command]/opt/homebrew/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2025-06-28T22:40:19.5214600Z ##[endgroup]
+2025-06-28T22:40:19.5215500Z ##[group]Fetching the repository
+2025-06-28T22:40:19.5221720Z [command]/opt/homebrew/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +a837f445e875c96aefaf7cc4be990a9cba9624f0:refs/remotes/origin/main
+2025-06-28T22:40:20.2969450Z From https://github.com/Emasoft/MFR
+2025-06-28T22:40:20.2971710Z  * [new ref]         a837f445e875c96aefaf7cc4be990a9cba9624f0 -> origin/main
+2025-06-28T22:40:20.3021660Z ##[endgroup]
+2025-06-28T22:40:20.3021940Z ##[group]Determining the checkout info
+2025-06-28T22:40:20.3022540Z ##[endgroup]
+2025-06-28T22:40:20.3025950Z [command]/opt/homebrew/bin/git sparse-checkout disable
+2025-06-28T22:40:20.3076390Z [command]/opt/homebrew/bin/git config --local --unset-all extensions.worktreeConfig
+2025-06-28T22:40:20.3112560Z ##[group]Checking out the ref
+2025-06-28T22:40:20.3115190Z [command]/opt/homebrew/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2025-06-28T22:40:20.3307450Z Switched to a new branch 'main'
+2025-06-28T22:40:20.3408520Z branch 'main' set up to track 'origin/main'.
+2025-06-28T22:40:20.3711240Z ##[endgroup]
+2025-06-28T22:40:20.3882030Z [command]/opt/homebrew/bin/git log -1 --format=%H
+2025-06-28T22:40:20.3882330Z a837f445e875c96aefaf7cc4be990a9cba9624f0
+2025-06-28T22:40:20.3982770Z ##[group]Run astral-sh/setup-uv@v6
+2025-06-28T22:40:20.3982990Z with:
+2025-06-28T22:40:20.3983130Z   version: 0.7.13
+2025-06-28T22:40:20.3983260Z   enable-cache: true
+2025-06-28T22:40:20.3983460Z   cache-dependency-glob: pyproject.toml
+uv.lock
+
+2025-06-28T22:40:20.3983700Z   activate-environment: false
+2025-06-28T22:40:20.3983920Z   working-directory: /Users/runner/work/MFR/MFR
+2025-06-28T22:40:20.3984160Z   server-url: https://github.com
+2025-06-28T22:40:20.3984440Z   github-token: ***
+2025-06-28T22:40:20.3984610Z   prune-cache: true
+2025-06-28T22:40:20.3984760Z   ignore-nothing-to-cache: false
+2025-06-28T22:40:20.3984960Z   ignore-empty-workdir: false
+2025-06-28T22:40:20.3985140Z env:
+2025-06-28T22:40:20.3985260Z   UV_VERSION: 0.7.13
+2025-06-28T22:40:20.3985420Z   DEFAULT_PYTHON: 3.11
+2025-06-28T22:40:20.3985580Z   GIT_AUTHOR_NAME: Emasoft
+2025-06-28T22:40:20.3985790Z   GIT_AUTHOR_EMAIL: 713559+Emasoft@users.noreply.github.com
+2025-06-28T22:40:20.3986080Z   GIT_COMMITTER_NAME: Emasoft
+2025-06-28T22:40:20.3986310Z   GIT_COMMITTER_EMAIL: 713559+Emasoft@users.noreply.github.com
+2025-06-28T22:40:20.3986550Z ##[endgroup]
+2025-06-28T22:40:20.5453770Z manifest-file not provided, reading from local file.
+2025-06-28T22:40:20.5488300Z Downloading uv from "https://github.com/astral-sh/uv/releases/download/0.7.13/uv-aarch64-apple-darwin.tar.gz" ...
+2025-06-28T22:40:21.2496650Z [command]/usr/bin/tar xz -C /Users/runner/work/_temp/8aba00e4-cf79-4ba8-97b6-6fd19e19b86e -f /Users/runner/work/_temp/85a35763-268b-4772-8ac0-6d134573892d
+2025-06-28T22:40:21.4004380Z Added /Users/runner/.local/bin to the path
+2025-06-28T22:40:21.4010320Z Added /Users/runner/hostedtoolcache/uv/0.7.13/aarch64 to the path
+2025-06-28T22:40:21.4033060Z Set UV_CACHE_DIR to /Users/runner/work/_temp/setup-uv-cache
+2025-06-28T22:40:21.4033380Z Successfully installed uv version 0.7.13
+2025-06-28T22:40:21.4033690Z Searching files using cache dependency glob: pyproject.toml,uv.lock
+2025-06-28T22:40:21.4051890Z /Users/runner/work/MFR/MFR/pyproject.toml
+2025-06-28T22:40:21.4064330Z /Users/runner/work/MFR/MFR/uv.lock
+2025-06-28T22:40:21.4079040Z Found 2 files to hash.
+2025-06-28T22:40:21.8081410Z Trying to restore uv cache from GitHub Actions cache with key: setup-uv-1-aarch64-apple-darwin-3.12.11-pruned-7eaad343f7bacbd27d9abeb4ec67bda9afa779c006c0560dbdb49456cfd220dc
+2025-06-28T22:40:21.9715770Z Cache hit for: setup-uv-1-aarch64-apple-darwin-3.12.11-pruned-7eaad343f7bacbd27d9abeb4ec67bda9afa779c006c0560dbdb49456cfd220dc
+2025-06-28T22:40:22.2445130Z Received 83363 of 83363 (100.0%), 0.8 MBs/sec
+2025-06-28T22:40:22.2446540Z Cache Size: ~0 MB (83363 B)
+2025-06-28T22:40:22.2489010Z [command]/opt/homebrew/bin/gtar -xf /Users/runner/work/_temp/1f718d0c-81da-4652-a667-980a61a00039/cache.tzst -P -C /Users/runner/work/MFR/MFR --delay-directory-restore --use-compress-program unzstd
+2025-06-28T22:40:22.2692880Z Cache restored successfully
+2025-06-28T22:40:22.2732740Z uv cache restored from GitHub Actions cache with key: setup-uv-1-aarch64-apple-darwin-3.12.11-pruned-7eaad343f7bacbd27d9abeb4ec67bda9afa779c006c0560dbdb49456cfd220dc
+2025-06-28T22:40:22.2822940Z ##[group]Run uv python install 3.11
+2025-06-28T22:40:22.2823230Z [36;1muv python install 3.11[0m
+2025-06-28T22:40:22.2823450Z [36;1muv python pin 3.11[0m
+2025-06-28T22:40:22.2886010Z shell: /bin/bash -e {0}
+2025-06-28T22:40:22.2886200Z env:
+2025-06-28T22:40:22.2886330Z   UV_VERSION: 0.7.13
+2025-06-28T22:40:22.2886520Z   DEFAULT_PYTHON: 3.11
+2025-06-28T22:40:22.2886700Z   GIT_AUTHOR_NAME: Emasoft
+2025-06-28T22:40:22.2886940Z   GIT_AUTHOR_EMAIL: 713559+Emasoft@users.noreply.github.com
+2025-06-28T22:40:22.2887220Z   GIT_COMMITTER_NAME: Emasoft
+2025-06-28T22:40:22.2887810Z   GIT_COMMITTER_EMAIL: 713559+Emasoft@users.noreply.github.com
+2025-06-28T22:40:22.2888140Z   UV_CACHE_DIR: /Users/runner/work/_temp/setup-uv-cache
+2025-06-28T22:40:22.2888380Z ##[endgroup]
+2025-06-28T22:40:22.8283810Z Downloading cpython-3.11.13-macos-aarch64-none (download) (17.2MiB)
+2025-06-28T22:40:23.3497820Z  Downloading cpython-3.11.13-macos-aarch64-none (download)
+2025-06-28T22:40:24.6893370Z Installed Python 3.11.13 in 2.36s
+2025-06-28T22:40:24.6893980Z  + cpython-3.11.13-macos-aarch64-none
+2025-06-28T22:40:24.7936850Z Pinned `.python-version` to `3.11`
+2025-06-28T22:40:24.7974480Z ##[group]Run uv sync --all-extras
+2025-06-28T22:40:24.7974730Z [36;1muv sync --all-extras[0m
+2025-06-28T22:40:24.8037040Z shell: /bin/bash -e {0}
+2025-06-28T22:40:24.8037250Z env:
+2025-06-28T22:40:24.8037410Z   UV_VERSION: 0.7.13
+2025-06-28T22:40:24.8037560Z   DEFAULT_PYTHON: 3.11
+2025-06-28T22:40:24.8037750Z   GIT_AUTHOR_NAME: Emasoft
+2025-06-28T22:40:24.8038000Z   GIT_AUTHOR_EMAIL: 713559+Emasoft@users.noreply.github.com
+2025-06-28T22:40:24.8038360Z   GIT_COMMITTER_NAME: Emasoft
+2025-06-28T22:40:24.8038610Z   GIT_COMMITTER_EMAIL: 713559+Emasoft@users.noreply.github.com
+2025-06-28T22:40:24.8038970Z   UV_CACHE_DIR: /Users/runner/work/_temp/setup-uv-cache
+2025-06-28T22:40:24.8039200Z ##[endgroup]
+2025-06-28T22:40:24.8359760Z Using CPython 3.11.13
+2025-06-28T22:40:24.8360040Z Creating virtual environment at: .venv
+2025-06-28T22:40:24.8471330Z Resolved 150 packages in 1ms
+2025-06-28T22:40:24.8522310Z    Building mass-find-replace @ file:///Users/runner/work/MFR/MFR
+2025-06-28T22:40:25.2698600Z Downloading setuptools (1.1MiB)
+2025-06-28T22:40:25.2930690Z Downloading nltk (1.4MiB)
+2025-06-28T22:40:25.2936000Z Downloading pygments (1.2MiB)
+2025-06-28T22:40:25.2940520Z Downloading virtualenv (5.8MiB)
+2025-06-28T22:40:25.2941840Z Downloading pip (1.7MiB)
+2025-06-28T22:40:25.2955370Z Downloading ruff (10.0MiB)
+2025-06-28T22:40:25.2965540Z Downloading cryptography (6.7MiB)
+2025-06-28T22:40:25.2967290Z Downloading apprise (1.3MiB)
+2025-06-28T22:40:25.2976840Z Downloading mypy (9.5MiB)
+2025-06-28T22:40:25.2978680Z Downloading uv (15.1MiB)
+2025-06-28T22:40:25.2989690Z Downloading pydantic-core (1.7MiB)
+2025-06-28T22:40:25.2991820Z Downloading deptry (1.6MiB)
+2025-06-28T22:40:25.2994710Z Downloading sqlalchemy (2.0MiB)
+2025-06-28T22:40:25.3005100Z Downloading prefect (5.8MiB)
+2025-06-28T22:40:26.6428010Z  Downloading deptry
+2025-06-28T22:40:26.6696660Z  Downloading pydantic-core
+2025-06-28T22:40:26.6858280Z  Downloading apprise
+2025-06-28T22:40:26.7978910Z  Downloading sqlalchemy
+2025-06-28T22:40:26.9539970Z  Downloading pygments
+2025-06-28T22:40:27.0922960Z       Built mass-find-replace @ file:///Users/runner/work/MFR/MFR
+2025-06-28T22:40:27.1462690Z  Downloading cryptography
+2025-06-28T22:40:27.1467220Z  Downloading virtualenv
+2025-06-28T22:40:27.2528220Z  Downloading nltk
+2025-06-28T22:40:27.2587730Z  Downloading pip
+2025-06-28T22:40:27.2794600Z  Downloading setuptools
+2025-06-28T22:40:27.3128770Z  Downloading ruff
+2025-06-28T22:40:27.4014100Z  Downloading uv
+2025-06-28T22:40:27.5079750Z  Downloading prefect
+2025-06-28T22:40:27.6329510Z  Downloading mypy
+2025-06-28T22:40:27.6334990Z Prepared 146 packages in 2.78s
+2025-06-28T22:40:27.8926380Z Installed 146 packages in 258ms
+2025-06-28T22:40:27.8930740Z  + aiosqlite==0.21.0
+2025-06-28T22:40:27.8931040Z  + alembic==1.16.2
+2025-06-28T22:40:27.8931360Z  + annotated-types==0.7.0
+2025-06-28T22:40:27.8931590Z  + anyio==4.9.0
+2025-06-28T22:40:27.8931800Z  + apprise==1.9.3
+2025-06-28T22:40:27.8932230Z  + asgi-lifespan==2.1.0
+2025-06-28T22:40:27.8932660Z  + asyncpg==0.30.0
+2025-06-28T22:40:27.8933030Z  + attrs==25.3.0
+2025-06-28T22:40:27.8933550Z  + authlib==1.6.0
+2025-06-28T22:40:27.8933870Z  + bandit==1.8.5
+2025-06-28T22:40:27.8934200Z  + boolean-py==5.0
+2025-06-28T22:40:27.8934450Z  + cachecontrol==0.14.3
+2025-06-28T22:40:27.8934810Z  + cachetools==6.1.0
+2025-06-28T22:40:27.8935160Z  + certifi==2025.6.15
+2025-06-28T22:40:27.8935460Z  + cffi==1.17.1
+2025-06-28T22:40:27.8935730Z  + cfgv==3.4.0
+2025-06-28T22:40:27.8940570Z  + chardet==4.0.0
+2025-06-28T22:40:27.8940730Z  + charset-normalizer==3.4.2
+2025-06-28T22:40:27.8940900Z  + click==8.1.8
+2025-06-28T22:40:27.8941050Z  + cloudpickle==3.1.1
+2025-06-28T22:40:27.8941210Z  + colorama==0.4.6
+2025-06-28T22:40:27.8941350Z  + coolname==2.2.0
+2025-06-28T22:40:27.8941520Z  + coverage==7.9.1
+2025-06-28T22:40:27.8941690Z  + cryptography==45.0.4
+2025-06-28T22:40:27.8941900Z  + cyclonedx-python-lib==9.1.0
+2025-06-28T22:40:27.8942150Z  + dateparser==1.2.1
+2025-06-28T22:40:27.8942320Z  + defusedxml==0.7.1
+2025-06-28T22:40:27.8942990Z  + deptry==0.23.0
+2025-06-28T22:40:27.8943170Z  + distlib==0.3.9
+2025-06-28T22:40:27.8943310Z  + docker==7.1.0
+2025-06-28T22:40:27.8943450Z  + dparse==0.6.4
+2025-06-28T22:40:27.8943590Z  + exceptiongroup==1.3.0
+2025-06-28T22:40:27.8943750Z  + fastapi==0.115.13
+2025-06-28T22:40:27.8943910Z  + filelock==3.16.1
+2025-06-28T22:40:27.8944040Z  + fsspec==2025.5.1
+2025-06-28T22:40:27.8944250Z  + graphviz==0.21
+2025-06-28T22:40:27.8944380Z  + greenlet==3.2.3
+2025-06-28T22:40:27.8944540Z  + griffe==1.7.3
+2025-06-28T22:40:27.8944680Z  + h11==0.16.0
+2025-06-28T22:40:27.8944800Z  + h2==4.2.0
+2025-06-28T22:40:27.8944930Z  + hpack==4.1.0
+2025-06-28T22:40:27.8945070Z  + httpcore==1.0.9
+2025-06-28T22:40:27.8945210Z  + httpx==0.28.1
+2025-06-28T22:40:27.8945340Z  + humanize==4.12.3
+2025-06-28T22:40:27.8945480Z  + hyperframe==6.1.0
+2025-06-28T22:40:27.8945630Z  + identify==2.6.12
+2025-06-28T22:40:27.8945770Z  + idna==3.10
+2025-06-28T22:40:27.8945920Z  + importlib-metadata==8.7.0
+2025-06-28T22:40:27.8946100Z  + iniconfig==2.1.0
+2025-06-28T22:40:27.8946250Z  + isbinary==1.0.1
+2025-06-28T22:40:27.8946380Z  + jinja2==3.1.6
+2025-06-28T22:40:27.8946540Z  + jinja2-humanize-extension==0.4.0
+2025-06-28T22:40:27.8946770Z  + joblib==1.5.1
+2025-06-28T22:40:27.8946920Z  + jsonpatch==1.33
+2025-06-28T22:40:27.8947080Z  + jsonpointer==3.0.0
+2025-06-28T22:40:27.8947230Z  + jsonschema==4.24.0
+2025-06-28T22:40:27.8947400Z  + jsonschema-specifications==2025.4.1
+2025-06-28T22:40:27.8947620Z  + license-expression==30.4.1
+2025-06-28T22:40:27.8947790Z  + mako==1.3.10
+2025-06-28T22:40:27.8947920Z  + markdown==3.8.1
+2025-06-28T22:40:27.8948130Z  + markdown-it-py==3.0.0
+2025-06-28T22:40:27.8948290Z  + markupsafe==3.0.2
+2025-06-28T22:40:27.8948440Z  + marshmallow==4.0.0
+2025-06-28T22:40:27.8948690Z  + mass-find-replace==0.3.0a0 (from file:///Users/runner/work/MFR/MFR)
+2025-06-28T22:40:27.8949130Z  + mdurl==0.1.2
+2025-06-28T22:40:27.8949310Z  + msgpack==1.1.1
+2025-06-28T22:40:27.8949490Z  + mypy==1.16.1
+2025-06-28T22:40:27.8949660Z  + mypy-extensions==1.1.0
+2025-06-28T22:40:27.8949810Z  + nltk==3.9.1
+2025-06-28T22:40:27.8949960Z  + nodeenv==1.9.1
+2025-06-28T22:40:27.8950100Z  + oauthlib==3.3.0
+2025-06-28T22:40:27.8950250Z  + opentelemetry-api==1.34.1
+2025-06-28T22:40:27.8950490Z  + orjson==3.10.18
+2025-06-28T22:40:27.8950640Z  + packageurl-python==0.17.1
+2025-06-28T22:40:27.8950810Z  + packaging==25.0
+2025-06-28T22:40:27.8950960Z  + pathspec==0.12.1
+2025-06-28T22:40:27.8951100Z  + pbr==6.1.1
+2025-06-28T22:40:27.8951230Z  + pendulum==3.1.0
+2025-06-28T22:40:27.8951380Z  + pip==25.1.1
+2025-06-28T22:40:27.8951570Z  + pip-api==0.0.34
+2025-06-28T22:40:27.8951710Z  + pip-audit==2.9.0
+2025-06-28T22:40:27.8951890Z  + pip-requirements-parser==32.0.1
+2025-06-28T22:40:27.8952080Z  + platformdirs==4.3.8
+2025-06-28T22:40:27.8952270Z  + pluggy==1.6.0
+2025-06-28T22:40:27.8952510Z  + pre-commit==4.2.0
+2025-06-28T22:40:27.8952670Z  + prefect==3.4.6
+2025-06-28T22:40:27.8952820Z  + prometheus-client==0.22.1
+2025-06-28T22:40:27.8953050Z  + psutil==6.1.1
+2025-06-28T22:40:27.8953200Z  + py-serializable==2.0.0
+2025-06-28T22:40:27.8953360Z  + pycparser==2.22
+2025-06-28T22:40:27.8953560Z  + pydantic==2.9.2
+2025-06-28T22:40:27.8953720Z  + pydantic-core==2.23.4
+2025-06-28T22:40:27.8953890Z  + pydantic-extra-types==2.10.5
+2025-06-28T22:40:27.8954080Z  + pydantic-settings==2.9.1
+2025-06-28T22:40:27.8954240Z  + pygments==2.19.1
+2025-06-28T22:40:27.8954400Z  + pyparsing==3.2.3
+2025-06-28T22:40:27.8954540Z  + pytest==8.4.1
+2025-06-28T22:40:27.8954880Z  + pytest-cov==6.2.1
+2025-06-28T22:40:27.8955040Z  + python-dateutil==2.9.0.post0
+2025-06-28T22:40:27.8955220Z  + python-dotenv==1.1.0
+2025-06-28T22:40:27.8955370Z  + python-slugify==8.0.4
+2025-06-28T22:40:27.8955660Z  + python-socks==2.7.1
+2025-06-28T22:40:27.8956050Z  + pytz==2025.2
+2025-06-28T22:40:27.8956290Z  + pyyaml==6.0.2
+2025-06-28T22:40:27.8956420Z  + readchar==4.2.1
+2025-06-28T22:40:27.8956560Z  + referencing==0.36.2
+2025-06-28T22:40:27.8956720Z  + regex==2024.11.6
+2025-06-28T22:40:27.8956850Z  + requests==2.32.4
+2025-06-28T22:40:27.8957170Z  + requests-oauthlib==2.0.0
+2025-06-28T22:40:27.8957430Z  + requirements-parser==0.13.0
+2025-06-28T22:40:27.8957610Z  + rfc3339-validator==0.1.4
+2025-06-28T22:40:27.8957760Z  + rich==14.0.0
+2025-06-28T22:40:27.8957910Z  + rpds-py==0.25.1
+2025-06-28T22:40:27.8958100Z  + ruamel-yaml==0.18.14
+2025-06-28T22:40:27.8958280Z  + ruamel-yaml-clib==0.2.12
+2025-06-28T22:40:27.8958430Z  + ruff==0.12.0
+2025-06-28T22:40:27.8958610Z  + safety==3.5.2
+2025-06-28T22:40:27.8958820Z  + safety-schemas==0.0.14
+2025-06-28T22:40:27.8959000Z  + setuptools==80.9.0
+2025-06-28T22:40:27.8959200Z  + shellingham==1.5.4
+2025-06-28T22:40:27.8959390Z  + six==1.17.0
+2025-06-28T22:40:27.8959520Z  + sniffio==1.3.1
+2025-06-28T22:40:27.8959680Z  + sortedcontainers==2.4.0
+2025-06-28T22:40:27.8959850Z  + sqlalchemy==2.0.41
+2025-06-28T22:40:27.8960000Z  + starlette==0.46.2
+2025-06-28T22:40:27.8960150Z  + stevedore==5.4.1
+2025-06-28T22:40:27.8960290Z  + striprtf==0.0.29
+2025-06-28T22:40:27.8960430Z  + tenacity==9.1.2
+2025-06-28T22:40:27.8960720Z  + text-unidecode==1.3
+2025-06-28T22:40:27.8960970Z  + toml==0.10.2
+2025-06-28T22:40:27.8961130Z  + tomlkit==0.13.3
+2025-06-28T22:40:27.8961300Z  + tqdm==4.67.1
+2025-06-28T22:40:27.8961570Z  + typer==0.16.0
+2025-06-28T22:40:27.8961930Z  + types-chardet==5.0.4.6
+2025-06-28T22:40:27.8962150Z  + typing-extensions==4.14.0
+2025-06-28T22:40:27.8962360Z  + typing-inspection==0.4.1
+2025-06-28T22:40:27.8962810Z  + tzdata==2025.2
+2025-06-28T22:40:27.8963010Z  + tzlocal==5.3.1
+2025-06-28T22:40:27.8963260Z  + ujson==5.10.0
+2025-06-28T22:40:27.8963490Z  + urllib3==2.5.0
+2025-06-28T22:40:27.8963850Z  + uv==0.7.13
+2025-06-28T22:40:27.8964040Z  + uvicorn==0.34.3
+2025-06-28T22:40:27.8964300Z  + virtualenv==20.31.2
+2025-06-28T22:40:27.8964460Z  + websockets==15.0.1
+2025-06-28T22:40:27.8964820Z  + yamllint==1.37.1
+2025-06-28T22:40:27.8965120Z  + zipp==3.23.0
+2025-06-28T22:40:27.9055690Z ##[group]Run uv run pytest tests/ -v --cov=src/mass_find_replace --cov-report=xml --cov-report=term
+2025-06-28T22:40:27.9056170Z [36;1muv run pytest tests/ -v --cov=src/mass_find_replace --cov-report=xml --cov-report=term[0m
+2025-06-28T22:40:27.9123920Z shell: /bin/bash -e {0}
+2025-06-28T22:40:27.9124150Z env:
+2025-06-28T22:40:27.9124270Z   UV_VERSION: 0.7.13
+2025-06-28T22:40:27.9124450Z   DEFAULT_PYTHON: 3.11
+2025-06-28T22:40:27.9124690Z   GIT_AUTHOR_NAME: Emasoft
+2025-06-28T22:40:27.9124940Z   GIT_AUTHOR_EMAIL: 713559+Emasoft@users.noreply.github.com
+2025-06-28T22:40:27.9125240Z   GIT_COMMITTER_NAME: Emasoft
+2025-06-28T22:40:27.9125490Z   GIT_COMMITTER_EMAIL: 713559+Emasoft@users.noreply.github.com
+2025-06-28T22:40:27.9125790Z   UV_CACHE_DIR: /Users/runner/work/_temp/setup-uv-cache
+2025-06-28T22:40:27.9125990Z ##[endgroup]
+2025-06-28T22:40:28.5494130Z ============================= test session starts ==============================
+2025-06-28T22:40:28.5494700Z platform darwin -- Python 3.11.13, pytest-8.4.1, pluggy-1.6.0 -- /Users/runner/work/MFR/MFR/.venv/bin/python
+2025-06-28T22:40:28.5495110Z cachedir: .pytest_cache
+2025-06-28T22:40:28.5495340Z rootdir: /Users/runner/work/MFR/MFR
+2025-06-28T22:40:28.5495590Z configfile: pyproject.toml
+2025-06-28T22:40:28.5495830Z plugins: anyio-4.9.0, cov-6.2.1
+2025-06-28T22:40:31.0893040Z collecting ... collected 111 items
+2025-06-28T22:40:31.0893240Z
+2025-06-28T22:40:31.1220070Z tests/test_additional_coverage.py::TestFileSystemOperations::test_scan_with_symlinks PASSED [  0%]
+2025-06-28T22:40:31.1553050Z tests/test_additional_coverage.py::TestFileSystemOperations::test_scan_with_gitignore PASSED [  1%]
+2025-06-28T22:40:31.1849840Z tests/test_additional_coverage.py::TestFileSystemOperations::test_process_large_file_with_encoding_error PASSED [  2%]
+2025-06-28T22:40:45.1550990Z tests/test_additional_coverage.py::TestFileSystemOperations::test_execute_transaction_os_errors FAILED [  3%]
+2025-06-28T22:40:45.3314500Z tests/test_additional_coverage.py::TestFileSystemOperations::test_file_locking_error PASSED [  4%]
+2025-06-28T22:40:45.4283320Z tests/test_additional_coverage.py::TestFileSystemOperations::test_rtf_file_processing PASSED [  5%]
+2025-06-28T22:40:45.5485150Z tests/test_additional_coverage.py::TestFileSystemOperations::test_binary_file_detection_edge_cases PASSED [  6%]
+2025-06-28T22:40:45.6447980Z tests/test_additional_coverage.py::TestFileSystemOperations::test_save_transactions_with_backup PASSED [  7%]
+2025-06-28T22:40:45.7401940Z tests/test_additional_coverage.py::TestFileSystemOperations::test_load_transactions_invalid_json PASSED [  8%]
+2025-06-28T22:40:45.8372370Z tests/test_additional_coverage.py::TestFileSystemOperations::test_folder_with_special_chars PASSED [  9%]
+2025-06-28T22:40:45.9547670Z tests/test_additional_coverage.py::TestReplaceLogicEdgeCases::test_replace_with_unicode PASSED [  9%]
+2025-06-28T22:40:46.0512260Z tests/test_additional_coverage.py::TestReplaceLogicEdgeCases::test_case_sensitive_replacements PASSED [ 10%]
+2025-06-28T22:40:46.1555770Z tests/test_additional_coverage.py::TestReplaceLogicEdgeCases::test_overlapping_replacements PASSED [ 11%]
+2025-06-28T22:40:46.7083370Z tests/test_additional_coverage.py::TestMainFlowEdgeCases::test_main_flow_with_modified_files_detection PASSED [ 12%]
+2025-06-28T22:40:46.7184970Z tests/test_additional_coverage.py::TestMainFlowEdgeCases::test_main_flow_keyboard_interrupt SKIPPED [ 13%]
+2025-06-28T22:40:46.8870300Z tests/test_additional_coverage.py::TestMainFlowEdgeCases::test_main_flow_with_all_skip_flags PASSED [ 14%]
+2025-06-28T22:40:47.0079780Z tests/test_additional_coverage.py::TestUtilityFunctions::test_get_exclude_patterns PASSED [ 15%]
+2025-06-28T22:40:47.1204900Z tests/test_additional_coverage.py::TestUtilityFunctions::test_update_transaction_status_edge_cases PASSED [ 16%]
+2025-06-28T22:40:47.2196130Z tests/test_additional_coverage.py::TestUtilityFunctions::test_open_file_with_encoding_edge_cases PASSED [ 17%]
+2025-06-28T22:40:47.3192780Z tests/test_additional_coverage.py::TestUtilityFunctions::test_group_and_process_file_transactions_edge_cases PASSED [ 18%]
+2025-06-28T22:40:47.4363730Z tests/test_coverage_improvements.py::TestMainCLI::test_main_cli_help PASSED [ 18%]
+2025-06-28T22:40:47.5467120Z tests/test_coverage_improvements.py::TestMainCLI::test_main_cli_self_test PASSED [ 19%]
+2025-06-28T22:40:47.6471090Z tests/test_coverage_improvements.py::TestMainCLI::test_main_cli_self_test_failure PASSED [ 20%]
+2025-06-28T22:40:47.7579890Z tests/test_coverage_improvements.py::TestMainCLI::test_main_cli_force_interactive_conflict PASSED [ 21%]
+2025-06-28T22:40:47.8684920Z tests/test_coverage_improvements.py::TestMainCLI::test_main_cli_invalid_directory PASSED [ 22%]
+2025-06-28T22:40:47.9808080Z tests/test_coverage_improvements.py::TestMainCLI::test_main_cli_not_directory PASSED [ 23%]
+2025-06-28T22:40:48.1164730Z tests/test_coverage_improvements.py::TestMainCLI::test_main_cli_invalid_mapping_file PASSED [ 24%]
+2025-06-28T22:40:48.2101660Z tests/test_coverage_improvements.py::TestMainCLI::test_main_cli_invalid_json PASSED [ 25%]
+2025-06-28T22:40:48.3153860Z tests/test_coverage_improvements.py::TestMainCLI::test_main_cli_empty_mapping PASSED [ 26%]
+2025-06-28T22:40:48.4492210Z tests/test_coverage_improvements.py::TestMainCLI::test_main_cli_invalid_ignore_file PASSED [ 27%]
+2025-06-28T22:40:48.5513980Z tests/test_coverage_improvements.py::TestMainCLI::test_main_cli_timeout_validation FAILED [ 27%]
+2025-06-28T22:40:48.6526110Z tests/test_coverage_improvements.py::TestMainCLI::test_main_cli_successful_run PASSED [ 28%]
+2025-06-28T22:40:48.7571570Z tests/test_coverage_improvements.py::TestMainCLI::test_main_cli_with_failures PASSED [ 29%]
+2025-06-28T22:40:48.9307680Z tests/test_coverage_improvements.py::TestMainFlow::test_main_flow_skip_scan_no_file PASSED [ 30%]
+2025-06-28T22:40:49.2241060Z tests/test_coverage_improvements.py::TestMainFlow::test_main_flow_resume_no_file PASSED [ 31%]
+2025-06-28T22:40:49.4473020Z tests/test_coverage_improvements.py::TestMainFlow::test_main_flow_empty_transaction_file PASSED [ 32%]
+2025-06-28T22:40:49.7523520Z tests/test_coverage_improvements.py::TestMainFlow::test_main_flow_with_dry_run_reset FAILED [ 33%]
+2025-06-28T22:40:50.0471100Z tests/test_coverage_improvements.py::TestMainFlow::test_main_flow_interactive_mode PASSED [ 34%]
+2025-06-28T22:40:50.3651540Z tests/test_coverage_improvements.py::TestMainFlow::test_main_flow_quiet_mode PASSED [ 35%]
+2025-06-28T22:40:50.6749040Z tests/test_coverage_improvements.py::TestMainFlow::test_main_flow_verbose_mode FAILED [ 36%]
+2025-06-28T22:40:50.8345690Z tests/test_coverage_improvements.py::TestExecuteTransactions::test_interactive_mode_skip FAILED [ 36%]
+2025-06-28T22:40:50.9767780Z tests/test_coverage_improvements.py::TestExecuteTransactions::test_interactive_mode_apply_all PASSED [ 37%]
+2025-06-28T22:40:51.2088620Z tests/test_coverage_improvements.py::TestExecuteTransactions::test_transaction_with_high_retry_count FAILED [ 38%]
+2025-06-28T22:40:51.2994170Z tests/test_coverage_improvements.py::TestHelperFunctions::test_get_logger_without_prefect PASSED [ 39%]
+2025-06-28T22:40:51.4641380Z tests/test_coverage_improvements.py::TestHelperFunctions::test_get_logger_with_context_error FAILED [ 40%]
+2025-06-28T22:40:51.5644980Z tests/test_coverage_improvements.py::TestHelperFunctions::test_print_mapping_table PASSED [ 41%]
+2025-06-28T22:40:51.6494750Z tests/test_coverage_improvements.py::TestHelperFunctions::test_get_operation_description PASSED [ 42%]
+2025-06-28T22:40:51.7294970Z tests/test_coverage_improvements.py::TestHelperFunctions::test_check_existing_transactions PASSED [ 43%]
+2025-06-28T22:40:51.8290960Z tests/test_coverage_improvements.py::TestHelperFunctions::test_run_subprocess_command PASSED [ 44%]
+2025-06-28T22:40:51.9140960Z tests/test_coverage_improvements.py::TestColorOutput::test_color_constants PASSED [ 45%]
+2025-06-28T22:40:52.0031410Z tests/test_coverage_improvements.py::TestReplaceLogic::test_validate_mapping_structure PASSED [ 45%]
+2025-06-28T22:40:52.0833480Z tests/test_coverage_improvements.py::TestFileOperations::test_get_file_encoding PASSED [ 46%]
+2025-06-28T22:40:52.1628260Z tests/test_coverage_improvements.py::TestFileOperations::test_is_binary_file PASSED [ 47%]
+2025-06-28T22:40:52.2692730Z tests/test_coverage_improvements.py::TestFileOperations::test_transaction_status_update PASSED [ 48%]
+2025-06-28T22:40:52.3550800Z tests/test_coverage_improvements.py::TestFileOperations::test_load_ignore_patterns PASSED [ 49%]
+2025-06-28T22:40:52.5081050Z tests/test_coverage_improvements.py::TestFileOperations::test_folder_rename_collision PASSED [ 50%]
+2025-06-28T22:40:52.7595130Z tests/test_final_coverage.py::TestPrefectIntegration::test_main_flow_with_prefect PASSED [ 51%]
+2025-06-28T22:40:52.9000400Z tests/test_final_coverage.py::TestPrefectIntegration::test_subprocess_flush_handlers PASSED [ 52%]
+2025-06-28T22:40:53.0295290Z tests/test_final_coverage.py::TestPrefectIntegration::test_subprocess_without_flush PASSED [ 53%]
+2025-06-28T22:40:53.1305630Z tests/test_final_coverage.py::TestMainCLIEdgeCases::test_main_cli_exception_handling PASSED [ 54%]
+2025-06-28T22:40:53.2161730Z tests/test_final_coverage.py::TestMainCLIEdgeCases::test_main_cli_json_key_error PASSED [ 54%]
+2025-06-28T22:40:53.3062020Z tests/test_final_coverage.py::TestMainCLIEdgeCases::test_main_cli_cyclic_mapping PASSED [ 55%]
+2025-06-28T22:40:53.3888410Z tests/test_final_coverage.py::TestMainCLIEdgeCases::test_main_cli_user_confirmation_no PASSED [ 56%]
+2025-06-28T22:40:53.4711990Z tests/test_final_coverage.py::TestMainCLIEdgeCases::test_main_cli_timeout_zero PASSED [ 57%]
+2025-06-28T22:40:53.5678340Z tests/test_final_coverage.py::TestCheckExistingTransactions::test_all_transactions_completed PASSED [ 58%]
+2025-06-28T22:40:53.6607430Z tests/test_final_coverage.py::TestCheckExistingTransactions::test_no_transactions PASSED [ 59%]
+2025-06-28T22:40:53.8084890Z tests/test_final_coverage.py::TestTransactionProcessing::test_symlink_rename_dry_run PASSED [ 60%]
+2025-06-28T22:40:55.0563020Z tests/test_final_coverage.py::TestTransactionProcessing::test_file_rename_permission_error PASSED [ 61%]
+2025-06-28T22:40:55.2063820Z tests/test_final_coverage.py::TestTransactionProcessing::test_content_change_with_no_changes PASSED [ 62%]
+2025-06-28T22:40:55.3042870Z tests/test_final_coverage.py::TestLoggerFunctions::test_log_message_functions PASSED [ 63%]
+2025-06-28T22:40:55.3942420Z tests/test_final_coverage.py::TestLoggerFunctions::test_replace_logic_functions PASSED [ 63%]
+2025-06-28T22:40:55.4729580Z tests/test_final_coverage.py::TestStringProcessing::test_canonicalize_edge_cases PASSED [ 64%]
+2025-06-28T22:40:55.5551360Z tests/test_final_coverage.py::TestStringProcessing::test_strip_functions PASSED [ 65%]
+2025-06-28T22:40:55.6369790Z tests/test_final_coverage.py::TestEncodingDetection::test_encoding_detection_edge_cases PASSED [ 66%]
+2025-06-28T22:40:55.7202520Z tests/test_final_coverage.py::TestRTFProcessing::test_rtf_to_text_edge_cases PASSED [ 67%]
+2025-06-28T22:40:55.8266090Z tests/test_final_coverage.py::TestFileOperationHelpers::test_transaction_type_enum PASSED [ 68%]
+2025-06-28T22:40:55.9270010Z tests/test_final_coverage.py::TestFileOperationHelpers::test_transaction_status_enum PASSED [ 69%]
+2025-06-28T22:40:56.0249020Z tests/test_final_coverage.py::TestScanEdgeCases::test_scan_with_permission_error PASSED [ 70%]
+2025-06-28T22:40:57.1807290Z tests/test_github_integration.py::TestGitHubIntegration::test_clone_and_setup_public_repo PASSED [ 71%]
+2025-06-28T22:40:58.5468720Z tests/test_github_integration.py::TestGitHubIntegration::test_build_mfr_in_container PASSED [ 72%]
+2025-06-28T22:40:58.9151430Z tests/test_github_integration.py::TestGitHubIntegration::test_mfr_on_cloned_repo SKIPPED [ 72%]
+2025-06-28T22:40:58.9156510Z tests/test_github_integration.py::TestGitHubIntegration::test_github_cli_operations SKIPPED [ 73%]
+2025-06-28T22:40:59.1831190Z tests/test_mass_find_replace.py::test_dry_run_behavior PASSED            [ 74%]
+2025-06-28T22:40:59.4314640Z tests/test_mass_find_replace.py::test_dry_run_virtual_paths PASSED       [ 75%]
+2025-06-28T22:40:59.6791820Z tests/test_mass_find_replace.py::test_path_resolution_after_rename PASSED [ 76%]
+2025-06-28T22:40:59.9127400Z tests/test_mass_find_replace.py::test_folder_nesting PASSED              [ 77%]
+2025-06-28T22:41:00.2485070Z tests/test_mass_find_replace.py::test_unicode_combining_chars PASSED     [ 78%]
+2025-06-28T22:41:01.6327680Z tests/test_mass_find_replace.py::test_permission_error_handling PASSED   [ 79%]
+2025-06-28T22:41:01.7338570Z tests/test_mass_find_replace.py::test_self_test_option PASSED            [ 80%]
+2025-06-28T22:41:01.9789000Z tests/test_mass_find_replace.py::test_symlink_name_processing PASSED     [ 81%]
+2025-06-28T22:41:02.2730520Z tests/test_mass_find_replace.py::test_extension_filtering PASSED         [ 81%]
+2025-06-28T22:41:02.5043480Z tests/test_mass_find_replace.py::test_rtf_processing PASSED              [ 82%]
+2025-06-28T22:41:02.7557860Z tests/test_mass_find_replace.py::test_binary_files_logging PASSED        [ 83%]
+2025-06-28T22:41:02.9908960Z tests/test_mass_find_replace.py::test_recursive_path_resolution PASSED   [ 84%]
+2025-06-28T22:41:05.7004260Z tests/test_mass_find_replace.py::test_gb18030_encoding PASSED            [ 85%]
+2025-06-28T22:41:05.9605610Z tests/test_mass_find_replace.py::test_collision_error_logging PASSED     [ 86%]
+2025-06-28T22:41:06.2190600Z tests/test_mass_find_replace.py::test_interactive_mode_collision_skip PASSED [ 87%]
+2025-06-28T22:41:06.4373170Z tests/test_mass_find_replace.py::test_malformed_json_handling PASSED     [ 88%]
+2025-06-28T22:41:06.7030480Z tests/test_surgical_replacements.py::TestSurgicalReplacements::test_preserves_trailing_spaces PASSED [ 89%]
+2025-06-28T22:41:06.9835670Z tests/test_surgical_replacements.py::TestSurgicalReplacements::test_preserves_line_endings PASSED [ 90%]
+2025-06-28T22:41:07.2372980Z tests/test_surgical_replacements.py::TestSurgicalReplacements::test_preserves_encoding_errors PASSED [ 90%]
+2025-06-28T22:41:07.5138360Z tests/test_surgical_replacements.py::TestSurgicalReplacements::test_preserves_different_encodings PASSED [ 91%]
+2025-06-28T22:41:07.7566700Z tests/test_surgical_replacements.py::TestSurgicalReplacements::test_preserves_null_bytes PASSED [ 92%]
+2025-06-28T22:41:08.0002010Z tests/test_surgical_replacements.py::TestSurgicalReplacements::test_preserves_corrupt_test_files PASSED [ 93%]
+2025-06-28T22:41:08.2893740Z tests/test_surgical_replacements.py::TestSurgicalReplacements::test_very_long_lines PASSED [ 94%]
+2025-06-28T22:41:08.5521290Z tests/test_surgical_replacements.py::TestSurgicalReplacements::test_unicode_edge_cases PASSED [ 95%]
+2025-06-28T22:41:08.8230350Z tests/test_surgical_replacements.py::TestSurgicalReplacements::test_empty_files_and_edge_cases PASSED [ 96%]
+2025-06-28T22:41:09.0640090Z tests/test_surgical_replacements.py::TestSurgicalReplacements::test_concurrent_patterns PASSED [ 97%]
+2025-06-28T22:41:09.3165520Z tests/test_surgical_replacements.py::TestSurgicalReplacements::test_file_permissions_preserved PASSED [ 98%]
+2025-06-28T22:41:09.5534880Z tests/test_surgical_replacements.py::TestErrorHandling::test_handles_read_only_files PASSED [ 99%]
+2025-06-28T22:41:09.9231030Z tests/test_surgical_replacements.py::TestErrorHandling::test_handles_files_with_no_newline_at_end PASSED [100%]
+2025-06-28T22:41:09.9231520Z
+2025-06-28T22:41:09.9231630Z =================================== FAILURES ===================================
+2025-06-28T22:41:09.9232040Z _________ TestFileSystemOperations.test_execute_transaction_os_errors __________
+2025-06-28T22:41:09.9232330Z
+2025-06-28T22:41:09.9232570Z self = <test_additional_coverage.TestFileSystemOperations object at 0x10602a990>
+2025-06-28T22:41:09.9233190Z tmp_path = PosixPath('/private/var/folders/y6/nj790rtn62lfktb1sh__79hc0000gn/T/pytest-of-runner/pytest-0/test_execute_transaction_os_er0')
+2025-06-28T22:41:09.9233690Z
+2025-06-28T22:41:09.9233800Z     def test_execute_transaction_os_errors(self, tmp_path):
+2025-06-28T22:41:09.9234170Z         """Test various OS errors during execution."""
+2025-06-28T22:41:09.9239970Z         from mass_find_replace.file_system_operations import execute_all_transactions, TransactionType, TransactionStatus
+2025-06-28T22:41:09.9240500Z
+2025-06-28T22:41:09.9240730Z         test_file = tmp_path / "test.txt"
+2025-06-28T22:41:09.9240950Z         test_file.write_text("content")
+2025-06-28T22:41:09.9241270Z
+2025-06-28T22:41:09.9241950Z         transaction = {"id": "1", "TYPE": TransactionType.FILE_NAME.value, "OLD_PATH": str(test_file), "NEW_PATH": str(tmp_path / "new.txt"), "PATH": "test.txt", "ORIGINAL_NAME": "test.txt", "NEW_NAME": "new.txt", "STATUS": TransactionStatus.PENDING.value}
+2025-06-28T22:41:09.9256320Z
+2025-06-28T22:41:09.9256550Z         logger = MagicMock()
+2025-06-28T22:41:09.9256730Z
+2025-06-28T22:41:09.9256970Z         # Test with EBUSY error (file busy)
+2025-06-28T22:41:09.9257310Z         with patch("pathlib.Path.rename", side_effect=OSError(errno.EBUSY, "Device busy")):
+2025-06-28T22:41:09.9257640Z             # Save transaction to file first
+2025-06-28T22:41:09.9257950Z             from mass_find_replace.file_system_operations import save_transactions
+2025-06-28T22:41:09.9258240Z
+2025-06-28T22:41:09.9258390Z             txn_file = tmp_path / "planned_transactions.json"
+2025-06-28T22:41:09.9258690Z             save_transactions([transaction], txn_file, logger)
+2025-06-28T22:41:09.9258920Z
+2025-06-28T22:41:09.9259070Z             stats = execute_all_transactions(
+2025-06-28T22:41:09.9259280Z                 transactions_file_path=txn_file,
+2025-06-28T22:41:09.9259480Z                 root_dir=tmp_path,
+2025-06-28T22:41:09.9259780Z                 dry_run=False,
+2025-06-28T22:41:09.9259970Z                 resume=False,
+2025-06-28T22:41:09.9260680Z                 timeout_minutes=0,  # Very short timeout (0 means immediate)
+2025-06-28T22:41:09.9260960Z                 skip_file_renaming=False,
+2025-06-28T22:41:09.9261190Z                 skip_folder_renaming=False,
+2025-06-28T22:41:09.9261460Z                 skip_content=False,
+2025-06-28T22:41:09.9261700Z                 interactive_mode=False,
+2025-06-28T22:41:09.9261900Z                 logger=logger,
+2025-06-28T22:41:09.9262060Z             )
+2025-06-28T22:41:09.9262240Z             # Should retry and eventually timeout
+2025-06-28T22:41:09.9262490Z >           assert stats["skipped"] > 0 or stats["failed"] > 0
+2025-06-28T22:41:09.9262710Z E           assert (0 > 0 or 0 > 0)
+2025-06-28T22:41:09.9262860Z
+2025-06-28T22:41:09.9263040Z tests/test_additional_coverage.py:186: AssertionError
+2025-06-28T22:41:09.9263360Z ----------------------------- Captured stderr call -----------------------------
+2025-06-28T22:41:09.9263740Z 22:40:33.884 | INFO    | prefect - Starting temporary server on http://127.0.0.1:8735
+2025-06-28T22:41:09.9264370Z See https://docs.prefect.io/3.0/manage/self-host#self-host-a-prefect-server for more information on running a dedicated Prefect server.
+2025-06-28T22:41:09.9265240Z 22:40:44.121 | WARNING | prefect.server.utilities.postgres_listener - Cannot create Postgres LISTEN connection: PREFECT_API_DATABASE_CONNECTION_URL is not a PostgreSQL connection URL (driver: sqlite+aiosqlite).
+2025-06-28T22:41:09.9266010Z 22:40:44.773 | INFO    | Flow run 'married-badger' - Beginning flow run 'married-badger' for flow 'execute-all-transactions'
+2025-06-28T22:41:09.9266480Z 22:40:44.789 | INFO    | Flow run 'married-badger' - Finished in state Completed()
+2025-06-28T22:41:09.9266860Z ------------------------------ Captured log call -------------------------------
+2025-06-28T22:41:09.9267230Z INFO     prefect:server.py:838 Starting temporary server on http://127.0.0.1:8735
+2025-06-28T22:41:09.9267790Z See https://docs.prefect.io/3.0/manage/self-host#self-host-a-prefect-server for more information on running a dedicated Prefect server.
+2025-06-28T22:41:09.9268420Z INFO     prefect.flow_runs:flow_engine.py:651 Beginning flow run 'married-badger' for flow 'execute-all-transactions'
+2025-06-28T22:41:09.9268860Z INFO     prefect.flow_runs:flow_engine.py:724 Finished in state Completed()
+2025-06-28T22:41:09.9269650Z _________________ TestMainCLI.test_main_cli_timeout_validation _________________
+2025-06-28T22:41:09.9269880Z
+2025-06-28T22:41:09.9270030Z self = <test_coverage_improvements.TestMainCLI object at 0x101ec9a50>
+2025-06-28T22:41:09.9270350Z capsys = <_pytest.capture.CaptureFixture object at 0x10acc72d0>
+2025-06-28T22:41:09.9270880Z tmp_path = PosixPath('/private/var/folders/y6/nj790rtn62lfktb1sh__79hc0000gn/T/pytest-of-runner/pytest-0/test_main_cli_timeout_validati0')
+2025-06-28T22:41:09.9271270Z
+2025-06-28T22:41:09.9271390Z     def test_main_cli_timeout_validation(self, capsys, tmp_path):
+2025-06-28T22:41:09.9271640Z         """Test timeout validation."""
+2025-06-28T22:41:09.9271930Z         mapping_file = tmp_path / "mapping.json"
+2025-06-28T22:41:09.9272270Z         mapping_file.write_text('{"REPLACEMENT_MAPPING": {"old": "new"}}')
+2025-06-28T22:41:09.9272570Z
+2025-06-28T22:41:09.9272730Z         # Test timeout < 1 (should be adjusted to 1)
+2025-06-28T22:41:09.9273140Z         test_args = ["mfr", str(tmp_path), "--mapping-file", str(mapping_file), "--timeout", "0.5", "--force"]
+2025-06-28T22:41:09.9273430Z
+2025-06-28T22:41:09.9273570Z         with patch.object(sys, "argv", test_args):
+2025-06-28T22:41:09.9273860Z             with patch("mass_find_replace.mass_find_replace.main_flow") as mock_flow:
+2025-06-28T22:41:09.9274140Z                 # main_flow doesn't return a value
+2025-06-28T22:41:09.9274340Z                 mock_flow.return_value = None
+2025-06-28T22:41:09.9274570Z                 from mass_find_replace.mass_find_replace import main_cli
+2025-06-28T22:41:09.9274790Z
+2025-06-28T22:41:09.9274890Z                 main_cli()
+2025-06-28T22:41:09.9275200Z                 # Check that timeout was adjusted to 1
+2025-06-28T22:41:09.9275450Z                 # main_flow is called with kwargs now, check timeout_minutes
+2025-06-28T22:41:09.9275700Z                 call_kwargs = mock_flow.call_args[1]
+2025-06-28T22:41:09.9275920Z >               assert call_kwargs["timeout_minutes"] == 1
+2025-06-28T22:41:09.9276120Z                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-06-28T22:41:09.9276310Z E               KeyError: 'timeout_minutes'
+2025-06-28T22:41:09.9276440Z
+2025-06-28T22:41:09.9276530Z tests/test_coverage_improvements.py:193: KeyError
+2025-06-28T22:41:09.9276840Z ----------------------------- Captured stdout call -----------------------------
+2025-06-28T22:41:09.9277920Z [94mMFR - Mass Find Replace - A script to safely rename things in your project[0m
+2025-06-28T22:41:09.9278300Z [93mWarning: --timeout value 0.5 increased to minimum 1 minute.[0m
+2025-06-28T22:41:09.9278630Z ________________ TestMainFlow.test_main_flow_with_dry_run_reset ________________
+2025-06-28T22:41:09.9278840Z
+2025-06-28T22:41:09.9278970Z self = <test_coverage_improvements.TestMainFlow object at 0x106483e10>
+2025-06-28T22:41:09.9279480Z tmp_path = PosixPath('/private/var/folders/y6/nj790rtn62lfktb1sh__79hc0000gn/T/pytest-of-runner/pytest-0/test_main_flow_with_dry_run_re0')
+2025-06-28T22:41:09.9279850Z
+2025-06-28T22:41:09.9279950Z     def test_main_flow_with_dry_run_reset(self, tmp_path):
+2025-06-28T22:41:09.9280210Z         """Test that DRY_RUN completed transactions are reset."""
+2025-06-28T22:41:09.9280670Z         from mass_find_replace.file_system_operations import TransactionStatus, TransactionType
+2025-06-28T22:41:09.9281110Z
+2025-06-28T22:41:09.9281240Z         test_file = tmp_path / "test.txt"
+2025-06-28T22:41:09.9281540Z         test_file.write_text("old content")
+2025-06-28T22:41:09.9281770Z
+2025-06-28T22:41:09.9281970Z         txn_file = tmp_path / "planned_transactions.json"
+2025-06-28T22:41:09.9282640Z         transactions = [{"id": "1", "TYPE": TransactionType.FILE_CONTENT_LINE.value, "PATH": str(test_file.relative_to(tmp_path)), "LINE_NUMBER": 1, "STATUS": TransactionStatus.COMPLETED.value, "ERROR_MESSAGE": "DRY_RUN", "EXPECTED_CHANGES": 1}]
+2025-06-28T22:41:09.9283360Z         txn_file.write_text(json.dumps(transactions))
+2025-06-28T22:41:09.9283550Z
+2025-06-28T22:41:09.9283920Z         result = self._run_main_flow(tmp_path, skip_scan=True, dry_run=False)
+2025-06-28T22:41:09.9284210Z         success, completed, failed, skipped = result
+2025-06-28T22:41:09.9284410Z         assert success is True
+2025-06-28T22:41:09.9284690Z >       assert completed == 1  # Should execute the reset transaction
+2025-06-28T22:41:09.9284920Z         ^^^^^^^^^^^^^^^^^^^^^
+2025-06-28T22:41:09.9285070Z E       assert 0 == 1
+2025-06-28T22:41:09.9285230Z
+2025-06-28T22:41:09.9285330Z tests/test_coverage_improvements.py:268: AssertionError
+2025-06-28T22:41:09.9285680Z ----------------------------- Captured stderr call -----------------------------
+2025-06-28T22:41:09.9286160Z 22:40:49.509 | INFO    | Flow run 'chirpy-barnacle' - Beginning flow run 'chirpy-barnacle' for flow 'Mass Find Replace'
+2025-06-28T22:41:09.9287040Z 22:40:49.510 | INFO    | Flow run 'chirpy-barnacle' - Using existing transaction file: '/private/var/folders/y6/nj790rtn62lfktb1sh__79hc0000gn/T/pytest-of-runner/pytest-0/test_main_flow_with_dry_run_re0/planned_transactions.json'. Ensure it was generated with compatible settings.
+2025-06-28T22:41:09.9287840Z 22:40:49.510 | INFO    | Flow run 'chirpy-barnacle' - Starting execution phase...
+2025-06-28T22:41:09.9288360Z 22:40:49.606 | INFO    | Flow run 'cunning-oriole' - Beginning subflow run 'cunning-oriole' for flow 'execute-all-transactions'
+2025-06-28T22:41:09.9288950Z 22:40:49.607 | INFO    | Flow run 'chirpy-barnacle' - Execution phase complete. Stats: {'total': 1, 'completed': 0, 'failed': 0, 'skipped': 0, 'retry_later': 0}
+2025-06-28T22:41:09.9289420Z 22:40:49.627 | INFO    | Flow run 'cunning-oriole' - Finished in state Completed()
+2025-06-28T22:41:09.9290050Z 22:40:49.628 | INFO    | Flow run 'chirpy-barnacle' - Execution phase complete. Stats: {'total': 1, 'completed': 0, 'failed': 0, 'skipped': 0, 'retry_later': 0}
+2025-06-28T22:41:09.9290940Z 22:40:49.628 | INFO    | Flow run 'chirpy-barnacle' - Review '/private/var/folders/y6/nj790rtn62lfktb1sh__79hc0000gn/T/pytest-of-runner/pytest-0/test_main_flow_with_dry_run_re0/planned_transactions.json' for a detailed log of changes and their statuses.
+2025-06-28T22:41:09.9291680Z 22:40:49.640 | INFO    | Flow run 'chirpy-barnacle' - Finished in state Completed()
+2025-06-28T22:41:09.9292000Z ------------------------------ Captured log call -------------------------------
+2025-06-28T22:41:09.9292390Z INFO     prefect.flow_runs:flow_engine.py:651 Beginning flow run 'chirpy-barnacle' for flow 'Mass Find Replace'
+2025-06-28T22:41:09.9293290Z INFO     prefect.flow_runs:mass_find_replace.py:459 Using existing transaction file: '/private/var/folders/y6/nj790rtn62lfktb1sh__79hc0000gn/T/pytest-of-runner/pytest-0/test_main_flow_with_dry_run_re0/planned_transactions.json'. Ensure it was generated with compatible settings.
+2025-06-28T22:41:09.9294110Z INFO     prefect.flow_runs:mass_find_replace.py:481 Starting execution phase...
+2025-06-28T22:41:09.9294570Z INFO     prefect.flow_runs:flow_engine.py:651 Beginning subflow run 'cunning-oriole' for flow 'execute-all-transactions'
+2025-06-28T22:41:09.9295190Z INFO     prefect.flow_runs:file_system_operations.py:2028 Execution phase complete. Stats: {'total': 1, 'completed': 0, 'failed': 0, 'skipped': 0, 'retry_later': 0}
+2025-06-28T22:41:09.9295770Z INFO     prefect.flow_runs:flow_engine.py:724 Finished in state Completed()
+2025-06-28T22:41:09.9296270Z INFO     prefect.flow_runs:mass_find_replace.py:494 Execution phase complete. Stats: {'total': 1, 'completed': 0, 'failed': 0, 'skipped': 0, 'retry_later': 0}
+2025-06-28T22:41:09.9297180Z INFO     prefect.flow_runs:mass_find_replace.py:495 Review '/private/var/folders/y6/nj790rtn62lfktb1sh__79hc0000gn/T/pytest-of-runner/pytest-0/test_main_flow_with_dry_run_re0/planned_transactions.json' for a detailed log of changes and their statuses.
+2025-06-28T22:41:09.9298020Z INFO     prefect.flow_runs:flow_engine.py:724 Finished in state Completed()
+2025-06-28T22:41:09.9298360Z ___________________ TestMainFlow.test_main_flow_verbose_mode ___________________
+2025-06-28T22:41:09.9298560Z
+2025-06-28T22:41:09.9298860Z self = <test_coverage_improvements.TestMainFlow object at 0x106480b10>
+2025-06-28T22:41:09.9299390Z tmp_path = PosixPath('/private/var/folders/y6/nj790rtn62lfktb1sh__79hc0000gn/T/pytest-of-runner/pytest-0/test_main_flow_verbose_mode0')
+2025-06-28T22:41:09.9299770Z
+2025-06-28T22:41:09.9299860Z     def test_main_flow_verbose_mode(self, tmp_path):
+2025-06-28T22:41:09.9300080Z         """Test verbose mode."""
+2025-06-28T22:41:09.9300350Z         with patch("mass_find_replace.mass_find_replace._get_logger") as mock_get_logger:
+2025-06-28T22:41:09.9300640Z             mock_logger = MagicMock()
+2025-06-28T22:41:09.9300850Z             mock_get_logger.return_value = mock_logger
+2025-06-28T22:41:09.9301080Z
+2025-06-28T22:41:09.9301250Z             result = self._run_main_flow(tmp_path, verbose_mode=True)
+2025-06-28T22:41:09.9301500Z             # Should create logger with verbose=True
+2025-06-28T22:41:09.9301740Z >           mock_get_logger.assert_called_with(verbose_mode=True)
+2025-06-28T22:41:09.9301910Z
+2025-06-28T22:41:09.9301990Z tests/test_coverage_improvements.py:296:
+2025-06-28T22:41:09.9302220Z _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+2025-06-28T22:41:09.9302380Z
+2025-06-28T22:41:09.9302490Z self = <MagicMock name='_get_logger' id='4468786832'>, args = ()
+2025-06-28T22:41:09.9302790Z kwargs = {'verbose_mode': True}, expected = call(verbose_mode=True)
+2025-06-28T22:41:09.9303020Z actual = call(True)
+2025-06-28T22:41:09.9303380Z _error_message = <function NonCallableMock.assert_called_with.<locals>._error_message at 0x10ab43560>
+2025-06-28T22:41:09.9303690Z cause = None
+2025-06-28T22:41:09.9303920Z
+2025-06-28T22:41:09.9304010Z     def assert_called_with(self, /, *args, **kwargs):
+2025-06-28T22:41:09.9304280Z         """assert that the last call was made with the specified arguments.
+2025-06-28T22:41:09.9304510Z
+2025-06-28T22:41:09.9304700Z         Raises an AssertionError if the args and keyword args passed in are
+2025-06-28T22:41:09.9304970Z         different to the last call to the mock."""
+2025-06-28T22:41:09.9305170Z         if self.call_args is None:
+2025-06-28T22:41:09.9305390Z             expected = self._format_mock_call_signature(args, kwargs)
+2025-06-28T22:41:09.9305620Z             actual = 'not called.'
+2025-06-28T22:41:09.9305860Z             error_message = ('expected call not found.\nExpected: %s\n  Actual: %s'
+2025-06-28T22:41:09.9306120Z                     % (expected, actual))
+2025-06-28T22:41:09.9306310Z             raise AssertionError(error_message)
+2025-06-28T22:41:09.9306480Z
+2025-06-28T22:41:09.9306590Z         def _error_message():
+2025-06-28T22:41:09.9306790Z             msg = self._format_mock_failure_message(args, kwargs)
+2025-06-28T22:41:09.9306990Z             return msg
+2025-06-28T22:41:09.9307190Z         expected = self._call_matcher(_Call((args, kwargs), two=True))
+2025-06-28T22:41:09.9307440Z         actual = self._call_matcher(self.call_args)
+2025-06-28T22:41:09.9307640Z         if actual != expected:
+2025-06-28T22:41:09.9307860Z             cause = expected if isinstance(expected, Exception) else None
+2025-06-28T22:41:09.9308130Z >           raise AssertionError(_error_message()) from cause
+2025-06-28T22:41:09.9308360Z E           AssertionError: expected call not found.
+2025-06-28T22:41:09.9308670Z E           Expected: _get_logger(verbose_mode=True)
+2025-06-28T22:41:09.9308870Z E             Actual: _get_logger(True)
+2025-06-28T22:41:09.9309000Z
+2025-06-28T22:41:09.9309250Z ../../../.local/share/uv/python/cpython-3.11.13-macos-aarch64-none/lib/python3.11/unittest/mock.py:939: AssertionError
+2025-06-28T22:41:09.9309680Z ----------------------------- Captured stderr call -----------------------------
+2025-06-28T22:41:09.9310090Z 22:40:50.423 | INFO    | Flow run 'skilled-sawfly' - Beginning flow run 'skilled-sawfly' for flow 'Mass Find Replace'
+2025-06-28T22:41:09.9310580Z 22:40:50.508 | INFO    | Flow run 'coral-cuckoo' - Beginning subflow run 'coral-cuckoo' for flow 'execute-all-transactions'
+2025-06-28T22:41:09.9311090Z 22:40:50.529 | INFO    | Flow run 'coral-cuckoo' - Finished in state Completed()
+2025-06-28T22:41:09.9311490Z 22:40:50.541 | INFO    | Flow run 'skilled-sawfly' - Finished in state Completed()
+2025-06-28T22:41:09.9311800Z ------------------------------ Captured log call -------------------------------
+2025-06-28T22:41:09.9312250Z INFO     prefect.flow_runs:flow_engine.py:651 Beginning flow run 'skilled-sawfly' for flow 'Mass Find Replace'
+2025-06-28T22:41:09.9312760Z INFO     prefect.flow_runs:flow_engine.py:651 Beginning subflow run 'coral-cuckoo' for flow 'execute-all-transactions'
+2025-06-28T22:41:09.9313190Z INFO     prefect.flow_runs:flow_engine.py:724 Finished in state Completed()
+2025-06-28T22:41:09.9313540Z INFO     prefect.flow_runs:flow_engine.py:724 Finished in state Completed()
+2025-06-28T22:41:09.9313880Z ______________ TestExecuteTransactions.test_interactive_mode_skip ______________
+2025-06-28T22:41:09.9314090Z
+2025-06-28T22:41:09.9314260Z self = <test_coverage_improvements.TestExecuteTransactions object at 0x1064822d0>
+2025-06-28T22:41:09.9314840Z tmp_path = PosixPath('/private/var/folders/y6/nj790rtn62lfktb1sh__79hc0000gn/T/pytest-of-runner/pytest-0/test_interactive_mode_skip0')
+2025-06-28T22:41:09.9315210Z
+2025-06-28T22:41:09.9315290Z     def test_interactive_mode_skip(self, tmp_path):
+2025-06-28T22:41:09.9315520Z         """Test interactive mode with skip response."""
+2025-06-28T22:41:09.9315900Z         from mass_find_replace.file_system_operations import execute_all_transactions, TransactionType, TransactionStatus
+2025-06-28T22:41:09.9316240Z
+2025-06-28T22:41:09.9316460Z         test_file = tmp_path / "test.txt"
+2025-06-28T22:41:09.9316820Z         test_file.write_text("old content")
+2025-06-28T22:41:09.9316990Z
+2025-06-28T22:41:09.9317600Z         transaction = {"id": "1", "TYPE": TransactionType.FILE_CONTENT_LINE.value, "PATH": str(test_file.relative_to(tmp_path)), "LINE_NUMBER": 1, "ORIGINAL_LINE_CONTENT": "old content", "NEW_LINE_CONTENT": "new content", "STATUS": TransactionStatus.PENDING.value, "EXPECTED_CHANGES": 1}
+2025-06-28T22:41:09.9318250Z
+2025-06-28T22:41:09.9318360Z         logger = MagicMock()
+2025-06-28T22:41:09.9318500Z
+2025-06-28T22:41:09.9318610Z         # Test 'n' (skip) response
+2025-06-28T22:41:09.9318790Z         # Save transactions to file first
+2025-06-28T22:41:09.9319060Z         txn_file = tmp_path / "planned_transactions.json"
+2025-06-28T22:41:09.9319350Z         from mass_find_replace.file_system_operations import save_transactions
+2025-06-28T22:41:09.9319670Z
+2025-06-28T22:41:09.9319870Z         save_transactions([transaction], txn_file, logger)
+2025-06-28T22:41:09.9320070Z
+2025-06-28T22:41:09.9320310Z         with patch("builtins.input", return_value="n"):
+2025-06-28T22:41:09.9320980Z             stats = execute_all_transactions(transactions_file_path=txn_file, root_dir=tmp_path, dry_run=False, resume=False, timeout_minutes=30, skip_file_renaming=False, skip_folder_renaming=False, skip_content=False, interactive_mode=True, logger=logger)
+2025-06-28T22:41:09.9321620Z >       assert stats["skipped"] == 1
+2025-06-28T22:41:09.9321900Z E       assert 0 == 1
+2025-06-28T22:41:09.9321980Z
+2025-06-28T22:41:09.9322140Z tests/test_coverage_improvements.py:356: AssertionError
+2025-06-28T22:41:09.9322420Z ----------------------------- Captured stdout call -----------------------------
+2025-06-28T22:41:09.9323030Z [2mTransaction 1 - Type: FILE_CONTENT_LINE, Path: test.txt[0m
+2025-06-28T22:41:09.9323300Z   Line 1: content replacement
+2025-06-28T22:41:09.9323470Z
+2025-06-28T22:41:09.9323560Z [1m=== Execution Summary ===[0m
+2025-06-28T22:41:09.9323810Z Total transactions: 1
+2025-06-28T22:41:09.9324020Z [32mCompleted: 1[0m
+2025-06-28T22:41:09.9324230Z [33mSkipped: 0[0m
+2025-06-28T22:41:09.9324510Z [31mFailed: 0[0m
+2025-06-28T22:41:09.9324750Z ----------------------------- Captured stderr call -----------------------------
+2025-06-28T22:41:09.9325480Z 22:40:50.734 | INFO    | Flow run 'wandering-skua' - Beginning flow run 'wandering-skua' for flow 'execute-all-transactions'
+2025-06-28T22:41:09.9325930Z 22:40:50.746 | INFO    | Flow run 'wandering-skua' - Finished in state Completed()
+2025-06-28T22:41:09.9326310Z ------------------------------ Captured log call -------------------------------
+2025-06-28T22:41:09.9326770Z INFO     prefect.flow_runs:flow_engine.py:651 Beginning flow run 'wandering-skua' for flow 'execute-all-transactions'
+2025-06-28T22:41:09.9327200Z INFO     prefect.flow_runs:flow_engine.py:724 Finished in state Completed()
+2025-06-28T22:41:09.9327550Z ________ TestExecuteTransactions.test_transaction_with_high_retry_count ________
+2025-06-28T22:41:09.9327780Z
+2025-06-28T22:41:09.9327950Z self = <test_coverage_improvements.TestExecuteTransactions object at 0x106481250>
+2025-06-28T22:41:09.9328490Z tmp_path = PosixPath('/private/var/folders/y6/nj790rtn62lfktb1sh__79hc0000gn/T/pytest-of-runner/pytest-0/test_transaction_with_high_ret0')
+2025-06-28T22:41:09.9328870Z
+2025-06-28T22:41:09.9328990Z     def test_transaction_with_high_retry_count(self, tmp_path):
+2025-06-28T22:41:09.9329230Z         """Test transaction with high retry count."""
+2025-06-28T22:41:09.9329620Z         from mass_find_replace.file_system_operations import execute_all_transactions, TransactionType, TransactionStatus
+2025-06-28T22:41:09.9330100Z
+2025-06-28T22:41:09.9330220Z         test_file = tmp_path / "test.txt"
+2025-06-28T22:41:09.9330410Z         test_file.write_text("content")
+2025-06-28T22:41:09.9330580Z
+2025-06-28T22:41:09.9330680Z         transaction = {
+2025-06-28T22:41:09.9330820Z             "id": "1",
+2025-06-28T22:41:09.9330990Z             "TYPE": TransactionType.FILE_CONTENT_LINE.value,
+2025-06-28T22:41:09.9331340Z             "FILE_PATH": str(test_file),
+2025-06-28T22:41:09.9331520Z             "PATH": "test.txt",
+2025-06-28T22:41:09.9331670Z             "LINE_NUMBER": 1,
+2025-06-28T22:41:09.9331860Z             "STATUS": TransactionStatus.RETRY_LATER.value,
+2025-06-28T22:41:09.9332080Z             "RETRY_COUNT": 50,  # High retry count
+2025-06-28T22:41:09.9332270Z             "EXPECTED_CHANGES": 1,
+2025-06-28T22:41:09.9332430Z         }
+2025-06-28T22:41:09.9332530Z
+2025-06-28T22:41:09.9332640Z         logger = MagicMock()
+2025-06-28T22:41:09.9332780Z
+2025-06-28T22:41:09.9332920Z         # With very short timeout, should skip due to timeout
+2025-06-28T22:41:09.9333140Z         # Save transactions to file first
+2025-06-28T22:41:09.9333350Z         txn_file = tmp_path / "planned_transactions.json"
+2025-06-28T22:41:09.9333650Z         from mass_find_replace.file_system_operations import save_transactions
+2025-06-28T22:41:09.9333880Z
+2025-06-28T22:41:09.9334030Z         save_transactions([transaction], txn_file, logger)
+2025-06-28T22:41:09.9334220Z
+2025-06-28T22:41:09.9334330Z >       stats = execute_all_transactions(
+2025-06-28T22:41:09.9334530Z             transactions_file_path=txn_file,
+2025-06-28T22:41:09.9334710Z             root_dir=tmp_path,
+2025-06-28T22:41:09.9334860Z             dry_run=False,
+2025-06-28T22:41:09.9335010Z             resume=False,
+2025-06-28T22:41:09.9335170Z             timeout_minutes=0.01,  # Very short timeout
+2025-06-28T22:41:09.9335370Z             skip_file_renaming=False,
+2025-06-28T22:41:09.9335550Z             skip_folder_renaming=False,
+2025-06-28T22:41:09.9335730Z             skip_content=False,
+2025-06-28T22:41:09.9335890Z             interactive_mode=False,
+2025-06-28T22:41:09.9336060Z             logger=logger,
+2025-06-28T22:41:09.9336190Z         )
+2025-06-28T22:41:09.9336260Z
+2025-06-28T22:41:09.9336330Z tests/test_coverage_improvements.py:408:
+2025-06-28T22:41:09.9336550Z _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+2025-06-28T22:41:09.9336840Z .venv/lib/python3.11/site-packages/prefect/flows.py:1691: in __call__
+2025-06-28T22:41:09.9337090Z     return run_flow(
+2025-06-28T22:41:09.9337330Z .venv/lib/python3.11/site-packages/prefect/flow_engine.py:1527: in run_flow
+2025-06-28T22:41:09.9337590Z     ret_val = run_flow_sync(**kwargs)
+2025-06-28T22:41:09.9337870Z               ^^^^^^^^^^^^^^^^^^^^^^^
+2025-06-28T22:41:09.9338150Z .venv/lib/python3.11/site-packages/prefect/flow_engine.py:1372: in run_flow_sync
+2025-06-28T22:41:09.9338500Z     return engine.state if return_type == "state" else engine.result()
+2025-06-28T22:41:10.4164550Z                                                        ^^^^^^^^^^^^^^^
+2025-06-28T22:41:10.4164980Z .venv/lib/python3.11/site-packages/prefect/flow_engine.py:350: in result
+2025-06-28T22:41:10.4165260Z     raise self._raised
+2025-06-28T22:41:10.4165540Z .venv/lib/python3.11/site-packages/prefect/flow_engine.py:299: in begin_run
+2025-06-28T22:41:10.4165940Z     self.parameters = self.flow.validate_parameters(self.parameters or {})
+2025-06-28T22:41:10.4166230Z                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-06-28T22:41:10.4166460Z _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+2025-06-28T22:41:10.4166630Z
+2025-06-28T22:41:10.4166720Z self = <prefect.flows.Flow object at 0x1061c4f10>
+2025-06-28T22:41:10.4167250Z parameters = {'dry_run': False, 'interactive_mode': False, 'logger': <MagicMock id='4476312784'>, 'resume': False, ...}
+2025-06-28T22:41:10.4167650Z
+2025-06-28T22:41:10.4167890Z     def validate_parameters(self, parameters: dict[str, Any]) -> dict[str, Any]:
+2025-06-28T22:41:10.4168220Z         """
+2025-06-28T22:41:10.4168560Z         Validate parameters for compatibility with the flow by attempting to cast the inputs to the
+2025-06-28T22:41:10.4169170Z         associated types specified by the function's type annotations.
+2025-06-28T22:41:10.4169490Z
+2025-06-28T22:41:10.4169970Z         Returns:
+2025-06-28T22:41:10.4170270Z             A new dict of parameters that have been cast to the appropriate types
+2025-06-28T22:41:10.4170570Z
+2025-06-28T22:41:10.4170750Z         Raises:
+2025-06-28T22:41:10.4171070Z             ParameterTypeError: if the provided parameters are not valid
+2025-06-28T22:41:10.4176950Z         """
+2025-06-28T22:41:10.4177070Z
+2025-06-28T22:41:10.4177280Z         def resolve_block_reference(data: Any | dict[str, Any]) -> Any:
+2025-06-28T22:41:10.4177560Z             if isinstance(data, dict) and "$ref" in data:
+2025-06-28T22:41:10.4177820Z                 return Block.load_from_ref(data["$ref"], _sync=True)
+2025-06-28T22:41:10.4178040Z             return data
+2025-06-28T22:41:10.4178170Z
+2025-06-28T22:41:10.4178270Z         try:
+2025-06-28T22:41:10.4178410Z             parameters = visit_collection(
+2025-06-28T22:41:10.4178650Z                 parameters, resolve_block_reference, return_data=True
+2025-06-28T22:41:10.4178870Z             )
+2025-06-28T22:41:10.4179020Z         except (ValueError, RuntimeError) as exc:
+2025-06-28T22:41:10.4179240Z             raise ParameterTypeError(
+2025-06-28T22:41:10.4179470Z                 "Failed to resolve block references in parameters."
+2025-06-28T22:41:10.4179680Z             ) from exc
+2025-06-28T22:41:10.4179810Z
+2025-06-28T22:41:10.4180000Z         args, kwargs = parameters_to_args_kwargs(self.fn, parameters)
+2025-06-28T22:41:10.4180220Z
+2025-06-28T22:41:10.4180350Z         with warnings.catch_warnings():
+2025-06-28T22:41:10.4180540Z             warnings.filterwarnings(
+2025-06-28T22:41:10.4180800Z                 "ignore", category=pydantic.warnings.PydanticDeprecatedSince20
+2025-06-28T22:41:10.4181050Z             )
+2025-06-28T22:41:10.4181250Z             has_v1_models = any(isinstance(o, V1BaseModel) for o in args) or any(
+2025-06-28T22:41:10.4181590Z                 isinstance(o, V1BaseModel) for o in kwargs.values()
+2025-06-28T22:41:10.4181800Z             )
+2025-06-28T22:41:10.4181910Z
+2025-06-28T22:41:10.4182330Z         has_v2_types = any(is_v2_type(o) for o in args) or any(
+2025-06-28T22:41:10.4182630Z             is_v2_type(o) for o in kwargs.values()
+2025-06-28T22:41:10.4182830Z         )
+2025-06-28T22:41:10.4182940Z
+2025-06-28T22:41:10.4183060Z         if has_v1_models and has_v2_types:
+2025-06-28T22:41:10.4183260Z             raise ParameterTypeError(
+2025-06-28T22:41:10.4183880Z                 "Cannot mix Pydantic v1 and v2 types as arguments to a flow."
+2025-06-28T22:41:10.4184150Z             )
+2025-06-28T22:41:10.4184260Z
+2025-06-28T22:41:10.4184440Z         validated_fn_kwargs = dict(arbitrary_types_allowed=True)
+2025-06-28T22:41:10.4184660Z
+2025-06-28T22:41:10.4184770Z         if has_v1_models:
+2025-06-28T22:41:10.4185030Z             validated_fn = V1ValidatedFunction(self.fn, config=validated_fn_kwargs)
+2025-06-28T22:41:10.4185290Z         else:
+2025-06-28T22:41:10.4185510Z             validated_fn = V2ValidatedFunction(self.fn, config=validated_fn_kwargs)
+2025-06-28T22:41:10.4185770Z
+2025-06-28T22:41:10.4185870Z         try:
+2025-06-28T22:41:10.4186000Z             with warnings.catch_warnings():
+2025-06-28T22:41:10.4186220Z                 warnings.filterwarnings(
+2025-06-28T22:41:10.4186500Z                     "ignore", category=pydantic.warnings.PydanticDeprecatedSince20
+2025-06-28T22:41:10.4186750Z                 )
+2025-06-28T22:41:10.4186970Z                 model = validated_fn.init_model_instance(*args, **kwargs)
+2025-06-28T22:41:10.4187250Z         except pydantic.ValidationError as exc:
+2025-06-28T22:41:10.4187550Z             # We capture the pydantic exception and raise our own because the pydantic
+2025-06-28T22:41:10.4187910Z             # exception is not picklable when using a cythonized pydantic installation
+2025-06-28T22:41:10.4188210Z             logger.error(
+2025-06-28T22:41:10.4188450Z                 f"Parameter validation failed for flow {self.name!r}: {exc.errors()}"
+2025-06-28T22:41:10.4188730Z                 f"\nParameters: {parameters}"
+2025-06-28T22:41:10.4189160Z             )
+2025-06-28T22:41:10.4189360Z >           raise ParameterTypeError.from_validation_error(exc) from None
+2025-06-28T22:41:10.4189730Z E           prefect.exceptions.ParameterTypeError: Flow run received invalid parameters:
+2025-06-28T22:41:10.4190160Z E            - timeout_minutes: Input should be a valid integer, got a number with a fractional part
+2025-06-28T22:41:10.4190420Z
+2025-06-28T22:41:10.4190580Z .venv/lib/python3.11/site-packages/prefect/flows.py:639: ParameterTypeError
+2025-06-28T22:41:10.4190960Z ----------------------------- Captured stderr call -----------------------------
+2025-06-28T22:41:10.4191790Z 22:40:51.012 | ERROR   | prefect.flows - Parameter validation failed for flow 'execute-all-transactions': [{'type': 'int_from_float', 'loc': ('timeout_minutes',), 'msg': 'Input should be a valid integer, got a number with a fractional part', 'input': 0.01, 'url': 'https://errors.pydantic.dev/2.9/v/int_from_float'}]
+2025-06-28T22:41:10.4193780Z Parameters: {'transactions_file_path': PosixPath('/private/var/folders/y6/nj790rtn62lfktb1sh__79hc0000gn/T/pytest-of-runner/pytest-0/test_transaction_with_high_ret0/planned_transactions.json'), 'root_dir': PosixPath('/private/var/folders/y6/nj790rtn62lfktb1sh__79hc0000gn/T/pytest-of-runner/pytest-0/test_transaction_with_high_ret0'), 'dry_run': False, 'resume': False, 'timeout_minutes': 0.01, 'skip_file_renaming': False, 'skip_folder_renaming': False, 'skip_content': False, 'interactive_mode': False, 'logger': <MagicMock id='4476312784'>}
+2025-06-28T22:41:10.4195360Z 22:40:51.013 | ERROR   | prefect.engine - Validation of flow parameters failed with error: Flow run received invalid parameters:
+2025-06-28T22:41:10.4195840Z  - timeout_minutes: Input should be a valid integer, got a number with a fractional part
+2025-06-28T22:41:10.4196650Z 22:40:51.026 | INFO    | prefect.engine - Finished in state Failed('Validation of flow parameters failed with error: ParameterTypeError: Flow run received invalid parameters:\n - timeout_minutes: Input should be a valid integer, got a number with a fractional part')
+2025-06-28T22:41:10.4197400Z ------------------------------ Captured log call -------------------------------
+2025-06-28T22:41:10.4198460Z ERROR    prefect.flows:flows.py:635 Parameter validation failed for flow 'execute-all-transactions': [{'type': 'int_from_float', 'loc': ('timeout_minutes',), 'msg': 'Input should be a valid integer, got a number with a fractional part', 'input': 0.01, 'url': 'https://errors.pydantic.dev/2.9/v/int_from_float'}]
+2025-06-28T22:41:10.4200410Z Parameters: {'transactions_file_path': PosixPath('/private/var/folders/y6/nj790rtn62lfktb1sh__79hc0000gn/T/pytest-of-runner/pytest-0/test_transaction_with_high_ret0/planned_transactions.json'), 'root_dir': PosixPath('/private/var/folders/y6/nj790rtn62lfktb1sh__79hc0000gn/T/pytest-of-runner/pytest-0/test_transaction_with_high_ret0'), 'dry_run': False, 'resume': False, 'timeout_minutes': 0.01, 'skip_file_renaming': False, 'skip_folder_renaming': False, 'skip_content': False, 'interactive_mode': False, 'logger': <MagicMock id='4476312784'>}
+2025-06-28T22:41:10.4202030Z ERROR    prefect.engine:flow_engine.py:302 Validation of flow parameters failed with error: Flow run received invalid parameters:
+2025-06-28T22:41:10.4202530Z  - timeout_minutes: Input should be a valid integer, got a number with a fractional part
+2025-06-28T22:41:10.4203350Z INFO     prefect.engine:flow_engine.py:724 Finished in state Failed('Validation of flow parameters failed with error: ParameterTypeError: Flow run received invalid parameters:\n - timeout_minutes: Input should be a valid integer, got a number with a fractional part')
+2025-06-28T22:41:10.4204240Z ____________ TestHelperFunctions.test_get_logger_with_context_error ____________
+2025-06-28T22:41:10.4204460Z
+2025-06-28T22:41:10.4204620Z self = <test_coverage_improvements.TestHelperFunctions object at 0x10646fc90>
+2025-06-28T22:41:10.4204870Z
+2025-06-28T22:41:10.4204950Z     def test_get_logger_with_context_error(self):
+2025-06-28T22:41:10.4205300Z         """Test logger creation with MissingContextError."""
+2025-06-28T22:41:10.4205560Z         import mass_find_replace.mass_find_replace as mfr
+2025-06-28T22:41:10.4205760Z
+2025-06-28T22:41:10.4205890Z         # Create a mock MissingContextError
+2025-06-28T22:41:10.4206150Z         mock_error = type("MissingContextError", (Exception,), {})
+2025-06-28T22:41:10.4206370Z
+2025-06-28T22:41:10.4206550Z         # get_run_logger is imported inside the try block in _get_logger
+2025-06-28T22:41:10.4206860Z         with patch("prefect.get_run_logger", side_effect=mock_error()):
+2025-06-28T22:41:10.4207130Z >           logger = mfr._get_logger(verbose_mode=True)
+2025-06-28T22:41:10.4207380Z                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-06-28T22:41:10.4207530Z
+2025-06-28T22:41:10.4207610Z tests/test_coverage_improvements.py:447:
+2025-06-28T22:41:10.4207840Z _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+2025-06-28T22:41:10.4208120Z src/mass_find_replace/mass_find_replace.py:57: in _get_logger
+2025-06-28T22:41:10.4208350Z     logger = get_run_logger()
+2025-06-28T22:41:10.4208510Z              ^^^^^^^^^^^^^^^^
+2025-06-28T22:41:10.4208870Z ../../../.local/share/uv/python/cpython-3.11.13-macos-aarch64-none/lib/python3.11/unittest/mock.py:1124: in __call__
+2025-06-28T22:41:10.4209250Z     return self._mock_call(*args, **kwargs)
+2025-06-28T22:41:10.4209450Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-06-28T22:41:10.4209830Z ../../../.local/share/uv/python/cpython-3.11.13-macos-aarch64-none/lib/python3.11/unittest/mock.py:1128: in _mock_call
+2025-06-28T22:41:10.4210250Z     return self._execute_mock_call(*args, **kwargs)
+2025-06-28T22:41:10.4210470Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-06-28T22:41:10.4210690Z _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+2025-06-28T22:41:10.4210840Z
+2025-06-28T22:41:10.4210980Z self = <MagicMock name='get_run_logger' id='4475345424'>, args = (), kwargs = {}
+2025-06-28T22:41:10.4211260Z effect = MissingContextError()
+2025-06-28T22:41:10.4211400Z
+2025-06-28T22:41:10.4211490Z     def _execute_mock_call(self, /, *args, **kwargs):
+2025-06-28T22:41:10.4211790Z         # separate from _increment_mock_call so that awaited functions are
+2025-06-28T22:41:10.4212140Z         # executed separately from their call, also AsyncMock overrides this method
+2025-06-28T22:41:10.4212560Z
+2025-06-28T22:41:10.4212740Z         effect = self.side_effect
+2025-06-28T22:41:10.4212920Z         if effect is not None:
+2025-06-28T22:41:10.4213090Z             if _is_exception(effect):
+2025-06-28T22:41:10.4213270Z >               raise effect
+2025-06-28T22:41:10.4213470Z E               test_coverage_improvements.MissingContextError
+2025-06-28T22:41:10.4213640Z
+2025-06-28T22:41:10.4213920Z ../../../.local/share/uv/python/cpython-3.11.13-macos-aarch64-none/lib/python3.11/unittest/mock.py:1183: MissingContextError
+2025-06-28T22:41:10.4214350Z ================================ tests coverage ================================
+2025-06-28T22:41:10.4214660Z ______________ coverage: platform darwin, python 3.11.13-final-0 _______________
+2025-06-28T22:41:10.4214860Z
+2025-06-28T22:41:10.4214950Z Name                                              Stmts   Miss  Cover
+2025-06-28T22:41:10.4215200Z ---------------------------------------------------------------------
+2025-06-28T22:41:10.4215500Z src/mass_find_replace/__init__.py                     6      0   100%
+2025-06-28T22:41:10.4215820Z src/mass_find_replace/file_system_operations.py     978    281    71%
+2025-06-28T22:41:10.4216130Z src/mass_find_replace/mass_find_replace.py          425    158    63%
+2025-06-28T22:41:10.4216450Z src/mass_find_replace/replace_logic.py              191     61    68%
+2025-06-28T22:41:10.4216760Z src/mass_find_replace/test_config.py                 40     40     0%
+2025-06-28T22:41:10.4217040Z ---------------------------------------------------------------------
+2025-06-28T22:41:10.4217280Z TOTAL                                              1640    540    67%
+2025-06-28T22:41:10.4217600Z Coverage XML written to file coverage.xml
+2025-06-28T22:41:10.4217830Z =========================== short test summary info ============================
+2025-06-28T22:41:10.4218300Z FAILED tests/test_additional_coverage.py::TestFileSystemOperations::test_execute_transaction_os_errors - assert (0 > 0 or 0 > 0)
+2025-06-28T22:41:10.4218910Z FAILED tests/test_coverage_improvements.py::TestMainCLI::test_main_cli_timeout_validation - KeyError: 'timeout_minutes'
+2025-06-28T22:41:10.4219460Z FAILED tests/test_coverage_improvements.py::TestMainFlow::test_main_flow_with_dry_run_reset - assert 0 == 1
+2025-06-28T22:41:10.4220040Z FAILED tests/test_coverage_improvements.py::TestMainFlow::test_main_flow_verbose_mode - AssertionError: expected call not found.
+2025-06-28T22:41:10.4220450Z Expected: _get_logger(verbose_mode=True)
+2025-06-28T22:41:10.4220640Z   Actual: _get_logger(True)
+2025-06-28T22:41:10.4221000Z FAILED tests/test_coverage_improvements.py::TestExecuteTransactions::test_interactive_mode_skip - assert 0 == 1
+2025-06-28T22:41:10.4221760Z FAILED tests/test_coverage_improvements.py::TestExecuteTransactions::test_transaction_with_high_retry_count - prefect.exceptions.ParameterTypeError: Flow run received invalid parameters:
+2025-06-28T22:41:10.4222440Z  - timeout_minutes: Input should be a valid integer, got a number with a fractional part
+2025-06-28T22:41:10.4223020Z FAILED tests/test_coverage_improvements.py::TestHelperFunctions::test_get_logger_with_context_error - test_coverage_improvements.MissingContextError
+2025-06-28T22:41:10.4223530Z ================== 7 failed, 101 passed, 3 skipped in 41.38s ===================
+2025-06-28T22:41:10.4223830Z --- Logging error ---
+2025-06-28T22:41:10.4223990Z Traceback (most recent call last):
+2025-06-28T22:41:10.4229160Z   File "/Users/runner/work/MFR/MFR/.venv/lib/python3.11/site-packages/prefect/logging/handlers.py", line 337, in emit
+2025-06-28T22:41:10.4229610Z     self.console.print(message, soft_wrap=True)
+2025-06-28T22:41:10.4230030Z   File "/Users/runner/work/MFR/MFR/.venv/lib/python3.11/site-packages/rich/console.py", line 1692, in print
+2025-06-28T22:41:10.4230380Z     with self:
+2025-06-28T22:41:10.4230710Z   File "/Users/runner/work/MFR/MFR/.venv/lib/python3.11/site-packages/rich/console.py", line 866, in __exit__
+2025-06-28T22:41:10.4231060Z     self._exit_buffer()
+2025-06-28T22:41:10.4231690Z   File "/Users/runner/work/MFR/MFR/.venv/lib/python3.11/site-packages/rich/console.py", line 824, in _exit_buffer
+2025-06-28T22:41:10.4232060Z     self._check_buffer()
+2025-06-28T22:41:10.4232440Z   File "/Users/runner/work/MFR/MFR/.venv/lib/python3.11/site-packages/rich/console.py", line 2033, in _check_buffer
+2025-06-28T22:41:10.4232800Z     self._write_buffer()
+2025-06-28T22:41:10.4233170Z   File "/Users/runner/work/MFR/MFR/.venv/lib/python3.11/site-packages/rich/console.py", line 2102, in _write_buffer
+2025-06-28T22:41:10.4233540Z     self.file.write(text)
+2025-06-28T22:41:10.4233720Z ValueError: I/O operation on closed file.
+2025-06-28T22:41:10.4233900Z Call stack:
+2025-06-28T22:41:10.4234250Z   File "/Users/runner/work/MFR/MFR/.venv/lib/python3.11/site-packages/prefect/server/api/server.py", line 917, in stop
+2025-06-28T22:41:10.4234640Z     subprocess_server_logger.info(
+2025-06-28T22:41:10.4235100Z   File "/Users/runner/.local/share/uv/python/cpython-3.11.13-macos-aarch64-none/lib/python3.11/logging/__init__.py", line 1489, in info
+2025-06-28T22:41:10.4235540Z     self._log(INFO, msg, args, **kwargs)
+2025-06-28T22:41:10.4236020Z   File "/Users/runner/.local/share/uv/python/cpython-3.11.13-macos-aarch64-none/lib/python3.11/logging/__init__.py", line 1634, in _log
+2025-06-28T22:41:10.4236440Z     self.handle(record)
+2025-06-28T22:41:10.4236870Z   File "/Users/runner/.local/share/uv/python/cpython-3.11.13-macos-aarch64-none/lib/python3.11/logging/__init__.py", line 1644, in handle
+2025-06-28T22:41:10.4237300Z     self.callHandlers(record)
+2025-06-28T22:41:10.4237750Z   File "/Users/runner/.local/share/uv/python/cpython-3.11.13-macos-aarch64-none/lib/python3.11/logging/__init__.py", line 1706, in callHandlers
+2025-06-28T22:41:10.4238280Z     hdlr.handle(record)
+2025-06-28T22:41:10.4238700Z   File "/Users/runner/.local/share/uv/python/cpython-3.11.13-macos-aarch64-none/lib/python3.11/logging/__init__.py", line 978, in handle
+2025-06-28T22:41:10.4239120Z     self.emit(record)
+2025-06-28T22:41:10.4239490Z   File "/Users/runner/work/MFR/MFR/.venv/lib/python3.11/site-packages/prefect/logging/handlers.py", line 343, in emit
+2025-06-28T22:41:10.4239930Z     self.handleError(record)
+2025-06-28T22:41:10.4240160Z Message: 'Stopping temporary server on http://127.0.0.1:8735'
+2025-06-28T22:41:10.4240400Z Arguments: ()
+2025-06-28T22:41:11.9208170Z ##[error]Process completed with exit code 1.
+2025-06-28T22:41:11.9296120Z Post job cleanup.
+2025-06-28T22:41:12.1753630Z [command]/opt/homebrew/bin/git version
+2025-06-28T22:41:12.1818660Z git version 2.50.0
+2025-06-28T22:41:12.1860440Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/489a219c-a9e4-4077-ad00-914c199da125/.gitconfig'
+2025-06-28T22:41:12.1866620Z Temporarily overriding HOME='/Users/runner/work/_temp/489a219c-a9e4-4077-ad00-914c199da125' before making global git config changes
+2025-06-28T22:41:12.1867210Z Adding repository directory to the temporary git global config as a safe directory
+2025-06-28T22:41:12.1874340Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/MFR/MFR
+2025-06-28T22:41:12.1928810Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-06-28T22:41:12.1970890Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-06-28T22:41:12.2875290Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-06-28T22:41:12.2907100Z http.https://github.com/.extraheader
+2025-06-28T22:41:12.2915540Z [command]/opt/homebrew/bin/git config --local --unset-all http.https://github.com/.extraheader
+2025-06-28T22:41:12.2957530Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-06-28T22:41:12.3522270Z Cleaning up orphan processes
