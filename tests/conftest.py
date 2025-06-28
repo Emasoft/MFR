@@ -23,6 +23,7 @@ import json
 import shutil
 from typing import Any, Callable, Generator, Tuple
 import sys
+import logging
 
 
 @pytest.fixture
@@ -100,3 +101,33 @@ def assert_file_content() -> Callable[[Path, str], None]:
         assert actual == expected_content, f"Content mismatch in {file_path}: Expected {expected_content!r}, got {actual!r}"
 
     return _assert
+
+
+@pytest.fixture(autouse=True)
+def cleanup_prefect_logging():
+    """Clean up Prefect logging handlers to avoid 'I/O operation on closed file' errors."""
+    yield
+    # After each test, flush and remove any Prefect logging handlers
+    try:
+        # Get all loggers
+        for logger_name in list(logging.Logger.manager.loggerDict.keys()):
+            if "prefect" in logger_name.lower():
+                logger = logging.getLogger(logger_name)
+                # Remove all handlers to avoid closed file issues
+                for handler in logger.handlers[:]:
+                    try:
+                        handler.flush()
+                        handler.close()
+                    except (ValueError, OSError):
+                        pass  # Ignore if already closed
+                    logger.removeHandler(handler)
+
+        # Also flush root logger handlers
+        root_logger = logging.getLogger()
+        for handler in root_logger.handlers[:]:
+            try:
+                handler.flush()
+            except (ValueError, OSError):
+                pass  # Ignore if already closed
+    except Exception:
+        pass  # Ignore any errors during cleanup
