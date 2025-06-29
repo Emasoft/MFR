@@ -1,0 +1,59 @@
+Pre-commit checks	Run pre-commit	﻿2025-06-29T16:00:17.0601669Z ##[group]Run uv run pre-commit run --all-files --show-diff-on-failure --color=always
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:17.0602273Z [36;1muv run pre-commit run --all-files --show-diff-on-failure --color=always[0m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:17.0659092Z shell: /usr/bin/bash -e {0}
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:17.0659340Z env:
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:17.0659515Z   UV_VERSION: 0.7.13
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:17.0659718Z   DEFAULT_PYTHON: 3.11
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:17.0659968Z   UV_CACHE_DIR: /home/runner/work/_temp/setup-uv-cache
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:17.0660258Z   SKIP: pip-compile
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:17.0660450Z ##[endgroup]
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:17.4604297Z uv-lock..................................................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:17.4892788Z uv-export................................................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:17.5132017Z uv-export dev-requirements...............................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:17.5462881Z Detect hardcoded secrets.................................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:17.5607195Z ruff.....................................................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:17.5770946Z ruff-format..............................................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7401599Z mypy.....................................................................[41mFailed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7402374Z [2m- hook id: mypy[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7402805Z [2m- exit code: 1[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7403002Z 
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7403292Z src/mass_find_replace/mass_find_replace.py:24: error: Module
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7404065Z "mass_find_replace.file_system_operations" does not explicitly export attribute
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7404733Z "TransactionStatus"  [attr-defined]
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7405261Z     from .file_system_operations import (
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7405665Z     ^
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7405964Z src/mass_find_replace/mass_find_replace.py:24: error: Module
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7406424Z "mass_find_replace.file_system_operations" does not explicitly export attribute
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7407216Z "TRANSACTION_FILE_BACKUP_EXT"  [attr-defined]
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7407552Z     from .file_system_operations import (
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7407804Z     ^
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7408060Z src/mass_find_replace/mass_find_replace.py:24: error: Module
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7408537Z "mass_find_replace.file_system_operations" does not explicitly export attribute
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7409172Z "BINARY_MATCHES_LOG_FILE"  [attr-defined]
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7409492Z     from .file_system_operations import (
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7409737Z     ^
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7409994Z src/mass_find_replace/mass_find_replace.py:24: error: Module
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7410439Z "mass_find_replace.file_system_operations" does not explicitly export attribute
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7410844Z "COLLISIONS_ERRORS_LOG_FILE"  [attr-defined]
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7411159Z     from .file_system_operations import (
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7411388Z     ^
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7411485Z 
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.9466144Z deptry...................................................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.9947950Z trim trailing whitespace.................................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:41.0386347Z fix end of files.........................................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:41.1106478Z check yaml...............................................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:41.1618334Z check for added large files..............................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:41.2096925Z check for merge conflicts................................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:41.2438506Z check toml...............................................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:41.3262239Z debug statements (python)................................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:41.3691265Z detect private key.......................................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:41.4138161Z mixed line ending........................................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:41.4640689Z check for case conflicts.................................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:41.5507657Z check docstring is first.................................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:41.5809086Z check json...............................................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:41.6117902Z pretty format json.......................................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:41.8386207Z yamllint.................................................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:41.8485823Z yamlfmt (GitHub workflows)...............................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:42.1311331Z shellcheck...............................................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:44.0458197Z actionlint...............................................................[42mPassed[m
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:44.0657581Z ##[error]Process completed with exit code 1.

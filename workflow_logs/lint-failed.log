@@ -1,0 +1,87 @@
+Lint Python Code	Run mypy	﻿2025-06-29T16:00:08.3027504Z ##[group]Run COLUMNS=400 uv run mypy --strict --show-error-context --pretty \
+Lint Python Code	Run mypy	2025-06-29T16:00:08.3028024Z [36;1mCOLUMNS=400 uv run mypy --strict --show-error-context --pretty \[0m
+Lint Python Code	Run mypy	2025-06-29T16:00:08.3028448Z [36;1m  --install-types --no-color-output --non-interactive \[0m
+Lint Python Code	Run mypy	2025-06-29T16:00:08.3028858Z [36;1m  --show-error-codes --show-error-code-links --no-error-summary \[0m
+Lint Python Code	Run mypy	2025-06-29T16:00:08.3029210Z [36;1m  --follow-imports=normal src/[0m
+Lint Python Code	Run mypy	2025-06-29T16:00:08.3085246Z shell: /usr/bin/bash -e {0}
+Lint Python Code	Run mypy	2025-06-29T16:00:08.3085481Z env:
+Lint Python Code	Run mypy	2025-06-29T16:00:08.3085648Z   PYTHON_VERSION: 3.11
+Lint Python Code	Run mypy	2025-06-29T16:00:08.3086023Z   UV_VERSION: 0.7.13
+Lint Python Code	Run mypy	2025-06-29T16:00:08.3086289Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.13/x64
+Lint Python Code	Run mypy	2025-06-29T16:00:08.3086710Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.13/x64/lib/pkgconfig
+Lint Python Code	Run mypy	2025-06-29T16:00:08.3087114Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+Lint Python Code	Run mypy	2025-06-29T16:00:08.3087477Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+Lint Python Code	Run mypy	2025-06-29T16:00:08.3087854Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+Lint Python Code	Run mypy	2025-06-29T16:00:08.3088229Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.13/x64/lib
+Lint Python Code	Run mypy	2025-06-29T16:00:08.3088576Z   UV_CACHE_DIR: /home/runner/work/_temp/setup-uv-cache
+Lint Python Code	Run mypy	2025-06-29T16:00:08.3088843Z ##[endgroup]
+Lint Python Code	Run mypy	2025-06-29T16:00:35.6925392Z Collecting types-PyMySQL
+Lint Python Code	Run mypy	2025-06-29T16:00:35.7595984Z   Downloading types_pymysql-1.1.0.20250516-py3-none-any.whl.metadata (2.0 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:35.7928458Z Collecting types-PyYAML
+Lint Python Code	Run mypy	2025-06-29T16:00:35.8076641Z   Downloading types_pyyaml-6.0.12.20250516-py3-none-any.whl.metadata (1.8 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:35.8330116Z Collecting types-Pygments
+Lint Python Code	Run mypy	2025-06-29T16:00:35.8476827Z   Downloading types_pygments-2.19.0.20250516-py3-none-any.whl.metadata (2.0 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:35.8678203Z Collecting types-cachetools
+Lint Python Code	Run mypy	2025-06-29T16:00:35.8826606Z   Downloading types_cachetools-6.0.0.20250525-py3-none-any.whl.metadata (1.8 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:35.9052671Z Collecting types-colorama
+Lint Python Code	Run mypy	2025-06-29T16:00:35.9208887Z   Downloading types_colorama-0.4.15.20240311-py3-none-any.whl.metadata (1.6 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:35.9437768Z Collecting types-dateparser
+Lint Python Code	Run mypy	2025-06-29T16:00:35.9583613Z   Downloading types_dateparser-1.2.2.20250627-py3-none-any.whl.metadata (1.8 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:35.9808813Z Collecting types-greenlet
+Lint Python Code	Run mypy	2025-06-29T16:00:35.9954214Z   Downloading types_greenlet-3.2.0.20250417-py3-none-any.whl.metadata (1.8 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.0200018Z Collecting types-jsonschema
+Lint Python Code	Run mypy	2025-06-29T16:00:36.0346958Z   Downloading types_jsonschema-4.24.0.20250528-py3-none-any.whl.metadata (2.1 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.0583351Z Collecting types-psycopg2
+Lint Python Code	Run mypy	2025-06-29T16:00:36.0731866Z   Downloading types_psycopg2-2.9.21.20250516-py3-none-any.whl.metadata (1.8 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.0947640Z Collecting types-python-dateutil
+Lint Python Code	Run mypy	2025-06-29T16:00:36.1094314Z   Downloading types_python_dateutil-2.9.0.20250516-py3-none-any.whl.metadata (2.1 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.1304772Z Collecting types-pytz
+Lint Python Code	Run mypy	2025-06-29T16:00:36.1450091Z   Downloading types_pytz-2025.2.0.20250516-py3-none-any.whl.metadata (1.8 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.1839486Z Collecting types-requests
+Lint Python Code	Run mypy	2025-06-29T16:00:36.1997043Z   Downloading types_requests-2.32.4.20250611-py3-none-any.whl.metadata (2.1 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.2178874Z Collecting types-toml
+Lint Python Code	Run mypy	2025-06-29T16:00:36.2326823Z   Downloading types_toml-0.10.8.20240310-py3-none-any.whl.metadata (1.5 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.2502057Z Collecting types-ujson
+Lint Python Code	Run mypy	2025-06-29T16:00:36.2684339Z   Downloading types_ujson-5.10.0.20250326-py3-none-any.whl.metadata (2.0 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.2969077Z Collecting types-docutils (from types-Pygments)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.3117527Z   Downloading types_docutils-0.21.0.20250604-py3-none-any.whl.metadata (2.0 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.3181146Z Requirement already satisfied: referencing in ./.venv/lib/python3.11/site-packages (from types-jsonschema) (0.36.2)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.3201701Z Requirement already satisfied: urllib3>=2 in ./.venv/lib/python3.11/site-packages (from types-requests) (2.5.0)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.3233029Z Requirement already satisfied: attrs>=22.2.0 in ./.venv/lib/python3.11/site-packages (from referencing->types-jsonschema) (25.3.0)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.3238466Z Requirement already satisfied: rpds-py>=0.7.0 in ./.venv/lib/python3.11/site-packages (from referencing->types-jsonschema) (0.25.1)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.3247669Z Requirement already satisfied: typing-extensions>=4.4.0 in ./.venv/lib/python3.11/site-packages (from referencing->types-jsonschema) (4.14.0)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.3457510Z Downloading types_pymysql-1.1.0.20250516-py3-none-any.whl (20 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.3665376Z Downloading types_pyyaml-6.0.12.20250516-py3-none-any.whl (20 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.3891292Z Downloading types_pygments-2.19.0.20250516-py3-none-any.whl (25 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.4110457Z Downloading types_cachetools-6.0.0.20250525-py3-none-any.whl (8.9 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.4292788Z Downloading types_colorama-0.4.15.20240311-py3-none-any.whl (5.8 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.4471586Z Downloading types_dateparser-1.2.2.20250627-py3-none-any.whl (22 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.4672252Z Downloading types_greenlet-3.2.0.20250417-py3-none-any.whl (8.8 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.4848551Z Downloading types_jsonschema-4.24.0.20250528-py3-none-any.whl (15 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.5046624Z Downloading types_psycopg2-2.9.21.20250516-py3-none-any.whl (24 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.5235912Z Downloading types_python_dateutil-2.9.0.20250516-py3-none-any.whl (14 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.5434598Z Downloading types_pytz-2025.2.0.20250516-py3-none-any.whl (10 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.5615950Z Downloading types_requests-2.32.4.20250611-py3-none-any.whl (20 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.5820518Z Downloading types_toml-0.10.8.20240310-py3-none-any.whl (4.8 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.7088909Z Downloading types_ujson-5.10.0.20250326-py3-none-any.whl (7.6 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.7347205Z Downloading types_docutils-0.21.0.20250604-py3-none-any.whl (65 kB)
+Lint Python Code	Run mypy	2025-06-29T16:00:36.9070491Z Installing collected packages: types-ujson, types-toml, types-requests, types-PyYAML, types-pytz, types-python-dateutil, types-PyMySQL, types-psycopg2, types-greenlet, types-docutils, types-dateparser, types-colorama, types-cachetools, types-Pygments, types-jsonschema
+Lint Python Code	Run mypy	2025-06-29T16:00:37.0308543Z 
+Lint Python Code	Run mypy	2025-06-29T16:00:37.0378401Z Successfully installed types-PyMySQL-1.1.0.20250516 types-PyYAML-6.0.12.20250516 types-Pygments-2.19.0.20250516 types-cachetools-6.0.0.20250525 types-colorama-0.4.15.20240311 types-dateparser-1.2.2.20250627 types-docutils-0.21.0.20250604 types-greenlet-3.2.0.20250417 types-jsonschema-4.24.0.20250528 types-psycopg2-2.9.21.20250516 types-python-dateutil-2.9.0.20250516 types-pytz-2025.2.0.20250516 types-requests-2.32.4.20250611 types-toml-0.10.8.20240310 types-ujson-5.10.0.20250326
+Lint Python Code	Run mypy	2025-06-29T16:00:56.8146269Z src/mass_find_replace/mass_find_replace.py:24: error: Module "mass_find_replace.file_system_operations" does not explicitly export attribute "TransactionStatus"  [attr-defined]
+Lint Python Code	Run mypy	2025-06-29T16:00:56.8147493Z Installing missing stub packages:
+Lint Python Code	Run mypy	2025-06-29T16:00:56.8147971Z     from .file_system_operations import (
+Lint Python Code	Run mypy	2025-06-29T16:00:56.8148376Z     ^
+Lint Python Code	Run mypy	2025-06-29T16:00:56.8149408Z src/mass_find_replace/mass_find_replace.py:24: error: Module "mass_find_replace.file_system_operations" does not explicitly export attribute "TRANSACTION_FILE_BACKUP_EXT"  [attr-defined]
+Lint Python Code	Run mypy	2025-06-29T16:00:56.8150519Z     from .file_system_operations import (
+Lint Python Code	Run mypy	2025-06-29T16:00:56.8151233Z     ^
+Lint Python Code	Run mypy	2025-06-29T16:00:56.8152235Z src/mass_find_replace/mass_find_replace.py:24: error: Module "mass_find_replace.file_system_operations" does not explicitly export attribute "BINARY_MATCHES_LOG_FILE"  [attr-defined]
+Lint Python Code	Run mypy	2025-06-29T16:00:56.8153383Z     from .file_system_operations import (
+Lint Python Code	Run mypy	2025-06-29T16:00:56.8153754Z     ^
+Lint Python Code	Run mypy	2025-06-29T16:00:56.8154768Z src/mass_find_replace/mass_find_replace.py:24: error: Module "mass_find_replace.file_system_operations" does not explicitly export attribute "COLLISIONS_ERRORS_LOG_FILE"  [attr-defined]
+Lint Python Code	Run mypy	2025-06-29T16:00:56.8155919Z     from .file_system_operations import (
+Lint Python Code	Run mypy	2025-06-29T16:00:56.8156584Z     ^
+Lint Python Code	Run mypy	2025-06-29T16:00:56.8158214Z /home/runner/work/MFR/MFR/.venv/bin/python -m pip install types-PyMySQL types-PyYAML types-Pygments types-cachetools types-colorama types-dateparser types-greenlet types-jsonschema types-psycopg2 types-python-dateutil types-pytz types-requests types-toml types-ujson
+Lint Python Code	Run mypy	2025-06-29T16:00:56.8159884Z 
+Lint Python Code	Run mypy	2025-06-29T16:00:56.8159893Z 
+Lint Python Code	Run mypy	2025-06-29T16:00:56.8705334Z ##[error]Process completed with exit code 1.

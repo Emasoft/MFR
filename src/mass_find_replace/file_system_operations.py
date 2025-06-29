@@ -1692,3 +1692,23 @@ def execute_all_transactions(
             print(f"  {DIM_STYLE}(Binary files were not modified){RESET_STYLE}")
 
     return stats
+
+
+# Re-export for backward compatibility
+__all__ = [
+    # Functions
+    "scan_directory_for_occurrences",
+    "save_transactions",
+    "load_transactions",
+    "execute_all_transactions",
+    "update_transaction_status_in_list",
+    "group_and_process_file_transactions",
+    "process_large_file_content",
+    "load_ignore_patterns",
+    # Constants re-exported from core
+    "TransactionStatus",
+    "TransactionType",
+    "TRANSACTION_FILE_BACKUP_EXT",
+    "BINARY_MATCHES_LOG_FILE",
+    "COLLISIONS_ERRORS_LOG_FILE",
+]
