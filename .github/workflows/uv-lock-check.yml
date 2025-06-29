@@ -11,6 +11,11 @@ on:
     - 'pyproject.toml'
     - 'uv.lock'
 
+# Cancel previous runs for PRs when new commits are pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
+
 env:
   UV_VERSION: "0.7.13"
   PYTHON_VERSION: "3.11"

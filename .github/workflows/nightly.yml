@@ -6,6 +6,11 @@ on:
   - cron: '0 2 * * *'
   workflow_dispatch:
 
+# Only allow one nightly run at a time, but don't cancel in progress
+concurrency:
+  group: ${{ github.workflow }}-nightly
+  cancel-in-progress: false
+
 jobs:
   extended-tests:
     name: Extended Tests - ${{ matrix.os }}

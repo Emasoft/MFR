@@ -7,6 +7,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Make workflow cancellable for PRs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
+
 env:
   PYTHON_VERSION: "3.11"
   UV_VERSION: "0.7.13"

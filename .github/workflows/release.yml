@@ -13,6 +13,11 @@ on:
         type: boolean
         default: false
 
+# Never cancel release workflows - they must complete
+concurrency:
+  group: ${{ github.workflow }}-release
+  cancel-in-progress: false
+
 jobs:
   create-release:
     name: Create Release

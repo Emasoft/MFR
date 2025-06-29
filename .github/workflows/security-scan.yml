@@ -6,6 +6,11 @@ on:
   - cron: '0 2 * * *'
   workflow_dispatch:  # Allow manual runs
 
+# Only allow one security scan at a time, but don't cancel in progress
+concurrency:
+  group: ${{ github.workflow }}-security-scan
+  cancel-in-progress: false
+
 jobs:
   gitleaks:
     name: Gitleaks Secret Scan
