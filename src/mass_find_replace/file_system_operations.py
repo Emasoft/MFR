@@ -125,14 +125,13 @@ class SurrogateHandlingEncoder(json.JSONEncoder):
         """Recursively process an item, encoding strings with surrogates."""
         if isinstance(obj, str):
             return self._encode_with_surrogate_handling(obj)
-        elif isinstance(obj, dict):
+        if isinstance(obj, dict):
             return {k: self._process_item(v) for k, v in obj.items()}
-        elif isinstance(obj, list):
+        if isinstance(obj, list):
             return [self._process_item(item) for item in obj]
-        elif isinstance(obj, tuple):
+        if isinstance(obj, tuple):
             return tuple(self._process_item(item) for item in obj)
-        else:
-            return obj
+        return obj
 
 
 def decode_surrogate_escaped_json(obj: Any) -> Any:
@@ -142,12 +141,10 @@ def decode_surrogate_escaped_json(obj: Any) -> Any:
             # Decode base64 back to bytes, then decode with surrogateescape
             encoded_bytes = base64.b64decode(obj["data"])
             return encoded_bytes.decode("utf-8", errors="surrogateescape")
-        else:
-            return {k: decode_surrogate_escaped_json(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
+        return {k: decode_surrogate_escaped_json(v) for k, v in obj.items()}
+    if isinstance(obj, list):
         return [decode_surrogate_escaped_json(item) for item in obj]
-    else:
-        return obj
+    return obj
 
 
 def open_file_with_encoding(
@@ -234,7 +231,8 @@ def file_lock(file_handle: Any, exclusive: bool = True, timeout: float = 10.0) -
                 if e.errno in (errno.EAGAIN, errno.EACCES, errno.EWOULDBLOCK):
                     # Lock is held by another process
                     if time.time() - start_time > timeout:
-                        raise TimeoutError(f"Could not acquire file lock within {timeout} seconds")
+                        msg = f"Could not acquire file lock within {timeout} seconds"
+                        raise TimeoutError(msg)
                     time.sleep(0.1)  # Brief pause before retry
                 else:
                     raise
@@ -315,7 +313,7 @@ def _log_collision_error(
         source_rel = source_path.relative_to(root_dir) if root_dir in source_path.parents or source_path == root_dir else source_path
         collision_rel = (collision_path.relative_to(root_dir) if collision_path and (root_dir in collision_path.parents or collision_path == root_dir) else collision_path) if collision_path else None
 
-        with open(collision_log_path, "a", encoding="utf-8") as log_f:
+        with Path(collision_log_path).open("a", encoding="utf-8") as log_f:
             log_f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - COLLISION ({collision_type}):\n")
             log_f.write(f"  Transaction ID: {tx.get('id', 'N/A')}\n")
             log_f.write(f"  Type: {tx.get('TYPE', 'N/A')}\n")
@@ -352,7 +350,7 @@ def get_file_encoding(file_path: Path, sample_size: int = DEFAULT_ENCODING_SAMPL
         if file_size <= SMALL_FILE_SIZE_THRESHOLD:
             raw_data = file_path.read_bytes()
         else:
-            with open(file_path, "rb") as f:
+            with Path(file_path).open("rb") as f:
                 raw_data = f.read(sample_size)
 
         if not raw_data:
@@ -361,13 +359,13 @@ def get_file_encoding(file_path: Path, sample_size: int = DEFAULT_ENCODING_SAMPL
         # 1. Check for BOM markers first
         if raw_data.startswith(b"\xff\xfe"):
             return "utf-16-le"
-        elif raw_data.startswith(b"\xfe\xff"):
+        if raw_data.startswith(b"\xfe\xff"):
             return "utf-16-be"
-        elif raw_data.startswith(b"\xff\xfe\x00\x00"):
+        if raw_data.startswith(b"\xff\xfe\x00\x00"):
             return "utf-32-le"
-        elif raw_data.startswith(b"\x00\x00\xfe\xff"):
+        if raw_data.startswith(b"\x00\x00\xfe\xff"):
             return "utf-32-be"
-        elif raw_data.startswith(b"\xef\xbb\xbf"):
+        if raw_data.startswith(b"\xef\xbb\xbf"):
             return "utf-8-sig"
 
         # 2. Check for UTF-16 patterns by analyzing byte patterns
@@ -472,7 +470,7 @@ def load_ignore_patterns(ignore_file_path: Path, logger: LoggerType = None) -> p
     if not ignore_file_path.is_file():
         return None
     try:
-        with open(ignore_file_path, "r", encoding=DEFAULT_ENCODING_FALLBACK, errors="ignore") as f:
+        with Path(ignore_file_path).open("r", encoding=DEFAULT_ENCODING_FALLBACK, errors="ignore") as f:
             patterns = f.readlines()
         valid_patterns = [p for p in (line.strip() for line in patterns) if p and not p.startswith("#")]
         return pathspec.PathSpec.from_lines("gitwildmatch", valid_patterns) if valid_patterns else None
@@ -926,7 +924,7 @@ def scan_directory_for_occurrences(
                             try:
                                 # Process binary file in chunks to avoid memory exhaustion
                                 BINARY_CHUNK_SIZE = 1_048_576  # 1MB chunks
-                                with open(item_abs_path, "rb") as bf:
+                                with item_abs_path.open("rb") as bf:
                                     # Pre-encode keys for efficiency
                                     encoded_keys = []
                                     for key_str in raw_keys_for_binary_search:
@@ -973,7 +971,7 @@ def scan_directory_for_occurrences(
                                                         log_path_str = relative_path_str
                                                     else:
                                                         log_path_str = str(item_abs_path.relative_to(root_dir)).replace("\\", "/")
-                                                    with open(binary_log_path, "a", encoding="utf-8") as log_f:
+                                                    with Path(binary_log_path).open("a", encoding="utf-8") as log_f:
                                                         log_f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - MATCH: File: {log_path_str}, Key: '{key_str}', Offset: {actual_offset}\n")
                                                 offset = idx + len(key_bytes)
 
@@ -1095,9 +1093,7 @@ def scan_directory_for_occurrences(
     # Sort folders by depth (shallow then deep) and path for deterministic order
     folder_txs.sort(key=lambda tx: (len(Path(tx["PATH"]).parts), tx["PATH"]))
 
-    processed_transactions = folder_txs + file_txs + content_txs
-
-    return processed_transactions
+    return folder_txs + file_txs + content_txs
 
 
 def save_transactions(
@@ -1119,9 +1115,8 @@ def save_transactions(
     # Use unique temp file name to avoid conflicts
     temp_file_path = transactions_file_path.with_suffix(f".tmp.{uuid.uuid4().hex[:8]}")
     try:
-        with open(temp_file_path, "w", encoding="utf-8") as f:
-            with file_lock(f, exclusive=True):
-                json.dump(transactions, f, indent=2, ensure_ascii=False, cls=SurrogateHandlingEncoder)
+        with Path(temp_file_path).open("w", encoding="utf-8") as f, file_lock(f, exclusive=True):
+            json.dump(transactions, f, indent=2, ensure_ascii=False, cls=SurrogateHandlingEncoder)
         # Atomically replace original file
         os.replace(temp_file_path, transactions_file_path)
     except TimeoutError as e:
@@ -1165,7 +1160,7 @@ def load_transactions(transactions_file_path: Path, logger: LoggerType = None) -
         )
         return None
     try:
-        with open(transactions_file_path, "r", encoding="utf-8") as f:
+        with Path(transactions_file_path).open("r", encoding="utf-8") as f:
             with file_lock(f, exclusive=False):  # Shared lock for reading
                 data = json.load(f)
         if not isinstance(data, list):
@@ -1177,8 +1172,9 @@ def load_transactions(transactions_file_path: Path, logger: LoggerType = None) -
             return None
         # Decode any surrogate-escaped strings
         decoded_data = decode_surrogate_escaped_json(data)
-        # Type assertion - we know this is a list from the check above
-        assert isinstance(decoded_data, list)
+        # Type check - we know this is a list from the check above
+        if not isinstance(decoded_data, list):
+            raise TypeError("Decoded transaction data must be a list")
         return decoded_data
     except TimeoutError as e:
         _log_fs_op_message(
