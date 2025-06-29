@@ -30,7 +30,7 @@ from typing import (
     Union,
     Final,
 )
-from collections.abc import Iterator  # Keep Any if specifically needed for dynamic parts
+from collections.abc import Iterator  # Used in actual implementation, not just type hints
 from enum import Enum
 import chardet
 import unicodedata  # For NFC normalization
