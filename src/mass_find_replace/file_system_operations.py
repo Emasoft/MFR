@@ -1705,6 +1705,12 @@ __all__ = [
     "group_and_process_file_transactions",
     "process_large_file_content",
     "load_ignore_patterns",
+    # Functions re-exported from utils
+    "get_file_encoding",
+    "open_file_with_encoding",
+    "log_collision_error",
+    # External dependencies re-exported
+    "is_binary_file",
     # Constants re-exported from core
     "TransactionStatus",
     "TransactionType",
@@ -1712,3 +1718,6 @@ __all__ = [
     "BINARY_MATCHES_LOG_FILE",
     "COLLISIONS_ERRORS_LOG_FILE",
 ]
+
+# Re-export is_binary_file from isbinary package for backward compatibility
+# Note: Already imported at the top of the file
