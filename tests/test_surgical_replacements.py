@@ -239,14 +239,16 @@ class TestSurgicalReplacements:
             "Right-to-left: مرحبا OLDNAME שלום\n"
             "Math symbols: ∑ OLDNAME ∫\n"
         )
-        test_file.write_text(content)
+        # Write as binary to avoid encoding issues on Windows
+        test_file.write_bytes(content.encode("utf-8"))
 
         # Run MFR
         mapping = {"OLDNAME": "NEWNAME"}
         self.run_mfr(tmp_path, mapping)
 
         # Verify - note that OLDNAME with ZWSP inside won't be replaced (correct behavior)
-        result = test_file.read_text()
+        # Read as binary and decode to avoid encoding issues
+        result = test_file.read_bytes().decode("utf-8")
         assert "Normal text with NEWNAME" in result
         assert "Emoji: 🎉 NEWNAME 🎊" in result
         assert "O\u200bLDNAME" in result  # Not replaced due to ZWSP
