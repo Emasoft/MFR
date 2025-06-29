@@ -25,14 +25,8 @@ import json
 import uuid
 import base64
 from pathlib import Path
-from typing import (
-    Any,
-    Union,
-    Final,
-)
+from typing import Any
 from collections.abc import Iterator  # Used in actual implementation, not just type hints
-from enum import Enum
-import chardet
 import unicodedata  # For NFC normalization
 import time
 import pathspec
@@ -41,420 +35,70 @@ from striprtf.striprtf import rtf_to_text
 from isbinary import is_binary_file
 import logging
 import sys
-import contextlib
 
 from prefect import flow
 
 from . import replace_logic
-
-# Platform-specific imports for file locking
-if sys.platform == "win32":
-    import msvcrt
-else:
-    import fcntl
-
-# Type alias for logger types to avoid repetition
-# Note: LoggerAdapter is not generic in Python 3.10, so we use Any
-LoggerType = Union[logging.Logger, Any, None]
-
-# Constants for file size thresholds
-SMALL_FILE_SIZE_THRESHOLD: Final[int] = 1_048_576  # 1 MB - files smaller than this are read entirely
-LARGE_FILE_SIZE_THRESHOLD: Final[int] = 100_000_000  # 100 MB - files larger than this are skipped for content scan
-DEFAULT_ENCODING_SAMPLE_SIZE: Final[int] = 10240  # 10 KB - sample size for encoding detection
-
-# Constants for retry logic
-QUICK_RETRY_COUNT: Final[int] = 3  # Number of quick retries with short delay
-QUICK_RETRY_DELAY: Final[int] = 1  # Seconds between quick retries
-MAX_RETRY_WAIT_TIME: Final[int] = 30  # Maximum wait time between retries in seconds
-RETRY_BACKOFF_MULTIPLIER: Final[int] = 5  # Multiplier for exponential backoff
-
-# Constants for large file processing
-SAFE_LINE_LENGTH_THRESHOLD: Final[int] = 1000  # Characters - lines longer than this use chunked processing
-CHUNK_SIZE: Final[int] = 1000  # Characters - chunk size for processing long lines
-FALLBACK_CHUNK_SIZE: Final[int] = 1000  # Characters - fallback chunk size if no safe split found
-
-
-class SandboxViolationError(Exception):
-    pass
-
-
-class MockableRetriableError(OSError):
-    pass
-
-
-DEFAULT_ENCODING_FALLBACK: Final[str] = "utf-8"
-TRANSACTION_FILE_BACKUP_EXT: Final[str] = ".bak"
-SELF_TEST_ERROR_FILE_BASENAME: Final[str] = "error_file_test.txt"
-BINARY_MATCHES_LOG_FILE: Final[str] = "binary_files_matches.log"
-COLLISIONS_ERRORS_LOG_FILE: Final[str] = "collisions_errors.log"
-
-RETRYABLE_OS_ERRORNOS: Final[set[int]] = {
-    errno.EACCES,
-    errno.EBUSY,
-    errno.ETXTBSY,
-}
-
-
-# ====================== JSON ENCODER FOR SURROGATES =======================
-
-
-class SurrogateHandlingEncoder(json.JSONEncoder):
-    """Custom JSON encoder that handles surrogate characters by encoding to base64."""
-
-    def _encode_with_surrogate_handling(self, text: str) -> str | dict[str, Any]:
-        """Single method to handle surrogate encoding."""
-        try:
-            text.encode("utf-8")
-            return text
-        except UnicodeEncodeError:
-            # Contains surrogates, encode as base64
-            return {"__surrogate_escaped__": True, "data": base64.b64encode(text.encode("utf-8", errors="surrogateescape")).decode("ascii")}
-
-    def encode(self, obj: Any) -> str:
-        """Encode object to JSON, handling surrogates in strings."""
-        if isinstance(obj, str):
-            processed = self._encode_with_surrogate_handling(obj)
-            return super().encode(processed)
-        return super().encode(obj)
-
-    def iterencode(self, obj: Any, _one_shot: bool = False) -> Iterator[str]:
-        """Encode object to JSON iteratively, handling surrogates in strings."""
-        return super().iterencode(self._process_item(obj), _one_shot)
-
-    def _process_item(self, obj: Any) -> Any:
-        """Recursively process an item, encoding strings with surrogates."""
-        if isinstance(obj, str):
-            return self._encode_with_surrogate_handling(obj)
-        if isinstance(obj, dict):
-            return {k: self._process_item(v) for k, v in obj.items()}
-        if isinstance(obj, list):
-            return [self._process_item(item) for item in obj]
-        if isinstance(obj, tuple):
-            return tuple(self._process_item(item) for item in obj)
-        return obj
-
-
-def decode_surrogate_escaped_json(obj: Any) -> Any:
-    """Decode JSON objects that were encoded with SurrogateHandlingEncoder."""
-    if isinstance(obj, dict):
-        if obj.get("__surrogate_escaped__") and "data" in obj:
-            # Decode base64 back to bytes, then decode with surrogateescape
-            encoded_bytes = base64.b64decode(obj["data"])
-            return encoded_bytes.decode("utf-8", errors="surrogateescape")
-        return {k: decode_surrogate_escaped_json(v) for k, v in obj.items()}
-    if isinstance(obj, list):
-        return [decode_surrogate_escaped_json(item) for item in obj]
-    return obj
-
-
-def open_file_with_encoding(
-    file_path: Path,
-    mode: str = "r",
-    encoding: str | None = None,
-    logger: LoggerType = None,
-) -> Any:
-    """Open a file with proper encoding detection and error handling.
-
-    Args:
-        file_path: Path to the file
-        mode: File open mode
-        encoding: Encoding to use (if None, will detect)
-        logger: Optional logger instance
-
-    Returns:
-        File handle
-
-    Raises:
-        IOError: If file cannot be opened
-    """
-    if encoding is None and "b" not in mode:
-        encoding = get_file_encoding(file_path, logger=logger)
-
-    try:
-        if "b" in mode:
-            return open(file_path, mode)
-        return open(file_path, mode, encoding=encoding, errors="surrogateescape", newline="")
-    except OSError as e:
-        _log_fs_op_message(
-            logging.ERROR,
-            f"Cannot open file {file_path} in mode '{mode}' with encoding '{encoding}': {e}",
-            logger,
-        )
-        raise
-
-
-# ANSI escape codes for interactive mode
-GREEN_FG: Final[str] = "\033[32m"
-YELLOW_FG: Final[str] = "\033[33m"
-BLUE_FG: Final[str] = "\033[94m"
-MAGENTA_FG: Final[str] = "\033[35m"
-CYAN_FG: Final[str] = "\033[36m"
-RED_FG: Final[str] = "\033[31m"
-DIM_STYLE: Final[str] = "\033[2m"
-BOLD_STYLE: Final[str] = "\033[1m"
-RESET_STYLE: Final[str] = "\033[0m"
-
-
-@contextlib.contextmanager
-def file_lock(file_handle: Any, exclusive: bool = True, timeout: float = 10.0) -> Iterator[Any]:
-    """Cross-platform file locking context manager.
-
-    Args:
-        file_handle: Open file handle to lock
-        exclusive: If True, acquire exclusive lock; if False, shared lock
-        timeout: Maximum seconds to wait for lock
-
-    Raises:
-        TimeoutError: If lock cannot be acquired within timeout
-    """
-    locked = False
-    start_time = time.time()
-
-    try:
-        while True:
-            try:
-                if sys.platform == "win32":
-                    # Windows file locking
-                    if exclusive:
-                        msvcrt.locking(file_handle.fileno(), msvcrt.LK_NBLCK, 1)
-                    else:
-                        # Windows doesn't have shared locks, use exclusive
-                        msvcrt.locking(file_handle.fileno(), msvcrt.LK_NBLCK, 1)
-                # Unix file locking
-                elif exclusive:
-                    fcntl.flock(file_handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-                else:
-                    fcntl.flock(file_handle.fileno(), fcntl.LOCK_SH | fcntl.LOCK_NB)
-                locked = True
-                break
-            except OSError as e:
-                if e.errno in (errno.EAGAIN, errno.EACCES, errno.EWOULDBLOCK):
-                    # Lock is held by another process
-                    if time.time() - start_time > timeout:
-                        msg = f"Could not acquire file lock within {timeout} seconds"
-                        raise TimeoutError(msg)
-                    time.sleep(0.1)  # Brief pause before retry
-                else:
-                    raise
-
-        yield file_handle
-
-    finally:
-        if locked:
-            try:
-                if sys.platform == "win32":
-                    msvcrt.locking(file_handle.fileno(), msvcrt.LK_UNLCK, 1)
-                else:
-                    fcntl.flock(file_handle.fileno(), fcntl.LOCK_UN)
-            except OSError:
-                pass  # Best effort unlock
-
-
-class TransactionType(str, Enum):
-    FILE_NAME = "FILE_NAME"
-    FOLDER_NAME = "FOLDER_NAME"
-    FILE_CONTENT_LINE = "FILE_CONTENT_LINE"
-
-
-class TransactionStatus(str, Enum):
-    PENDING = "PENDING"
-    IN_PROGRESS = "IN_PROGRESS"
-    COMPLETED = "COMPLETED"
-    FAILED = "FAILED"
-    SKIPPED = "SKIPPED"
-    RETRY_LATER = "RETRY_LATER"
-
-
-def _log_fs_op_message(level: int, message: str, logger: LoggerType = None) -> None:
-    """Helper to log messages using provided logger or print as fallback for fs_operations.
-
-    Args:
-        level: Logging level (e.g., logging.INFO, logging.ERROR)
-        message: Message to log
-        logger: Optional logger instance. If None, prints to stdout/stderr
-    """
-    if logger:
-        logger.log(level, message)
-    else:
-        prefix = ""
-        if level == logging.ERROR:
-            prefix = "ERROR (fs_op): "
-        elif level == logging.WARNING:
-            prefix = "WARNING (fs_op): "
-        elif level == logging.INFO:
-            prefix = "INFO (fs_op): "
-        elif level == logging.DEBUG:
-            prefix = "DEBUG (fs_op): "
-        print(f"{prefix}{message}")
-
-
-def _log_collision_error(
-    root_dir: Path,
-    tx: dict[str, Any],
-    source_path: Path,
-    collision_path: Path | None,
-    collision_type: str | None,
-    logger: LoggerType = None,
-) -> None:
-    """Log collision errors to a dedicated file.
-
-    Args:
-        root_dir: Root directory of the project
-        tx: Transaction dictionary containing rename information
-        source_path: Source path that would be renamed
-        collision_path: Path that already exists causing the collision
-        collision_type: Type of collision (e.g., "exact match", "case-insensitive match")
-        logger: Optional logger instance
-    """
-    collision_log_path = root_dir / COLLISIONS_ERRORS_LOG_FILE
-
-    try:
-        # Get relative paths for cleaner logging
-        source_rel = source_path.relative_to(root_dir) if root_dir in source_path.parents or source_path == root_dir else source_path
-        collision_rel = (collision_path.relative_to(root_dir) if collision_path and (root_dir in collision_path.parents or collision_path == root_dir) else collision_path) if collision_path else None
-
-        with Path(collision_log_path).open("a", encoding="utf-8") as log_f:
-            log_f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - COLLISION ({collision_type}):\n")
-            log_f.write(f"  Transaction ID: {tx.get('id', 'N/A')}\n")
-            log_f.write(f"  Type: {tx.get('TYPE', 'N/A')}\n")
-            log_f.write(f"  Original Path: {tx.get('PATH', 'N/A')}\n")
-            log_f.write(f"  Original Name: {tx.get('ORIGINAL_NAME', 'N/A')}\n")
-            log_f.write(f"  Proposed New Name: {tx.get('NEW_NAME', 'N/A')}\n")
-            log_f.write(f"  Source: {source_rel}\n")
-            log_f.write(f"  Collision With: {collision_rel}\n")
-            log_f.write(f"  Collision Type: {collision_type}\n")
-            log_f.write("-" * 80 + "\n")
-
-        _log_fs_op_message(logging.DEBUG, f"Logged collision error to {collision_log_path}", logger)
-    except Exception as e:
-        _log_fs_op_message(logging.WARNING, f"Could not write to collision log: {e}", logger)
-
-
-def get_file_encoding(file_path: Path, sample_size: int = DEFAULT_ENCODING_SAMPLE_SIZE, logger: LoggerType = None) -> str:
-    """Detect file encoding using multiple strategies.
-
-    Args:
-        file_path: Path to the file
-        sample_size: Number of bytes to sample for detection
-        logger: Optional logger instance
-
-    Returns:
-        Detected encoding name
-    """
-    if not file_path.is_file():
-        return DEFAULT_ENCODING_FALLBACK
-    try:
-        file_size = file_path.stat().st_size
-
-        # Read the file or sample
-        if file_size <= SMALL_FILE_SIZE_THRESHOLD:
-            raw_data = file_path.read_bytes()
-        else:
-            with Path(file_path).open("rb") as f:
-                raw_data = f.read(sample_size)
-
-        if not raw_data:
-            return DEFAULT_ENCODING_FALLBACK
-
-        # 1. Check for BOM markers first
-        if raw_data.startswith(b"\xff\xfe"):
-            return "utf-16-le"
-        if raw_data.startswith(b"\xfe\xff"):
-            return "utf-16-be"
-        if raw_data.startswith(b"\xff\xfe\x00\x00"):
-            return "utf-32-le"
-        if raw_data.startswith(b"\x00\x00\xfe\xff"):
-            return "utf-32-be"
-        if raw_data.startswith(b"\xef\xbb\xbf"):
-            return "utf-8-sig"
-
-        # 2. Check for UTF-16 patterns by analyzing byte patterns
-        if len(raw_data) >= 4:
-            # Look for alternating null bytes with ASCII characters
-            # Check up to 500 bytes for more reliable detection
-            check_len = min(len(raw_data), 500)
-
-            # Count ASCII characters with null bytes in UTF-16 LE pattern
-            le_ascii_chars = 0
-            be_ascii_chars = 0
-
-            for i in range(0, check_len - 1, 2):
-                # UTF-16 LE: ASCII byte followed by null
-                if 0x20 <= raw_data[i] <= 0x7E and raw_data[i + 1] == 0:
-                    le_ascii_chars += 1
-                # UTF-16 BE: null followed by ASCII byte
-                if raw_data[i] == 0 and 0x20 <= raw_data[i + 1] <= 0x7E:
-                    be_ascii_chars += 1
-
-            # If we found significant ASCII patterns, it's likely UTF-16
-            min_ascii_threshold = 5  # At least 5 ASCII chars to be confident
-
-            if le_ascii_chars > min_ascii_threshold and le_ascii_chars > be_ascii_chars:
-                try:
-                    raw_data.decode("utf-16-le", errors="strict")
-                    return "utf-16-le"
-                except UnicodeDecodeError:
-                    pass
-            elif be_ascii_chars > min_ascii_threshold:
-                try:
-                    raw_data.decode("utf-16-be", errors="strict")
-                    return "utf-16-be"
-                except UnicodeDecodeError:
-                    pass
-
-        # 3. Try UTF-8 for all files regardless of size
-        try:
-            if file_path.suffix.lower() != ".rtf":
-                raw_data.decode("utf-8", errors="strict")
-                return "utf-8"
-        except UnicodeDecodeError:
-            pass
-
-        # RTF files use Latin-1
-        if file_path.suffix.lower() == ".rtf":
-            return "latin-1"
-
-        # 4. Use chardet detection
-        detected = chardet.detect(raw_data)
-        encoding = detected.get("encoding") or DEFAULT_ENCODING_FALLBACK
-        confidence = detected.get("confidence", 0)
-
-        # Normalize GB2312 to GB18030
-        if encoding and encoding.lower().startswith("gb2312"):
-            encoding = "gb18030"
-
-        # Only consider chardet results with reasonable confidence
-        if confidence > 0.5 and encoding:
-            encoding = encoding.lower()
-            # Handle common encoding aliases
-            try:
-                raw_data.decode(encoding, errors="surrogateescape")
-                return encoding
-            except (UnicodeDecodeError, LookupError):
-                pass
-
-        # 5. Fallback explicit checks if UTF-8 and chardet's primary suggestion failed or wasn't definitive
-        for enc_try in ["cp1252", "latin1", "iso-8859-1"]:
-            try:
-                if encoding != enc_try:
-                    raw_data.decode(enc_try, errors="surrogateescape")
-                    return enc_try
-            except (UnicodeDecodeError, LookupError):
-                pass
-
-        _log_fs_op_message(
-            logging.DEBUG,
-            f"Encoding for {file_path} could not be confidently determined. Chardet: {detected}. Using {DEFAULT_ENCODING_FALLBACK}.",
-            logger,
-        )
-        return DEFAULT_ENCODING_FALLBACK
-    except Exception as e:
-        _log_fs_op_message(
-            logging.WARNING,
-            f"Error detecting encoding for {file_path}: {e}. Falling back to {DEFAULT_ENCODING_FALLBACK}.",
-            logger,
-        )
-        return DEFAULT_ENCODING_FALLBACK
+from .core import (
+    # Constants
+    SMALL_FILE_SIZE_THRESHOLD,
+    LARGE_FILE_SIZE_THRESHOLD,
+    DEFAULT_ENCODING_SAMPLE_SIZE,
+    QUICK_RETRY_COUNT,
+    QUICK_RETRY_DELAY,
+    MAX_RETRY_WAIT_TIME,
+    RETRY_BACKOFF_MULTIPLIER,
+    SAFE_LINE_LENGTH_THRESHOLD,
+    CHUNK_SIZE,
+    FALLBACK_CHUNK_SIZE,
+    DEFAULT_ENCODING_FALLBACK,
+    TRANSACTION_FILE_BACKUP_EXT,
+    SELF_TEST_ERROR_FILE_BASENAME,
+    BINARY_MATCHES_LOG_FILE,
+    COLLISIONS_ERRORS_LOG_FILE,
+    RETRYABLE_OS_ERRORNOS,
+    GREEN_FG,
+    YELLOW_FG,
+    BLUE_FG,
+    MAGENTA_FG,
+    CYAN_FG,
+    RED_FG,
+    DIM_STYLE,
+    BOLD_STYLE,
+    RESET_STYLE,
+    # Exceptions
+    SandboxViolationError,
+    MockableRetriableError,
+    # Types
+    LoggerType,
+    TransactionType,
+    TransactionStatus,
+)
+from .utils import (
+    SurrogateHandlingEncoder,
+    decode_surrogate_escaped_json,
+    file_lock,
+    log_fs_op_message,
+    log_collision_error,
+    get_file_encoding,
+    open_file_with_encoding,
+)
+
+
+# ====================== MAIN FILE SYSTEM OPERATIONS ======================
+
+# Note: The following have been moved to separate modules:
+# - JSON encoding/decoding → utils/json_handlers.py
+# - File locking → utils/file_locking.py
+# - Logging utilities → utils/logging_utils.py
+# - File encoding detection → utils/file_encoding.py
+# - Constants → core/constants.py
+# - Exceptions → core/exceptions.py
+# - Types/Enums → core/types.py
+
+# Temporary aliases for backward compatibility
+_log_fs_op_message = log_fs_op_message
+_log_collision_error = log_collision_error
 
 
 def load_ignore_patterns(ignore_file_path: Path, logger: LoggerType = None) -> pathspec.PathSpec | None:
