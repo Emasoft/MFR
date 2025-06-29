@@ -16,7 +16,7 @@ Pre-commit checks	Run pre-commit	2025-06-29T16:00:17.5770946Z ruff-format.......
 Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7401599Z mypy.....................................................................[41mFailed[m
 Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7402374Z [2m- hook id: mypy[m
 Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7402805Z [2m- exit code: 1[m
-Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7403002Z 
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7403002Z
 Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7403292Z src/mass_find_replace/mass_find_replace.py:24: error: Module
 Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7404065Z "mass_find_replace.file_system_operations" does not explicitly export attribute
 Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7404733Z "TransactionStatus"  [attr-defined]
@@ -37,7 +37,7 @@ Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7410439Z "mass_find_replace
 Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7410844Z "COLLISIONS_ERRORS_LOG_FILE"  [attr-defined]
 Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7411159Z     from .file_system_operations import (
 Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7411388Z     ^
-Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7411485Z 
+Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.7411485Z
 Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.9466144Z deptry...................................................................[42mPassed[m
 Pre-commit checks	Run pre-commit	2025-06-29T16:00:40.9947950Z trim trailing whitespace.................................................[42mPassed[m
 Pre-commit checks	Run pre-commit	2025-06-29T16:00:41.0386347Z fix end of files.........................................................[42mPassed[m

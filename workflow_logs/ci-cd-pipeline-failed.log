@@ -17,7 +17,7 @@ Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:00:21.64
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:00:21.6420825Z configfile: pyproject.toml
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:00:21.6421099Z plugins: anyio-4.9.0, cov-6.2.1
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:00:25.4532708Z collecting ... collected 111 items
-Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:00:25.4533172Z 
+Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:00:25.4533172Z
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:00:25.4943456Z tests/test_additional_coverage.py::TestFileSystemOperations::test_scan_with_symlinks PASSED [  0%]
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:00:25.5302242Z tests/test_additional_coverage.py::TestFileSystemOperations::test_scan_with_gitignore PASSED [  1%]
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:00:25.5730416Z tests/test_additional_coverage.py::TestFileSystemOperations::test_process_large_file_with_encoding_error PASSED [  2%]
@@ -129,82 +129,82 @@ Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:19.75
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.1501655Z tests/test_surgical_replacements.py::TestSurgicalReplacements::test_file_permissions_preserved PASSED [ 98%]
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.5504171Z tests/test_surgical_replacements.py::TestErrorHandling::test_handles_read_only_files PASSED [ 99%]
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2000833Z tests/test_surgical_replacements.py::TestErrorHandling::test_handles_files_with_no_newline_at_end PASSED [100%]
-Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2001568Z 
+Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2001568Z
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2001798Z =================================== FAILURES ===================================
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2002541Z _________________________ test_collision_error_logging _________________________
-Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2003041Z 
+Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2003041Z
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2004298Z temp_test_dir = {'config': PosixPath('/tmp/pytest-of-runner/pytest-0/test_collision_error_logging0/config'), 'runtime': PosixPath('/tmp/pytest-of-runner/pytest-0/test_collision_error_logging0/runtime')}
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2006285Z default_map_file = PosixPath('/tmp/pytest-of-runner/pytest-0/test_collision_error_logging0/config/replacement_mapping.json')
-Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2007172Z 
+Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2007172Z
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2007735Z     def test_collision_error_logging(temp_test_dir: dict[str, Path], default_map_file: Path) -> None:
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2008707Z         """Test that collision errors are properly logged"""
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2009537Z         # Use a fresh directory to avoid conflicts with fixture files
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2010208Z         test_dir = temp_test_dir["runtime"] / "collision_test"
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2010599Z         test_dir.mkdir()
-Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2010832Z     
+Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2010832Z
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2011107Z         # Test 1: File that will rename to collide with existing file
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2011591Z         # This file will be renamed from oldname_config.py to newname_config.py
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2012000Z         source_file = test_dir / "oldname_config.py"
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2012287Z         source_file.write_text("# Config file")
-Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2012519Z     
+Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2012519Z
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2012696Z         # Existing file that will cause collision
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2013161Z         exact_collision = test_dir / "newname_config.py"
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2013497Z         exact_collision.write_text("# Existing config")
-Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2013745Z     
+Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2013745Z
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2013980Z         # Test 2: File with different case that will collide after rename
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2014332Z         # OldnameTheme.ts will be renamed to NewnameTheme.ts
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2014641Z         case_test_file = test_dir / "OldnameTheme.ts"
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2014956Z         case_test_file.write_text("export const theme = 'test';")
-Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2015225Z     
+Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2015225Z
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2015479Z         # Existing file with different case that will cause collision
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2015803Z         case_collision = test_dir / "NEWNAMETHEME.ts"
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2016127Z         case_collision.write_text("export const theme = 'existing';")
-Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2016411Z     
+Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2016411Z
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2016576Z         # Debug: List all files before running
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2017346Z         print("\n=== Files before running ===")
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2017799Z         for f in test_dir.iterdir():
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2018189Z             print(f"  {f.name}")
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2018542Z         print("=== End files list ===")
-Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2018775Z     
+Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2018775Z
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2018963Z         # Run the replacement on the test subdirectory
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2019368Z         run_main_flow_for_test(test_dir, default_map_file, dry_run=False, extensions=[".ts", ".py"])
-Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2019737Z     
+Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2019737Z
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2019912Z         # Check that collision log was created
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2020570Z         collision_log = test_dir / COLLISIONS_ERRORS_LOG_FILE
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2020952Z         assert collision_log.exists(), "Collision error log file was not created"
-Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2021271Z     
+Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2021271Z
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2021427Z         # Read and verify log content
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2021711Z         log_content = collision_log.read_text(encoding="utf-8")
-Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2021991Z     
+Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2021991Z
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2022148Z         # Print log for debugging
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2022465Z         print(f"\n=== Collision Log Content ===\n{log_content}\n=== End Log ===\n")
-Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2022781Z     
+Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2022781Z
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2022954Z         # Verify exact match collision is logged
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2023323Z         assert "OldnameTheme.ts" in log_content, "OldnameTheme.ts collision not logged"
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2023787Z         assert "OldnameTheme.ts" in log_content, "Target collision file not mentioned"
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2024239Z         assert "exact match" in log_content, "Exact match collision type not specified"
-Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2024567Z     
+Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2024567Z
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2024824Z         # Verify collision is logged (on case-insensitive filesystems like macOS,
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2025267Z         # OLDNAME_CONFIG.py and oldname_config.py are the same, so it's an exact match)
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2025721Z         assert "oldname_config.py" in log_content, "Case-insensitive source not logged"
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2026148Z         # The collision should be logged with the attempted target name
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2026661Z         assert "oldname_config.py" in log_content, "Collision target not mentioned"
-Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2027412Z     
+Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2027412Z
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2027594Z         # Verify transaction details are included
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2027872Z         assert "Transaction ID:" in log_content
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2028142Z >       assert "Original Name:" in log_content
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2029715Z E       AssertionError: assert 'Original Name:' in '2025-06-29 16:01:14 - COLLISION (case-insensitive match):\n  Source: OldnameTheme.ts\n  Target: N/A\n  Collision with: NEWNAMETHEME.ts\n  Transaction ID: f2913a86-6463-4360-bc86-c9d3d33991d7\n--------------------------------------------------------------------------------\n2025-06-29 16:01:14 - COLLISION (exact match):\n  Source: oldname_config.py\n  Target: N/A\n  Collision with: newname_config.py\n  Transaction ID: 0617dc90-fdab-443e-97e5-37214f6acf73\n--------------------------------------------------------------------------------\n'
-Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2031394Z 
+Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2031394Z
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2031522Z tests/test_mass_find_replace.py:577: AssertionError
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2031875Z ----------------------------- Captured stdout call -----------------------------
-Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2032128Z 
+Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2032128Z
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2032212Z === Files before running ===
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2032452Z   NEWNAMETHEME.ts
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2032624Z   OldnameTheme.ts
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2032797Z   newname_config.py
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2032970Z   oldname_config.py
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2033140Z === End files list ===
-Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2033255Z 
+Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2033255Z
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2033331Z === Collision Log Content ===
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2033596Z 2025-06-29 16:01:14 - COLLISION (case-insensitive match):
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2033883Z   Source: OldnameTheme.ts
@@ -218,9 +218,9 @@ Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.20
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2035929Z   Collision with: newname_config.py
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2036200Z   Transaction ID: 0617dc90-fdab-443e-97e5-37214f6acf73
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2036527Z --------------------------------------------------------------------------------
-Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2036741Z 
+Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2036741Z
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2036805Z === End Log ===
-Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2036912Z 
+Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2036912Z
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2037055Z ----------------------------- Captured stderr call -----------------------------
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2037523Z 16:01:14.379 | INFO    | Flow run 'pink-quoll' - Beginning flow run 'pink-quoll' for flow 'Mass Find Replace'
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2038205Z 16:01:14.380 | INFO    | Flow run 'pink-quoll' - Scanning '/tmp/pytest-of-runner/pytest-0/test_collision_error_logging0/runtime/collision_test'...
@@ -251,7 +251,7 @@ Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.20
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.9191759Z INFO     prefect.flow_runs:flow_engine.py:724 Finished in state Completed()
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.9192581Z ================================ tests coverage ================================
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.9193282Z _______________ coverage: platform linux, python 3.11.13-final-0 _______________
-Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.9193739Z 
+Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.9193739Z
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.9193934Z Name                                              Stmts   Miss  Cover
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.9194514Z ---------------------------------------------------------------------
 Test Python 3.11 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.9195131Z src/mass_find_replace/__init__.py                     6      0   100%
@@ -329,7 +329,7 @@ Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:00:19.09
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:00:19.0976840Z configfile: pyproject.toml
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:00:19.0977134Z plugins: anyio-4.9.0, cov-6.2.1
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:00:22.7481804Z collecting ... collected 111 items
-Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:00:22.7482270Z 
+Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:00:22.7482270Z
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:00:22.8037642Z tests/test_additional_coverage.py::TestFileSystemOperations::test_scan_with_symlinks PASSED [  0%]
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:00:22.8515187Z tests/test_additional_coverage.py::TestFileSystemOperations::test_scan_with_gitignore PASSED [  1%]
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:00:22.9004735Z tests/test_additional_coverage.py::TestFileSystemOperations::test_process_large_file_with_encoding_error PASSED [  2%]
@@ -441,82 +441,82 @@ Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:18.83
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:19.2334878Z tests/test_surgical_replacements.py::TestSurgicalReplacements::test_file_permissions_preserved PASSED [ 98%]
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:19.6596656Z tests/test_surgical_replacements.py::TestErrorHandling::test_handles_read_only_files PASSED [ 99%]
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4146472Z tests/test_surgical_replacements.py::TestErrorHandling::test_handles_files_with_no_newline_at_end PASSED [100%]
-Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4147286Z 
+Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4147286Z
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4147469Z =================================== FAILURES ===================================
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4148084Z _________________________ test_collision_error_logging _________________________
-Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4148539Z 
+Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4148539Z
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4149631Z temp_test_dir = {'config': PosixPath('/tmp/pytest-of-runner/pytest-0/test_collision_error_logging0/config'), 'runtime': PosixPath('/tmp/pytest-of-runner/pytest-0/test_collision_error_logging0/runtime')}
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4151592Z default_map_file = PosixPath('/tmp/pytest-of-runner/pytest-0/test_collision_error_logging0/config/replacement_mapping.json')
-Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4152264Z 
+Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4152264Z
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4152592Z     def test_collision_error_logging(temp_test_dir: dict[str, Path], default_map_file: Path) -> None:
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4153154Z         """Test that collision errors are properly logged"""
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4153821Z         # Use a fresh directory to avoid conflicts with fixture files
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4154792Z         test_dir = temp_test_dir["runtime"] / "collision_test"
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4155146Z         test_dir.mkdir()
-Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4155372Z     
+Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4155372Z
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4155636Z         # Test 1: File that will rename to collide with existing file
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4156093Z         # This file will be renamed from oldname_config.py to newname_config.py
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4156526Z         source_file = test_dir / "oldname_config.py"
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4156875Z         source_file.write_text("# Config file")
-Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4157158Z     
+Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4157158Z
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4157365Z         # Existing file that will cause collision
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4157711Z         exact_collision = test_dir / "newname_config.py"
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4158078Z         exact_collision.write_text("# Existing config")
-Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4158376Z     
+Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4158376Z
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4158656Z         # Test 2: File with different case that will collide after rename
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4159084Z         # OldnameTheme.ts will be renamed to NewnameTheme.ts
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4159452Z         case_test_file = test_dir / "OldnameTheme.ts"
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4159834Z         case_test_file.write_text("export const theme = 'test';")
-Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4160165Z     
+Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4160165Z
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4160462Z         # Existing file with different case that will cause collision
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4160856Z         case_collision = test_dir / "NEWNAMETHEME.ts"
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4161447Z         case_collision.write_text("export const theme = 'existing';")
-Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4161808Z     
+Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4161808Z
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4162014Z         # Debug: List all files before running
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4162331Z         print("\n=== Files before running ===")
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4162640Z         for f in test_dir.iterdir():
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4162913Z             print(f"  {f.name}")
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4163176Z         print("=== End files list ===")
-Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4163447Z     
+Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4163447Z
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4163669Z         # Run the replacement on the test subdirectory
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4164391Z         run_main_flow_for_test(test_dir, default_map_file, dry_run=False, extensions=[".ts", ".py"])
-Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4164843Z     
+Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4164843Z
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4165049Z         # Check that collision log was created
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4165346Z         collision_log = test_dir / COLLISIONS_ERRORS_LOG_FILE
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4165739Z         assert collision_log.exists(), "Collision error log file was not created"
-Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4166075Z     
+Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4166075Z
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4166245Z         # Read and verify log content
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4166538Z         log_content = collision_log.read_text(encoding="utf-8")
-Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4166815Z     
+Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4166815Z
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4166980Z         # Print log for debugging
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4167308Z         print(f"\n=== Collision Log Content ===\n{log_content}\n=== End Log ===\n")
-Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4167631Z     
+Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4167631Z
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4167819Z         # Verify exact match collision is logged
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4168198Z         assert "OldnameTheme.ts" in log_content, "OldnameTheme.ts collision not logged"
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4168661Z         assert "OldnameTheme.ts" in log_content, "Target collision file not mentioned"
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4169119Z         assert "exact match" in log_content, "Exact match collision type not specified"
-Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4169455Z     
+Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4169455Z
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4169707Z         # Verify collision is logged (on case-insensitive filesystems like macOS,
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4170158Z         # OLDNAME_CONFIG.py and oldname_config.py are the same, so it's an exact match)
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4170614Z         assert "oldname_config.py" in log_content, "Case-insensitive source not logged"
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4171033Z         # The collision should be logged with the attempted target name
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4171447Z         assert "oldname_config.py" in log_content, "Collision target not mentioned"
-Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4171926Z     
+Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4171926Z
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4172113Z         # Verify transaction details are included
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4172387Z         assert "Transaction ID:" in log_content
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4172657Z >       assert "Original Name:" in log_content
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4174385Z E       AssertionError: assert 'Original Name:' in '2025-06-29 16:01:13 - COLLISION (case-insensitive match):\n  Source: OldnameTheme.ts\n  Target: N/A\n  Collision with: NEWNAMETHEME.ts\n  Transaction ID: 69d40323-3865-4b64-b89f-0160594a4f32\n--------------------------------------------------------------------------------\n2025-06-29 16:01:13 - COLLISION (exact match):\n  Source: oldname_config.py\n  Target: N/A\n  Collision with: newname_config.py\n  Transaction ID: 198c5b39-08c9-4ea7-a1bf-aee2d420c9cb\n--------------------------------------------------------------------------------\n'
-Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4175895Z 
+Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4175895Z
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4176018Z tests/test_mass_find_replace.py:577: AssertionError
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4176373Z ----------------------------- Captured stdout call -----------------------------
-Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4176615Z 
+Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4176615Z
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4176704Z === Files before running ===
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4176910Z   NEWNAMETHEME.ts
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4177089Z   OldnameTheme.ts
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4177269Z   newname_config.py
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4177446Z   oldname_config.py
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4177625Z === End files list ===
-Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4177746Z 
+Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4177746Z
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4177825Z === Collision Log Content ===
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4178091Z 2025-06-29 16:01:13 - COLLISION (case-insensitive match):
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4180218Z   Source: OldnameTheme.ts
@@ -530,9 +530,9 @@ Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.41
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4183259Z   Collision with: newname_config.py
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4183549Z   Transaction ID: 198c5b39-08c9-4ea7-a1bf-aee2d420c9cb
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4184083Z --------------------------------------------------------------------------------
-Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4184343Z 
+Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4184343Z
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4184412Z === End Log ===
-Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4184517Z 
+Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4184517Z
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4184672Z ----------------------------- Captured stderr call -----------------------------
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4185212Z 16:01:13.022 | INFO    | Flow run 'voracious-malamute' - Beginning flow run 'voracious-malamute' for flow 'Mass Find Replace'
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:20.4185982Z 16:01:13.024 | INFO    | Flow run 'voracious-malamute' - Scanning '/tmp/pytest-of-runner/pytest-0/test_collision_error_logging0/runtime/collision_test'...
@@ -563,7 +563,7 @@ Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.21
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2165225Z INFO     prefect.flow_runs:flow_engine.py:724 Finished in state Completed()
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2165614Z ================================ tests coverage ================================
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2166000Z _______________ coverage: platform linux, python 3.10.18-final-0 _______________
-Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2166261Z 
+Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2166261Z
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2166379Z Name                                              Stmts   Miss  Cover
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2166698Z ---------------------------------------------------------------------
 Test Python 3.10 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:21.2167054Z src/mass_find_replace/__init__.py                     6      0   100%
@@ -641,7 +641,7 @@ Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:08.19
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:08.1968984Z configfile: pyproject.toml
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:08.1969355Z plugins: anyio-4.9.0, cov-6.2.1
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:15.9066698Z collecting ... collected 111 items
-Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:15.9067097Z 
+Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:15.9067097Z
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:15.9554603Z tests/test_additional_coverage.py::TestFileSystemOperations::test_scan_with_symlinks PASSED [  0%]
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:15.9950028Z tests/test_additional_coverage.py::TestFileSystemOperations::test_scan_with_gitignore PASSED [  1%]
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:01:16.0282825Z tests/test_additional_coverage.py::TestFileSystemOperations::test_process_large_file_with_encoding_error PASSED [  2%]
@@ -753,82 +753,82 @@ Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:10.03
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:10.4190842Z tests/test_surgical_replacements.py::TestSurgicalReplacements::test_file_permissions_preserved PASSED [ 98%]
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:10.8016028Z tests/test_surgical_replacements.py::TestErrorHandling::test_handles_read_only_files PASSED [ 99%]
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4618807Z tests/test_surgical_replacements.py::TestErrorHandling::test_handles_files_with_no_newline_at_end PASSED [100%]
-Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4619620Z 
+Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4619620Z
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4619808Z =================================== FAILURES ===================================
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4620423Z _________________________ test_collision_error_logging _________________________
-Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4620860Z 
+Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4620860Z
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4621879Z temp_test_dir = {'config': PosixPath('/tmp/pytest-of-runner/pytest-0/test_collision_error_logging0/config'), 'runtime': PosixPath('/tmp/pytest-of-runner/pytest-0/test_collision_error_logging0/runtime')}
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4623931Z default_map_file = PosixPath('/tmp/pytest-of-runner/pytest-0/test_collision_error_logging0/config/replacement_mapping.json')
-Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4624717Z 
+Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4624717Z
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4625161Z     def test_collision_error_logging(temp_test_dir: dict[str, Path], default_map_file: Path) -> None:
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4625895Z         """Test that collision errors are properly logged"""
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4626740Z         # Use a fresh directory to avoid conflicts with fixture files
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4627267Z         test_dir = temp_test_dir["runtime"] / "collision_test"
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4627686Z         test_dir.mkdir()
-Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4627968Z     
+Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4627968Z
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4628310Z         # Test 1: File that will rename to collide with existing file
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4628909Z         # This file will be renamed from oldname_config.py to newname_config.py
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4629450Z         source_file = test_dir / "oldname_config.py"
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4629876Z         source_file.write_text("# Config file")
-Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4630220Z     
+Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4630220Z
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4630485Z         # Existing file that will cause collision
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4630974Z         exact_collision = test_dir / "newname_config.py"
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4631434Z         exact_collision.write_text("# Existing config")
-Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4631818Z     
+Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4631818Z
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4632354Z         # Test 2: File with different case that will collide after rename
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4632907Z         # OldnameTheme.ts will be renamed to NewnameTheme.ts
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4633367Z         case_test_file = test_dir / "OldnameTheme.ts"
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4633841Z         case_test_file.write_text("export const theme = 'test';")
-Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4634259Z     
+Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4634259Z
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4634597Z         # Existing file with different case that will cause collision
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4635087Z         case_collision = test_dir / "NEWNAMETHEME.ts"
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4635610Z         case_collision.write_text("export const theme = 'existing';")
-Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4636061Z     
+Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4636061Z
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4636363Z         # Debug: List all files before running
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4636972Z         print("\n=== Files before running ===")
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4637349Z         for f in test_dir.iterdir():
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4637693Z             print(f"  {f.name}")
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4638035Z         print("=== End files list ===")
-Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4638379Z     
+Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4638379Z
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4638654Z         # Run the replacement on the test subdirectory
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4639263Z         run_main_flow_for_test(test_dir, default_map_file, dry_run=False, extensions=[".ts", ".py"])
-Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4639831Z     
+Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4639831Z
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4640092Z         # Check that collision log was created
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4640519Z         collision_log = test_dir / COLLISIONS_ERRORS_LOG_FILE
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4641097Z         assert collision_log.exists(), "Collision error log file was not created"
-Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4641588Z     
+Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4641588Z
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4641838Z         # Read and verify log content
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4642419Z         log_content = collision_log.read_text(encoding="utf-8")
-Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4642836Z     
+Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4642836Z
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4643077Z         # Print log for debugging
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4643545Z         print(f"\n=== Collision Log Content ===\n{log_content}\n=== End Log ===\n")
-Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4644033Z     
+Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4644033Z
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4644312Z         # Verify exact match collision is logged
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4644875Z         assert "OldnameTheme.ts" in log_content, "OldnameTheme.ts collision not logged"
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4645579Z         assert "OldnameTheme.ts" in log_content, "Target collision file not mentioned"
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4646264Z         assert "exact match" in log_content, "Exact match collision type not specified"
-Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4646758Z     
+Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4646758Z
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4647141Z         # Verify collision is logged (on case-insensitive filesystems like macOS,
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4647811Z         # OLDNAME_CONFIG.py and oldname_config.py are the same, so it's an exact match)
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4648496Z         assert "oldname_config.py" in log_content, "Case-insensitive source not logged"
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4649133Z         # The collision should be logged with the attempted target name
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4649757Z         assert "oldname_config.py" in log_content, "Collision target not mentioned"
-Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4650570Z     
+Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4650570Z
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4650836Z         # Verify transaction details are included
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4651227Z         assert "Transaction ID:" in log_content
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4651625Z >       assert "Original Name:" in log_content
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4654227Z E       AssertionError: assert 'Original Name:' in '2025-06-29 16:02:04 - COLLISION (case-insensitive match):\n  Source: OldnameTheme.ts\n  Target: N/A\n  Collision with: NEWNAMETHEME.ts\n  Transaction ID: 518362b3-a556-4962-ba8c-28d213df87d6\n--------------------------------------------------------------------------------\n2025-06-29 16:02:04 - COLLISION (exact match):\n  Source: oldname_config.py\n  Target: N/A\n  Collision with: newname_config.py\n  Transaction ID: 12f5fd72-e0dd-4d69-b4e6-68a1c4b6483b\n--------------------------------------------------------------------------------\n'
-Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4656540Z 
+Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4656540Z
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4656741Z tests/test_mass_find_replace.py:577: AssertionError
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4657270Z ----------------------------- Captured stdout call -----------------------------
-Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4657635Z 
+Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4657635Z
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4657754Z === Files before running ===
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4658067Z   NEWNAMETHEME.ts
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4658330Z   OldnameTheme.ts
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4658593Z   newname_config.py
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4658862Z   oldname_config.py
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4659121Z === End files list ===
-Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4659292Z 
+Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4659292Z
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4659408Z === Collision Log Content ===
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4659802Z 2025-06-29 16:02:04 - COLLISION (case-insensitive match):
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4660220Z   Source: OldnameTheme.ts
@@ -842,9 +842,9 @@ Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.46
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4663597Z   Collision with: newname_config.py
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4664017Z   Transaction ID: 12f5fd72-e0dd-4d69-b4e6-68a1c4b6483b
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4664510Z --------------------------------------------------------------------------------
-Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4664842Z 
+Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4664842Z
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4664946Z === End Log ===
-Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4665102Z 
+Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4665102Z
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4665319Z ----------------------------- Captured stderr call -----------------------------
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4666090Z 16:02:04.796 | INFO    | Flow run 'acrid-chameleon' - Beginning flow run 'acrid-chameleon' for flow 'Mass Find Replace'
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.4667222Z 16:02:04.797 | INFO    | Flow run 'acrid-chameleon' - Scanning '/tmp/pytest-of-runner/pytest-0/test_collision_error_logging0/runtime/collision_test'...
@@ -875,7 +875,7 @@ Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:11.47
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:12.1734757Z INFO     prefect.flow_runs:flow_engine.py:724 Finished in state Completed()
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:12.1735346Z ================================ tests coverage ================================
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:12.1735816Z _______________ coverage: platform linux, python 3.12.11-final-0 _______________
-Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:12.1736134Z 
+Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:12.1736134Z
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:12.1736305Z Name                                              Stmts   Miss  Cover
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:12.1736698Z ---------------------------------------------------------------------
 Test Python 3.12 on ubuntu-latest	Run tests with coverage	2025-06-29T16:02:12.1737136Z src/mass_find_replace/__init__.py                     6      0   100%
@@ -954,7 +954,7 @@ Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:00:26.146
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:00:26.1467420Z configfile: pyproject.toml
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:00:26.1467680Z plugins: anyio-4.9.0, cov-6.2.1
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:00:28.6293490Z collecting ... collected 111 items
-Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:00:28.6293710Z 
+Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:00:28.6293710Z
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:00:28.6621260Z tests/test_additional_coverage.py::TestFileSystemOperations::test_scan_with_symlinks PASSED [  0%]
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:00:28.6957370Z tests/test_additional_coverage.py::TestFileSystemOperations::test_scan_with_gitignore PASSED [  1%]
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:00:28.7271700Z tests/test_additional_coverage.py::TestFileSystemOperations::test_process_large_file_with_encoding_error PASSED [  2%]
@@ -1066,33 +1066,33 @@ Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:07.552
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:07.7927360Z tests/test_surgical_replacements.py::TestSurgicalReplacements::test_file_permissions_preserved PASSED [ 98%]
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.0280780Z tests/test_surgical_replacements.py::TestErrorHandling::test_handles_read_only_files PASSED [ 99%]
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9070560Z tests/test_surgical_replacements.py::TestErrorHandling::test_handles_files_with_no_newline_at_end PASSED [100%]
-Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9071100Z 
+Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9071100Z
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9071230Z =================================== FAILURES ===================================
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9071580Z _________________________ test_collision_error_logging _________________________
-Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9071870Z 
+Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9071870Z
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9072520Z temp_test_dir = {'config': PosixPath('/private/var/folders/y6/nj790rtn62lfktb1sh__79hc0000gn/T/pytest-of-runner/pytest-0/test_collisio...vate/var/folders/y6/nj790rtn62lfktb1sh__79hc0000gn/T/pytest-of-runner/pytest-0/test_collision_error_logging0/runtime')}
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9073810Z default_map_file = PosixPath('/private/var/folders/y6/nj790rtn62lfktb1sh__79hc0000gn/T/pytest-of-runner/pytest-0/test_collision_error_logging0/config/replacement_mapping.json')
-Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9074300Z 
+Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9074300Z
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9074830Z     def test_collision_error_logging(temp_test_dir: dict[str, Path], default_map_file: Path) -> None:
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9078140Z         """Test that collision errors are properly logged"""
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9078420Z         # Use a fresh directory to avoid conflicts with fixture files
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9078700Z         test_dir = temp_test_dir["runtime"] / "collision_test"
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9078930Z         test_dir.mkdir()
-Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9090980Z     
+Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9090980Z
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9091170Z         # Test 1: File that will rename to collide with existing file
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9091550Z         # This file will be renamed from oldname_config.py to newname_config.py
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9091900Z         source_file = test_dir / "oldname_config.py"
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9092160Z         source_file.write_text("# Config file")
-Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9092340Z     
+Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9092340Z
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9092470Z         # Existing file that will cause collision
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9092690Z         exact_collision = test_dir / "newname_config.py"
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9093000Z         exact_collision.write_text("# Existing config")
-Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9093270Z     
+Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9093270Z
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9093480Z         # Test 2: File with different case that will collide after rename
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9093800Z         # OldnameTheme.ts will be renamed to NewnameTheme.ts
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9094050Z         case_test_file = test_dir / "OldnameTheme.ts"
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9094310Z         case_test_file.write_text("export const theme = 'test';")
-Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9094560Z     
+Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9094560Z
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9095000Z --- Logging error ---
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9095280Z Traceback (most recent call last):
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9101170Z   File "/Users/runner/work/MFR/MFR/.venv/lib/python3.11/site-packages/prefect/logging/handlers.py", line 337, in emit
@@ -1112,52 +1112,52 @@ Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.910
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9106550Z         # Existing file with different case that will cause collision
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9106860Z         case_collision = test_dir / "NEWNAMETHEME.ts"
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9107130Z         case_collision.write_text("export const theme = 'existing';")
-Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9107390Z     
+Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9107390Z
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9107540Z         # Debug: List all files before running
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9107740Z         print("\n=== Files before running ===")
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9107970Z         for f in test_dir.iterdir():
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9108190Z             print(f"  {f.name}")
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9108410Z         print("=== End files list ===")
-Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9108620Z     
+Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9108620Z
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9108790Z         # Run the replacement on the test subdirectory
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9109150Z         run_main_flow_for_test(test_dir, default_map_file, dry_run=False, extensions=[".ts", ".py"])
-Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9109540Z     
+Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9109540Z
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9109730Z         # Check that collision log was created
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9110010Z         collision_log = test_dir / COLLISIONS_ERRORS_LOG_FILE
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9110410Z         assert collision_log.exists(), "Collision error log file was not created"
-Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9110880Z     
+Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9110880Z
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9111040Z         # Read and verify log content
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9111360Z         log_content = collision_log.read_text(encoding="utf-8")
-Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9111620Z     
+Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9111620Z
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9111730Z         # Print log for debugging
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9111970Z         print(f"\n=== Collision Log Content ===\n{log_content}\n=== End Log ===\n")
-Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9112190Z     
+Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9112190Z
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9112320Z         # Verify exact match collision is logged
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9112600Z         assert "OldnameTheme.ts" in log_content, "OldnameTheme.ts collision not logged"
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9113020Z         assert "OldnameTheme.ts" in log_content, "Target collision file not mentioned"
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9113440Z         assert "exact match" in log_content, "Exact match collision type not specified"
-Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9113720Z     
+Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9113720Z
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9113940Z         # Verify collision is logged (on case-insensitive filesystems like macOS,
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9114340Z         # OLDNAME_CONFIG.py and oldname_config.py are the same, so it's an exact match)
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9114690Z         assert "oldname_config.py" in log_content, "Case-insensitive source not logged"
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9115010Z         # The collision should be logged with the attempted target name
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9115320Z         assert "oldname_config.py" in log_content, "Collision target not mentioned"
-Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9115550Z     
+Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9115550Z
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9115680Z         # Verify transaction details are included
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9116070Z         assert "Transaction ID:" in log_content
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9116270Z >       assert "Original Name:" in log_content
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9117460Z E       AssertionError: assert 'Original Name:' in '2025-06-29 16:01:04 - COLLISION (exact match):\n  Source: OldnameTheme.ts\n  Target: N/A\n  Collision with: NewnameTheme.ts\n  Transaction ID: 4a4bd0b1-4965-4869-ad0c-9f7ff2ae9081\n--------------------------------------------------------------------------------\n2025-06-29 16:01:04 - COLLISION (exact match):\n  Source: oldname_config.py\n  Target: N/A\n  Collision with: newname_config.py\n  Transaction ID: e909cf2e-4fc7-4f82-bf1e-b3e23f84cd5e\n--------------------------------------------------------------------------------\n'
-Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9118580Z 
+Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9118580Z
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9118670Z tests/test_mass_find_replace.py:577: AssertionError
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9118930Z ----------------------------- Captured stdout call -----------------------------
-Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9119120Z 
+Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9119120Z
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9119170Z === Files before running ===
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9119320Z   newname_config.py
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9119450Z   OldnameTheme.ts
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9119600Z   NEWNAMETHEME.ts
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9119760Z   oldname_config.py
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9119920Z === End files list ===
-Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9120010Z 
+Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9120010Z
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9120090Z === Collision Log Content ===
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9120280Z 2025-06-29 16:01:04 - COLLISION (exact match):
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9120530Z   Source: OldnameTheme.ts
@@ -1171,9 +1171,9 @@ Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.912
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9121990Z   Collision with: newname_config.py
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9122200Z   Transaction ID: e909cf2e-4fc7-4f82-bf1e-b3e23f84cd5e
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9122450Z --------------------------------------------------------------------------------
-Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9122650Z 
+Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9122650Z
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9122690Z === End Log ===
-Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9122800Z 
+Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9122800Z
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9122920Z ----------------------------- Captured stderr call -----------------------------
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9123480Z 16:01:04.091 | INFO    | Flow run 'resourceful-leech' - Beginning flow run 'resourceful-leech' for flow 'Mass Find Replace'
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9124190Z 16:01:04.092 | INFO    | Flow run 'resourceful-leech' - Scanning '/private/var/folders/y6/nj790rtn62lfktb1sh__79hc0000gn/T/pytest-of-runner/pytest-0/test_collision_error_logging0/runtime/collision_test'...
@@ -1204,7 +1204,7 @@ Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.914
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9146630Z INFO     prefect.flow_runs:flow_engine.py:724 Finished in state Completed()
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9147170Z ================================ tests coverage ================================
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9147520Z ______________ coverage: platform darwin, python 3.11.13-final-0 _______________
-Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9147720Z 
+Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9147720Z
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9147830Z Name                                              Stmts   Miss  Cover
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9148110Z ---------------------------------------------------------------------
 Test Python 3.11 on macos-latest	Run tests with coverage	2025-06-29T16:01:08.9148450Z src/mass_find_replace/__init__.py                     6      0   100%
@@ -1268,7 +1268,7 @@ Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:00:31.8
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:00:31.8788514Z configfile: pyproject.toml
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:00:31.8788939Z plugins: anyio-4.9.0, cov-6.2.1
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:00:43.6972704Z collecting ... collected 111 items
-Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:00:43.6972978Z 
+Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:00:43.6972978Z
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:00:43.7474333Z tests/test_additional_coverage.py::TestFileSystemOperations::test_scan_with_symlinks SKIPPED [  0%]
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:00:43.8005069Z tests/test_additional_coverage.py::TestFileSystemOperations::test_scan_with_gitignore PASSED [  1%]
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:00:43.8421089Z tests/test_additional_coverage.py::TestFileSystemOperations::test_process_large_file_with_encoding_error PASSED [  2%]
@@ -1380,82 +1380,82 @@ Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:55.2
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:55.4246662Z tests/test_surgical_replacements.py::TestSurgicalReplacements::test_file_permissions_preserved SKIPPED [ 98%]
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:55.5873290Z tests/test_surgical_replacements.py::TestErrorHandling::test_handles_read_only_files SKIPPED [ 99%]
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7892746Z tests/test_surgical_replacements.py::TestErrorHandling::test_handles_files_with_no_newline_at_end PASSED [100%]
-Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7893631Z 
+Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7893631Z
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7893835Z ================================== FAILURES ===================================
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7894485Z ________________________ test_collision_error_logging _________________________
-Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7894894Z 
+Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7894894Z
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7896284Z temp_test_dir = {'config': WindowsPath('C:/Users/runneradmin/AppData/Local/Temp/pytest-of-runneradmin/pytest-0/test_collision_error_lo...wsPath('C:/Users/runneradmin/AppData/Local/Temp/pytest-of-runneradmin/pytest-0/test_collision_error_logging0/runtime')}
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7898649Z default_map_file = WindowsPath('C:/Users/runneradmin/AppData/Local/Temp/pytest-of-runneradmin/pytest-0/test_collision_error_logging0/config/replacement_mapping.json')
-Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7899283Z 
+Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7899283Z
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7899547Z     def test_collision_error_logging(temp_test_dir: dict[str, Path], default_map_file: Path) -> None:
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7900088Z         """Test that collision errors are properly logged"""
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7900474Z         # Use a fresh directory to avoid conflicts with fixture files
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7900837Z         test_dir = temp_test_dir["runtime"] / "collision_test"
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7901152Z         test_dir.mkdir()
-Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7901381Z     
+Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7901381Z
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7901620Z         # Test 1: File that will rename to collide with existing file
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7902041Z         # This file will be renamed from oldname_config.py to newname_config.py
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7902626Z         source_file = test_dir / "oldname_config.py"
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7902959Z         source_file.write_text("# Config file")
-Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7903221Z     
+Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7903221Z
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7903442Z         # Existing file that will cause collision
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7903810Z         exact_collision = test_dir / "newname_config.py"
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7904130Z         exact_collision.write_text("# Existing config")
-Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7904425Z     
+Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7904425Z
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7904701Z         # Test 2: File with different case that will collide after rename
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7905105Z         # OldnameTheme.ts will be renamed to NewnameTheme.ts
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7905428Z         case_test_file = test_dir / "OldnameTheme.ts"
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7905788Z         case_test_file.write_text("export const theme = 'test';")
-Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7906103Z     
+Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7906103Z
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7906354Z         # Existing file with different case that will cause collision
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7906730Z         case_collision = test_dir / "NEWNAMETHEME.ts"
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7907096Z         case_collision.write_text("export const theme = 'existing';")
-Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7907401Z     
+Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7907401Z
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7907622Z         # Debug: List all files before running
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7907931Z         print("\n=== Files before running ===")
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7908226Z         for f in test_dir.iterdir():
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7908471Z             print(f"  {f.name}")
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7908731Z         print("=== End files list ===")
-Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7908989Z     
+Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7908989Z
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7909194Z         # Run the replacement on the test subdirectory
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7909640Z         run_main_flow_for_test(test_dir, default_map_file, dry_run=False, extensions=[".ts", ".py"])
-Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7910043Z     
+Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7910043Z
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7910232Z         # Check that collision log was created
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7910568Z         collision_log = test_dir / COLLISIONS_ERRORS_LOG_FILE
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7910997Z         assert collision_log.exists(), "Collision error log file was not created"
-Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7911360Z     
+Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7911360Z
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7911538Z         # Read and verify log content
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7911856Z         log_content = collision_log.read_text(encoding="utf-8")
-Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7912162Z     
+Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7912162Z
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7912338Z         # Print log for debugging
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7912708Z         print(f"\n=== Collision Log Content ===\n{log_content}\n=== End Log ===\n")
-Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7913061Z     
+Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7913061Z
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7913256Z         # Verify exact match collision is logged
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7913663Z         assert "OldnameTheme.ts" in log_content, "OldnameTheme.ts collision not logged"
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7914164Z         assert "OldnameTheme.ts" in log_content, "Target collision file not mentioned"
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7914648Z         assert "exact match" in log_content, "Exact match collision type not specified"
-Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7914993Z     
+Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7914993Z
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7915286Z         # Verify collision is logged (on case-insensitive filesystems like macOS,
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7916529Z         # OLDNAME_CONFIG.py and oldname_config.py are the same, so it's an exact match)
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7917018Z         assert "oldname_config.py" in log_content, "Case-insensitive source not logged"
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7917479Z         # The collision should be logged with the attempted target name
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7917936Z         assert "oldname_config.py" in log_content, "Collision target not mentioned"
-Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7918301Z     
+Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7918301Z
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7918499Z         # Verify transaction details are included
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7918816Z         assert "Transaction ID:" in log_content
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7919120Z >       assert "Original Name:" in log_content
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7920680Z E       AssertionError: assert 'Original Name:' in '2025-06-29 16:02:44 - COLLISION (exact match):\n  Source: oldname_config.py\n  Target: N/A\n  Collision with: newname_config.py\n  Transaction ID: f8082aa5-91cd-4cc7-ac86-884195e25945\n--------------------------------------------------------------------------------\n2025-06-29 16:02:44 - COLLISION (exact match):\n  Source: OldnameTheme.ts\n  Target: N/A\n  Collision with: NewnameTheme.ts\n  Transaction ID: 733bb537-c484-43df-86a6-cb7ee9f62529\n--------------------------------------------------------------------------------\n'
-Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7922227Z 
+Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7922227Z
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7922386Z tests\test_mass_find_replace.py:577: AssertionError
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7922747Z ---------------------------- Captured stdout call -----------------------------
-Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7923049Z 
+Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7923049Z
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7923145Z === Files before running ===
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7923396Z   NEWNAMETHEME.ts
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7923624Z   newname_config.py
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7923816Z   OldnameTheme.ts
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7924031Z   oldname_config.py
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7924251Z === End files list ===
-Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7924387Z 
+Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7924387Z
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7924478Z === Collision Log Content ===
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7924761Z 2025-06-29 16:02:44 - COLLISION (exact match):
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7925062Z   Source: oldname_config.py
@@ -1469,9 +1469,9 @@ Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7927267Z   Collision with: NewnameTheme.ts
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7927573Z   Transaction ID: 733bb537-c484-43df-86a6-cb7ee9f62529
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7927947Z --------------------------------------------------------------------------------
-Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7928169Z 
+Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7928169Z
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7928249Z === End Log ===
-Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7928386Z 
+Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7928386Z
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7928535Z ---------------------------- Captured stderr call -----------------------------
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7929034Z 16:02:43.697 | INFO    | Flow run 'hot-kudu' - Beginning flow run 'hot-kudu' for flow 'Mass Find Replace'
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7929847Z 16:02:43.697 | INFO    | Flow run 'hot-kudu' - Scanning 'C:\Users\runneradmin\AppData\Local\Temp\pytest-of-runneradmin\pytest-0\test_collision_error_logging0\runtime\collision_test'...
@@ -1502,7 +1502,7 @@ Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:56.7
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:57.6082798Z INFO     prefect.flow_runs:flow_engine.py:724 Finished in state Completed()
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:57.6083514Z =============================== tests coverage ================================
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:57.6084060Z ______________ coverage: platform win32, python 3.12.11-final-0 _______________
-Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:57.6084410Z 
+Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:57.6084410Z
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:57.6084608Z Name                                              Stmts   Miss  Cover
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:57.6085056Z ---------------------------------------------------------------------
 Test Python 3.12 on windows-latest	Run tests with coverage	2025-06-29T16:02:57.6085596Z src\mass_find_replace\__init__.py                     6      0   100%
@@ -1583,7 +1583,7 @@ Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:00:34.6
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:00:34.6932442Z configfile: pyproject.toml
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:00:34.6932703Z plugins: anyio-4.9.0, cov-6.2.1
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:00:40.3059966Z collecting ... collected 111 items
-Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:00:40.3060305Z 
+Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:00:40.3060305Z
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:00:40.3708599Z tests/test_additional_coverage.py::TestFileSystemOperations::test_scan_with_symlinks SKIPPED [  0%]
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:00:40.4347564Z tests/test_additional_coverage.py::TestFileSystemOperations::test_scan_with_gitignore PASSED [  1%]
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:00:40.4988488Z tests/test_additional_coverage.py::TestFileSystemOperations::test_process_large_file_with_encoding_error PASSED [  2%]
@@ -1695,82 +1695,82 @@ Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:22.0
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:22.2242576Z tests/test_surgical_replacements.py::TestSurgicalReplacements::test_file_permissions_preserved SKIPPED [ 98%]
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:22.4109100Z tests/test_surgical_replacements.py::TestErrorHandling::test_handles_read_only_files SKIPPED [ 99%]
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5613261Z tests/test_surgical_replacements.py::TestErrorHandling::test_handles_files_with_no_newline_at_end PASSED [100%]
-Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5613891Z 
+Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5613891Z
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5614059Z ================================== FAILURES ===================================
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5614613Z ________________________ test_collision_error_logging _________________________
-Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5614986Z 
+Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5614986Z
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5616296Z temp_test_dir = {'config': WindowsPath('C:/Users/runneradmin/AppData/Local/Temp/pytest-of-runneradmin/pytest-0/test_collision_error_lo...wsPath('C:/Users/runneradmin/AppData/Local/Temp/pytest-of-runneradmin/pytest-0/test_collision_error_logging0/runtime')}
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5618842Z default_map_file = WindowsPath('C:/Users/runneradmin/AppData/Local/Temp/pytest-of-runneradmin/pytest-0/test_collision_error_logging0/config/replacement_mapping.json')
-Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5619753Z 
+Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5619753Z
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5620025Z     def test_collision_error_logging(temp_test_dir: dict[str, Path], default_map_file: Path) -> None:
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5620502Z         """Test that collision errors are properly logged"""
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5620853Z         # Use a fresh directory to avoid conflicts with fixture files
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5621187Z         test_dir = temp_test_dir["runtime"] / "collision_test"
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5621453Z         test_dir.mkdir()
-Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5621631Z     
+Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5621631Z
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5621840Z         # Test 1: File that will rename to collide with existing file
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5622214Z         # This file will be renamed from oldname_config.py to newname_config.py
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5623210Z         source_file = test_dir / "oldname_config.py"
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5623498Z         source_file.write_text("# Config file")
-Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5623719Z     
+Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5623719Z
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5623893Z         # Existing file that will cause collision
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5624171Z         exact_collision = test_dir / "newname_config.py"
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5624461Z         exact_collision.write_text("# Existing config")
-Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5624703Z     
+Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5624703Z
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5624927Z         # Test 2: File with different case that will collide after rename
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5625268Z         # OldnameTheme.ts will be renamed to NewnameTheme.ts
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5625575Z         case_test_file = test_dir / "OldnameTheme.ts"
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5625891Z         case_test_file.write_text("export const theme = 'test';")
-Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5626161Z     
+Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5626161Z
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5626373Z         # Existing file with different case that will cause collision
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5626748Z         case_collision = test_dir / "NEWNAMETHEME.ts"
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5627084Z         case_collision.write_text("export const theme = 'existing';")
-Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5627375Z     
+Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5627375Z
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5627535Z         # Debug: List all files before running
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5627793Z         print("\n=== Files before running ===")
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5628040Z         for f in test_dir.iterdir():
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5628256Z             print(f"  {f.name}")
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5628472Z         print("=== End files list ===")
-Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5628689Z     
+Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5628689Z
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5628873Z         # Run the replacement on the test subdirectory
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5629266Z         run_main_flow_for_test(test_dir, default_map_file, dry_run=False, extensions=[".ts", ".py"])
-Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5629635Z     
+Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5629635Z
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5629804Z         # Check that collision log was created
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5630087Z         collision_log = test_dir / COLLISIONS_ERRORS_LOG_FILE
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5630476Z         assert collision_log.exists(), "Collision error log file was not created"
-Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5630803Z     
+Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5630803Z
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5630948Z         # Read and verify log content
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5631237Z         log_content = collision_log.read_text(encoding="utf-8")
-Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5631503Z     
+Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5631503Z
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5631657Z         # Print log for debugging
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5631965Z         print(f"\n=== Collision Log Content ===\n{log_content}\n=== End Log ===\n")
-Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5632275Z     
+Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5632275Z
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5632444Z         # Verify exact match collision is logged
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5632804Z         assert "OldnameTheme.ts" in log_content, "OldnameTheme.ts collision not logged"
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5633272Z         assert "OldnameTheme.ts" in log_content, "Target collision file not mentioned"
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5633719Z         assert "exact match" in log_content, "Exact match collision type not specified"
-Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5634041Z     
+Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5634041Z
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5634278Z         # Verify collision is logged (on case-insensitive filesystems like macOS,
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5636075Z         # OLDNAME_CONFIG.py and oldname_config.py are the same, so it's an exact match)
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5636825Z         assert "oldname_config.py" in log_content, "Case-insensitive source not logged"
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5637514Z         # The collision should be logged with the attempted target name
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5638205Z         assert "oldname_config.py" in log_content, "Collision target not mentioned"
-Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5638744Z     
+Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5638744Z
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5639011Z         # Verify transaction details are included
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5639449Z         assert "Transaction ID:" in log_content
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5639737Z >       assert "Original Name:" in log_content
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5641330Z E       AssertionError: assert 'Original Name:' in '2025-06-29 16:02:10 - COLLISION (exact match):\n  Source: oldname_config.py\n  Target: N/A\n  Collision with: newname_config.py\n  Transaction ID: ab317b5d-daf4-4be3-ac27-a0580b5e2c87\n--------------------------------------------------------------------------------\n2025-06-29 16:02:10 - COLLISION (exact match):\n  Source: OldnameTheme.ts\n  Target: N/A\n  Collision with: NewnameTheme.ts\n  Transaction ID: cf489a04-809b-4daa-bc2b-8b66ac3141c1\n--------------------------------------------------------------------------------\n'
-Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5643328Z 
+Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5643328Z
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5643464Z tests\test_mass_find_replace.py:577: AssertionError
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5643813Z ---------------------------- Captured stdout call -----------------------------
-Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5644101Z 
+Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5644101Z
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5644180Z === Files before running ===
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5644383Z   NEWNAMETHEME.ts
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5644563Z   newname_config.py
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5644729Z   OldnameTheme.ts
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5644898Z   oldname_config.py
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5645067Z === End files list ===
-Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5645186Z 
+Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5645186Z
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5645260Z === Collision Log Content ===
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5645496Z 2025-06-29 16:02:10 - COLLISION (exact match):
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5645753Z   Source: oldname_config.py
@@ -1784,9 +1784,9 @@ Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5647627Z   Collision with: NewnameTheme.ts
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5647892Z   Transaction ID: cf489a04-809b-4daa-bc2b-8b66ac3141c1
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5648217Z --------------------------------------------------------------------------------
-Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5648430Z 
+Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5648430Z
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5648495Z === End Log ===
-Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5648606Z 
+Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5648606Z
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5648745Z ---------------------------- Captured stderr call -----------------------------
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5649247Z 16:02:10.390 | INFO    | Flow run 'augmented-tench' - Beginning flow run 'augmented-tench' for flow 'Mass Find Replace'
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5650103Z 16:02:10.406 | INFO    | Flow run 'augmented-tench' - Scanning 'C:\Users\runneradmin\AppData\Local\Temp\pytest-of-runneradmin\pytest-0\test_collision_error_logging0\runtime\collision_test'...
@@ -1817,7 +1817,7 @@ Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:23.5
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:24.4771846Z INFO     prefect.flow_runs:flow_engine.py:724 Finished in state Completed()
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:24.4772381Z =============================== tests coverage ================================
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:24.4772780Z ______________ coverage: platform win32, python 3.11.13-final-0 _______________
-Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:24.4773071Z 
+Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:24.4773071Z
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:24.4773205Z Name                                              Stmts   Miss  Cover
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:24.4773539Z ---------------------------------------------------------------------
 Test Python 3.11 on windows-latest	Run tests with coverage	2025-06-29T16:02:24.4774853Z src\mass_find_replace\__init__.py                     6      0   100%
@@ -1895,7 +1895,7 @@ Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:01:11.177
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:01:11.1774160Z configfile: pyproject.toml
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:01:11.1774410Z plugins: anyio-4.9.0, cov-6.2.1
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:01:18.3662230Z collecting ... collected 111 items
-Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:01:18.3662480Z 
+Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:01:18.3662480Z
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:01:18.4022690Z tests/test_additional_coverage.py::TestFileSystemOperations::test_scan_with_symlinks PASSED [  0%]
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:01:18.4356820Z tests/test_additional_coverage.py::TestFileSystemOperations::test_scan_with_gitignore PASSED [  1%]
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:01:18.4652320Z tests/test_additional_coverage.py::TestFileSystemOperations::test_process_large_file_with_encoding_error PASSED [  2%]
@@ -2007,72 +2007,72 @@ Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:01.310
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:01.5473760Z tests/test_surgical_replacements.py::TestSurgicalReplacements::test_file_permissions_preserved PASSED [ 98%]
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:01.7819460Z tests/test_surgical_replacements.py::TestErrorHandling::test_handles_read_only_files PASSED [ 99%]
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6193610Z tests/test_surgical_replacements.py::TestErrorHandling::test_handles_files_with_no_newline_at_end PASSED [100%]
-Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6194150Z 
+Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6194150Z
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6194410Z =================================== FAILURES ===================================
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6194940Z _________________________ test_collision_error_logging _________________________
-Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6195130Z 
+Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6195130Z
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6195840Z temp_test_dir = {'config': PosixPath('/private/var/folders/y6/nj790rtn62lfktb1sh__79hc0000gn/T/pytest-of-runner/pytest-0/test_collisio...vate/var/folders/y6/nj790rtn62lfktb1sh__79hc0000gn/T/pytest-of-runner/pytest-0/test_collision_error_logging0/runtime')}
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6197390Z default_map_file = PosixPath('/private/var/folders/y6/nj790rtn62lfktb1sh__79hc0000gn/T/pytest-of-runner/pytest-0/test_collision_error_logging0/config/replacement_mapping.json')
-Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6197950Z 
+Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6197950Z
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6198640Z     def test_collision_error_logging(temp_test_dir: dict[str, Path], default_map_file: Path) -> None:
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6199750Z         """Test that collision errors are properly logged"""
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6200200Z         # Use a fresh directory to avoid conflicts with fixture files
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6200540Z         test_dir = temp_test_dir["runtime"] / "collision_test"
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6200840Z         test_dir.mkdir()
-Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6201080Z     
+Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6201080Z
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6201320Z         # Test 1: File that will rename to collide with existing file
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6201700Z         # This file will be renamed from oldname_config.py to newname_config.py
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6202100Z         source_file = test_dir / "oldname_config.py"
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6202380Z         source_file.write_text("# Config file")
-Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6219540Z     
+Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6219540Z
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6219830Z         # Existing file that will cause collision
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6220110Z         exact_collision = test_dir / "newname_config.py"
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6220420Z         exact_collision.write_text("# Existing config")
-Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6220680Z     
+Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6220680Z
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6221020Z         # Test 2: File with different case that will collide after rename
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6221400Z         # OldnameTheme.ts will be renamed to NewnameTheme.ts
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6221800Z         case_test_file = test_dir / "OldnameTheme.ts"
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6222100Z         case_test_file.write_text("export const theme = 'test';")
-Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6222320Z     
+Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6222320Z
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6222550Z         # Existing file with different case that will cause collision
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6223500Z         case_collision = test_dir / "NEWNAMETHEME.ts"
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6223800Z         case_collision.write_text("export const theme = 'existing';")
-Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6224030Z     
+Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6224030Z
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6224170Z         # Debug: List all files before running
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6224440Z         print("\n=== Files before running ===")
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6224720Z         for f in test_dir.iterdir():
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6224960Z             print(f"  {f.name}")
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6225270Z         print("=== End files list ===")
-Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6225480Z     
+Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6225480Z
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6225640Z         # Run the replacement on the test subdirectory
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6226390Z         run_main_flow_for_test(test_dir, default_map_file, dry_run=False, extensions=[".ts", ".py"])
-Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6226890Z     
+Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6226890Z
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6227090Z         # Check that collision log was created
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6227410Z         collision_log = test_dir / COLLISIONS_ERRORS_LOG_FILE
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6227800Z         assert collision_log.exists(), "Collision error log file was not created"
-Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6228050Z     
+Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6228050Z
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6228170Z         # Read and verify log content
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6228510Z         log_content = collision_log.read_text(encoding="utf-8")
-Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6228770Z     
+Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6228770Z
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6228940Z         # Print log for debugging
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6229420Z         print(f"\n=== Collision Log Content ===\n{log_content}\n=== End Log ===\n")
-Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6229730Z     
+Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6229730Z
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6229920Z         # Verify exact match collision is logged
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6230530Z         assert "OldnameTheme.ts" in log_content, "OldnameTheme.ts collision not logged"
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6230990Z         assert "OldnameTheme.ts" in log_content, "Target collision file not mentioned"
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6231430Z         assert "exact match" in log_content, "Exact match collision type not specified"
-Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6231900Z     
+Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6231900Z
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6232180Z         # Verify collision is logged (on case-insensitive filesystems like macOS,
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6232710Z         # OLDNAME_CONFIG.py and oldname_config.py are the same, so it's an exact match)
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6233220Z         assert "oldname_config.py" in log_content, "Case-insensitive source not logged"
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6233560Z         # The collision should be logged with the attempted target name
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6234190Z         assert "oldname_config.py" in log_content, "Collision target not mentioned"
-Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6234440Z     
+Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6234440Z
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6234580Z         # Verify transaction details are included
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6234800Z         assert "Transaction ID:" in log_content
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6235050Z >       assert "Original Name:" in log_content
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6236450Z E       AssertionError: assert 'Original Name:' in '2025-06-29 16:01:57 - COLLISION (exact match):\n  Source: OldnameTheme.ts\n  Target: N/A\n  Collision with: NewnameTheme.ts\n  Transaction ID: a9a15a00-1522-495e-8841-b65d5599c16b\n--------------------------------------------------------------------------------\n2025-06-29 16:01:57 - COLLISION (exact match):\n  Source: oldname_config.py\n  Target: N/A\n  Collision with: newname_config.py\n  Transaction ID: 8312e487-e509-4f64-8609-05aa7fbded07\n--------------------------------------------------------------------------------\n'
-Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6237730Z 
+Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6237730Z
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6238320Z --- Logging error ---
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6238570Z Traceback (most recent call last):
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6244810Z   File "/Users/runner/work/MFR/MFR/.venv/lib/python3.12/site-packages/prefect/logging/handlers.py", line 337, in emit
@@ -2092,14 +2092,14 @@ Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.624
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6249910Z Call stack:
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6250070Z tests/test_mass_find_replace.py:577: AssertionError
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6250400Z ----------------------------- Captured stdout call -----------------------------
-Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6250640Z 
+Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6250640Z
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6250740Z === Files before running ===
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6250900Z   newname_config.py
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6251080Z   OldnameTheme.ts
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6251250Z   NEWNAMETHEME.ts
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6251380Z   oldname_config.py
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6251560Z === End files list ===
-Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6251650Z 
+Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6251650Z
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6251750Z === Collision Log Content ===
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6251970Z 2025-06-29 16:01:57 - COLLISION (exact match):
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6252160Z   Source: OldnameTheme.ts
@@ -2113,9 +2113,9 @@ Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.625
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6253900Z   Collision with: newname_config.py
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6254110Z   Transaction ID: 8312e487-e509-4f64-8609-05aa7fbded07
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6254420Z --------------------------------------------------------------------------------
-Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6254590Z 
+Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6254590Z
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6254640Z === End Log ===
-Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6254770Z 
+Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6254770Z
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6254930Z ----------------------------- Captured stderr call -----------------------------
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6255490Z 16:01:57.765 | INFO    | Flow run 'vague-petrel' - Beginning flow run 'vague-petrel' for flow 'Mass Find Replace'
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6256210Z 16:01:57.766 | INFO    | Flow run 'vague-petrel' - Scanning '/private/var/folders/y6/nj790rtn62lfktb1sh__79hc0000gn/T/pytest-of-runner/pytest-0/test_collision_error_logging0/runtime/collision_test'...
@@ -2146,7 +2146,7 @@ Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.627
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6277880Z INFO     prefect.flow_runs:flow_engine.py:724 Finished in state Completed()
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6278190Z ================================ tests coverage ================================
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6278720Z ______________ coverage: platform darwin, python 3.12.11-final-0 _______________
-Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6278960Z 
+Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6278960Z
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6279050Z Name                                              Stmts   Miss  Cover
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6279320Z ---------------------------------------------------------------------
 Test Python 3.12 on macos-latest	Run tests with coverage	2025-06-29T16:02:02.6279640Z src/mass_find_replace/__init__.py                     6      0   100%

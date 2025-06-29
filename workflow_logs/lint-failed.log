@@ -66,7 +66,7 @@ Lint Python Code	Run mypy	2025-06-29T16:00:36.5820518Z Downloading types_toml-0.
 Lint Python Code	Run mypy	2025-06-29T16:00:36.7088909Z Downloading types_ujson-5.10.0.20250326-py3-none-any.whl (7.6 kB)
 Lint Python Code	Run mypy	2025-06-29T16:00:36.7347205Z Downloading types_docutils-0.21.0.20250604-py3-none-any.whl (65 kB)
 Lint Python Code	Run mypy	2025-06-29T16:00:36.9070491Z Installing collected packages: types-ujson, types-toml, types-requests, types-PyYAML, types-pytz, types-python-dateutil, types-PyMySQL, types-psycopg2, types-greenlet, types-docutils, types-dateparser, types-colorama, types-cachetools, types-Pygments, types-jsonschema
-Lint Python Code	Run mypy	2025-06-29T16:00:37.0308543Z 
+Lint Python Code	Run mypy	2025-06-29T16:00:37.0308543Z
 Lint Python Code	Run mypy	2025-06-29T16:00:37.0378401Z Successfully installed types-PyMySQL-1.1.0.20250516 types-PyYAML-6.0.12.20250516 types-Pygments-2.19.0.20250516 types-cachetools-6.0.0.20250525 types-colorama-0.4.15.20240311 types-dateparser-1.2.2.20250627 types-docutils-0.21.0.20250604 types-greenlet-3.2.0.20250417 types-jsonschema-4.24.0.20250528 types-psycopg2-2.9.21.20250516 types-python-dateutil-2.9.0.20250516 types-pytz-2025.2.0.20250516 types-requests-2.32.4.20250611 types-toml-0.10.8.20240310 types-ujson-5.10.0.20250326
 Lint Python Code	Run mypy	2025-06-29T16:00:56.8146269Z src/mass_find_replace/mass_find_replace.py:24: error: Module "mass_find_replace.file_system_operations" does not explicitly export attribute "TransactionStatus"  [attr-defined]
 Lint Python Code	Run mypy	2025-06-29T16:00:56.8147493Z Installing missing stub packages:
@@ -82,6 +82,6 @@ Lint Python Code	Run mypy	2025-06-29T16:00:56.8154768Z src/mass_find_replace/mas
 Lint Python Code	Run mypy	2025-06-29T16:00:56.8155919Z     from .file_system_operations import (
 Lint Python Code	Run mypy	2025-06-29T16:00:56.8156584Z     ^
 Lint Python Code	Run mypy	2025-06-29T16:00:56.8158214Z /home/runner/work/MFR/MFR/.venv/bin/python -m pip install types-PyMySQL types-PyYAML types-Pygments types-cachetools types-colorama types-dateparser types-greenlet types-jsonschema types-psycopg2 types-python-dateutil types-pytz types-requests types-toml types-ujson
-Lint Python Code	Run mypy	2025-06-29T16:00:56.8159884Z 
-Lint Python Code	Run mypy	2025-06-29T16:00:56.8159893Z 
+Lint Python Code	Run mypy	2025-06-29T16:00:56.8159884Z
+Lint Python Code	Run mypy	2025-06-29T16:00:56.8159893Z
 Lint Python Code	Run mypy	2025-06-29T16:00:56.8705334Z ##[error]Process completed with exit code 1.

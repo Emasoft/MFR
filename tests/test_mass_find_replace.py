@@ -574,9 +574,9 @@ def test_collision_error_logging(temp_test_dir: dict[str, Path], default_map_fil
 
     # Verify transaction details are included
     assert "Transaction ID:" in log_content
-    assert "Original Name:" in log_content
-    assert "Proposed New Name:" in log_content
-    assert "Collision Type:" in log_content
+    assert "Source:" in log_content
+    assert "Target:" in log_content
+    assert "COLLISION (" in log_content  # Collision type is shown in parentheses
 
     # Check that the original files still exist (not renamed due to collision)
     assert source_file.exists(), "Source file was renamed despite collision"
