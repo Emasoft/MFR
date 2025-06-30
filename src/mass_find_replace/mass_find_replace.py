@@ -16,7 +16,7 @@ from __future__ import annotations
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Final
+from typing import Any, Final, cast
 
 from prefect import flow
 
@@ -58,7 +58,7 @@ def _get_logger(
             if verbose_mode:
                 logger.setLevel(logging.DEBUG)
             # Prefect's get_run_logger returns Any, we know it's a logger
-            return logger  # type: ignore[no-any-return]
+            return cast(logging.Logger | logging.LoggerAdapter[logging.Logger], logger)
         except MissingContextError:
             pass
     except ImportError:
