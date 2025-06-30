@@ -1,8 +1,8 @@
 # act configuration for running GitHub Actions locally
-# Use full size Ubuntu runner image (includes Node.js and more tools)
---platform ubuntu-latest=catthehacker/ubuntu:full-latest
---platform ubuntu-22.04=catthehacker/ubuntu:full-22.04
---platform ubuntu-20.04=catthehacker/ubuntu:full-20.04
+# Use node:18-bullseye which has Node.js for GitHub Actions
+--platform ubuntu-latest=node:18-bullseye
+--platform ubuntu-22.04=node:18-bullseye
+--platform ubuntu-20.04=node:18-bullseye
 
 # Use Docker to simulate GitHub Actions environment
 --container-architecture linux/amd64

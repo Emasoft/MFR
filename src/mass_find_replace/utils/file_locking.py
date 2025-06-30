@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 # HERE IS THE CHANGELOG FOR THIS VERSION OF THE FILE:
 # - Initial extraction of file locking functionality from file_system_operations.py
@@ -78,7 +77,7 @@ def file_lock(file_handle: Any, exclusive: bool = True, timeout: float = 10.0) -
                     # Lock is held by another process
                     if time.time() - start_time > timeout:
                         msg = f"Could not acquire file lock within {timeout} seconds"
-                        raise TimeoutError(msg)
+                        raise TimeoutError(msg) from None
                     time.sleep(0.1)  # Brief pause before retry
                 else:
                     raise
