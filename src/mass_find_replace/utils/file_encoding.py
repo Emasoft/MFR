@@ -150,7 +150,7 @@ def get_file_encoding(file_path: Path, sample_size: int = DEFAULT_ENCODING_SAMPL
 
         log_fs_op_message(
             logging.DEBUG,
-            f"Encoding for {file_path} could not be confidently determined. " f"Chardet: {detected}. Using {DEFAULT_ENCODING_FALLBACK}.",
+            f"Encoding for {file_path} could not be confidently determined. Chardet: {detected}. Using {DEFAULT_ENCODING_FALLBACK}.",
             logger,
         )
         return DEFAULT_ENCODING_FALLBACK

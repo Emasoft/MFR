@@ -69,7 +69,7 @@ class TestSurgicalReplacements:
         """Test that trailing spaces are preserved."""
         test_file = tmp_path / "spaces.txt"
         # Create content with various trailing spaces
-        original_content = "Line with no trailing space\n" "Line with one trailing space \n" "Line with multiple trailing spaces   \n" "Line with OLDNAME and trailing spaces   \n" "Line with tabs\t\t\n" "Line with OLDNAME and tabs\t\t\n" "Last line without newline and spaces   "
+        original_content = "Line with no trailing space\nLine with one trailing space \nLine with multiple trailing spaces   \nLine with OLDNAME and trailing spaces   \nLine with tabs\t\t\nLine with OLDNAME and tabs\t\t\nLast line without newline and spaces   "
         # Write as binary to control exact bytes
         test_file.write_bytes(original_content.encode("utf-8"))
 
@@ -124,7 +124,7 @@ class TestSurgicalReplacements:
 
         # Create file with invalid UTF-8 sequences
         # \x80-\xFF are invalid UTF-8 start bytes
-        broken_bytes = b"Valid UTF-8 with OLDNAME\n" b"Invalid UTF-8: \x80\x81\x82 OLDNAME \x83\x84\x85\n" b"More text with OLDNAME\n" b"Mixed: \xc0\xc1 OLDNAME \xfe\xff\n"
+        broken_bytes = b"Valid UTF-8 with OLDNAME\nInvalid UTF-8: \x80\x81\x82 OLDNAME \x83\x84\x85\nMore text with OLDNAME\nMixed: \xc0\xc1 OLDNAME \xfe\xff\n"
         test_file.write_bytes(broken_bytes)
 
         # Run MFR
@@ -177,7 +177,7 @@ class TestSurgicalReplacements:
         test_file = tmp_path / "nullbytes.txt"
 
         # Create content with null bytes
-        content_with_nulls = b"Text before null\x00Text after null with OLDNAME\x00\n" b"More text\x00\x00\x00OLDNAME in the middle\x00\n" b"\x00\x00Leading nulls OLDNAME\n" b"OLDNAME trailing nulls\x00\x00\x00"
+        content_with_nulls = b"Text before null\x00Text after null with OLDNAME\x00\nMore text\x00\x00\x00OLDNAME in the middle\x00\n\x00\x00Leading nulls OLDNAME\nOLDNAME trailing nulls\x00\x00\x00"
         test_file.write_bytes(content_with_nulls)
 
         # Run MFR
@@ -283,7 +283,7 @@ class TestSurgicalReplacements:
         """Test multiple patterns that might interfere with each other."""
         test_file = tmp_path / "concurrent.txt"
 
-        content = "OLDNAME1 OLDNAME2 OLDNAME3\n" "OLDNAME1OLDNAME2OLDNAME3\n" "Nested: OLDNAME1 contains OLDNAME2\n" "Partial: OLDNAME12 and 3OLDNAME\n"
+        content = "OLDNAME1 OLDNAME2 OLDNAME3\nOLDNAME1OLDNAME2OLDNAME3\nNested: OLDNAME1 contains OLDNAME2\nPartial: OLDNAME12 and 3OLDNAME\n"
         test_file.write_text(content)
 
         # Run MFR with multiple mappings
