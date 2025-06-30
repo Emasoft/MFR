@@ -203,7 +203,8 @@ class TestFileSystemOperations:
         save_transactions([transaction], txn_file, logger)
 
         # Mock file operations to raise locking error when trying to process the content
-        with patch("mass_find_replace.file_system_operations.open_file_with_encoding", side_effect=OSError(errno.EACCES, "Permission denied")):
+        # Need to patch in the core.file_processor module where it's actually used
+        with patch("mass_find_replace.core.file_processor.open_file_with_encoding", side_effect=OSError(errno.EACCES, "Permission denied")):
             stats = execute_all_transactions(
                 transactions_file_path=txn_file,
                 root_dir=tmp_path,

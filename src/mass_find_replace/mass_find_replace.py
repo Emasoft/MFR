@@ -57,6 +57,7 @@ def _get_logger(
             logger = get_run_logger()
             if verbose_mode:
                 logger.setLevel(logging.DEBUG)
+            # Prefect's get_run_logger returns Any, we know it's a logger
             return logger  # type: ignore[no-any-return]
         except MissingContextError:
             pass
