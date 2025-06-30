@@ -252,7 +252,7 @@ py-serializable==2.0.0
     # via cyclonedx-python-lib
 pycparser==2.22 ; platform_python_implementation != 'PyPy'
     # via cffi
-pydantic==2.9.2
+pydantic==2.11.7
     # via
     #   fastapi
     #   prefect

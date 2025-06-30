@@ -168,7 +168,7 @@ prometheus-client==0.22.1
     # via prefect
 pycparser==2.22 ; platform_python_implementation != 'PyPy'
     # via cffi
-pydantic==2.9.2
+pydantic==2.11.7
     # via
     #   fastapi
     #   prefect
