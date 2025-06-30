@@ -15,9 +15,19 @@ from .validation import (
     validate_directory,
     validate_mapping_file,
 )
+from .executor import (
+    load_ignore_patterns,
+    get_user_confirmation,
+    execute_workflow,
+)
+from .scanner import perform_scan_phase
 
 __all__ = [
     "check_existing_transactions",
     "validate_directory",
     "validate_mapping_file",
+    "load_ignore_patterns",
+    "get_user_confirmation",
+    "execute_workflow",
+    "perform_scan_phase",
 ]
