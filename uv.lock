@@ -1035,6 +1035,9 @@ dev = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "deptry" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
     { name = "types-chardet" },
 ]
 
@@ -1059,7 +1062,12 @@ requires-dist = [
 provides-extras = ["dev"]
 
 [package.metadata.requires-dev]
-dev = [{ name = "types-chardet", specifier = ">=5.0.4.6" }]
+dev = [
+    { name = "deptry", specifier = ">=0.23.0" },
+    { name = "pytest", specifier = ">=8.4.1" },
+    { name = "pytest-cov", specifier = ">=6.2.1" },
+    { name = "types-chardet", specifier = ">=5.0.4.6" },
+]
 
 [[package]]
 name = "mdurl"

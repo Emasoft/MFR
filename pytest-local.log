@@ -1,0 +1,23 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.1, pytest-8.3.5, pluggy-1.5.0 -- /Library/Frameworks/Python.framework/Versions/3.13/bin/python3
+cachedir: .pytest_cache
+metadata: {'Python': '3.13.1', 'Platform': 'macOS-15.4.1-arm64-arm-64bit-Mach-O', 'Packages': {'pytest': '8.3.5', 'pluggy': '1.5.0'}, 'Plugins': {'anyio': '4.9.0', 'html': '4.1.1', 'langsmith': '0.3.37', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.3.1', 'rich': '0.2.0', 'cov': '6.1.1'}}
+rootdir: /Users/emanuelesabetta/Code/MFR
+configfile: pyproject.toml
+plugins: anyio-4.9.0, html-4.1.1, langsmith-0.3.37, metadata-3.1.1, mock-3.14.1, timeout-2.3.1, rich-0.2.0, cov-6.1.1
+collecting ... collected 0 items / 1 error
+
+==================================== ERRORS ====================================
+_______________ ERROR collecting tests/test_mass_find_replace.py _______________
+ImportError while importing test module '/Users/emanuelesabetta/Code/MFR/tests/test_mass_find_replace.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests/test_mass_find_replace.py:23: in <module>
+    from mass_find_replace.mass_find_replace import MAIN_TRANSACTION_FILE_NAME
+E   ModuleNotFoundError: No module named 'mass_find_replace'
+=========================== short test summary info ============================
+ERROR tests/test_mass_find_replace.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+=============================== 1 error in 0.06s ===============================

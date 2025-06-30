@@ -1,8 +1,8 @@
 # act configuration for running GitHub Actions locally
-# Use medium size Ubuntu runner image (has more tools pre-installed)
---platform ubuntu-latest=catthehacker/ubuntu:act-latest
---platform ubuntu-22.04=catthehacker/ubuntu:act-22.04
---platform ubuntu-20.04=catthehacker/ubuntu:act-20.04
+# Use full size Ubuntu runner image (includes Node.js and more tools)
+--platform ubuntu-latest=catthehacker/ubuntu:full-latest
+--platform ubuntu-22.04=catthehacker/ubuntu:full-22.04
+--platform ubuntu-20.04=catthehacker/ubuntu:full-20.04
 
 # Use Docker to simulate GitHub Actions environment
 --container-architecture linux/amd64

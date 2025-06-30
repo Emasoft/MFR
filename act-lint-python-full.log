@@ -1,0 +1,8 @@
+time="2025-06-30T10:10:17+02:00" level=info msg="Using docker host 'unix:///var/run/docker.sock', and daemon socket 'unix:///var/run/docker.sock'"
+[Lint/Lint Python Code] ⭐ Run Set up job
+[Lint/Lint Python Code] 🚀  Start image=catthehacker/ubuntu:full-latest
+[Lint/Lint Python Code]   🐳  docker pull image=catthehacker/ubuntu:full-latest platform=linux/amd64 username= forcePull=true
+[Lint/Lint Python Code] context canceled
+[Lint/Lint Python Code]   ❌  Failure - Set up job
+[Lint/Lint Python Code] 🏁  Job failed
+Error: context canceled

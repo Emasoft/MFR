@@ -112,3 +112,9 @@ gitleaks-report.sarif
 .act/
 .actrc.local
 .env.local
+
+# act log files
+act-*.log
+pytest-*.log
+pre-commit-*.log
+mypy_lint_log.txt

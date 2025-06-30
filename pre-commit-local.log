@@ -1,0 +1,57 @@
+[INFO] Installing environment for https://github.com/astral-sh/uv-pre-commit.
+[INFO] Once installed this environment will be reused.
+[INFO] This may take a few minutes...
+[INFO] Using pre-commit with uv 0.7.13 via pre-commit-uv 4.1.4
+[INFO] Installing environment for https://github.com/astral-sh/ruff-pre-commit.
+[INFO] Once installed this environment will be reused.
+[INFO] This may take a few minutes...
+[INFO] Using pre-commit with uv 0.7.13 via pre-commit-uv 4.1.4
+[INFO] Installing environment for https://github.com/pre-commit/pre-commit-hooks.
+[INFO] Once installed this environment will be reused.
+[INFO] This may take a few minutes...
+[INFO] Using pre-commit with uv 0.7.13 via pre-commit-uv 4.1.4
+[INFO] Installing environment for https://github.com/shellcheck-py/shellcheck-py.
+[INFO] Once installed this environment will be reused.
+[INFO] This may take a few minutes...
+[INFO] Using pre-commit with uv 0.7.13 via pre-commit-uv 4.1.4
+uv-lock..................................................................Passed
+uv-export................................................................Passed
+uv-export dev-requirements...............................................Passed
+Detect hardcoded secrets.................................................Passed
+ruff.....................................................................Passed
+ruff-format..............................................................Passed
+mypy.....................................................................Failed
+- hook id: mypy
+- exit code: 1
+
+src/mass_find_replace/mass_find_replace.py: note: In function "_get_logger":
+src/mass_find_replace/mass_find_replace.py:60: error: Returning Any from
+function declared to return "Logger | LoggerAdapter[Logger]"  [no-any-return]
+                return logger
+                ^~~~~~~~~~~~~
+src/mass_find_replace/mass_find_replace.py:60: note: See https://mypy.rtfd.io/en/stable/_refs.html#code-no-any-return for more info
+
+deptry...................................................................Failed
+- hook id: deptry
+- exit code: 2
+
+error: Failed to spawn: `deptry`
+  Caused by: No such file or directory (os error 2)
+
+trim trailing whitespace.................................................Passed
+fix end of files.........................................................Passed
+check yaml...............................................................Passed
+check for added large files..............................................Passed
+check for merge conflicts................................................Passed
+check toml...............................................................Passed
+debug statements (python)................................................Passed
+detect private key.......................................................Passed
+mixed line ending........................................................Passed
+check for case conflicts.................................................Passed
+check docstring is first.................................................Passed
+check json...............................................................Passed
+pretty format json.......................................................Passed
+yamllint.................................................................Passed
+yamlfmt (GitHub workflows)...............................................Passed
+shellcheck...............................................................Passed
+actionlint...............................................................Passed

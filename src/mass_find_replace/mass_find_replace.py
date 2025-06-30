@@ -57,7 +57,7 @@ def _get_logger(
             logger = get_run_logger()
             if verbose_mode:
                 logger.setLevel(logging.DEBUG)
-            return logger
+            return logger  # type: ignore[no-any-return]
         except MissingContextError:
             pass
     except ImportError:
