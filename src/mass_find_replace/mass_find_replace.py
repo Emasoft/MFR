@@ -16,7 +16,7 @@ from __future__ import annotations
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Final, cast
+from typing import Any, Final
 
 from prefect import flow
 
@@ -54,11 +54,11 @@ def _get_logger(
         from prefect.exceptions import MissingContextError
 
         try:
-            logger = get_run_logger()
+            logger: logging.Logger | logging.LoggerAdapter[logging.Logger] = get_run_logger()
             if verbose_mode:
                 logger.setLevel(logging.DEBUG)
-            # Prefect's get_run_logger returns Any, we know it's a logger
-            return cast(logging.Logger | logging.LoggerAdapter[logging.Logger], logger)
+            # Type annotation helps mypy understand the logger type
+            return logger
         except MissingContextError:
             pass
     except ImportError:
