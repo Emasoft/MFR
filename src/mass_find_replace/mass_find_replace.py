@@ -5,6 +5,9 @@
 # - Removed unused skip_scan parameter from execute_all_transactions call.
 # - Added explicit flushing of Prefect's log handler after subprocess output printing to avoid Prefect shutdown logging errors.
 # - Replaced bare except with except Exception to comply with linting rules.
+# - Extracted CLI functionality to cli/parser.py module.
+# - Extracted display functions to ui/display.py module.
+# - Extracted validation functions to workflow/validation.py module.
 #
 # Copyright (c) 2024 Emasoft
 #
@@ -29,17 +32,25 @@ from .file_system_operations import (
     BINARY_MATCHES_LOG_FILE,
     COLLISIONS_ERRORS_LOG_FILE,
 )
+from .ui.display import (
+    print_mapping_table as _print_mapping_table,
+    get_operation_description as _get_operation_description,
+    GREEN,
+    RED,
+    RESET,
+    YELLOW,
+    BLUE,
+    DIM,
+)
+from .workflow.validation import (
+    check_existing_transactions as _check_existing_transactions,
+    validate_directory,
+    validate_mapping_file,
+)
 
 SCRIPT_NAME: Final[str] = "MFR - Mass Find Replace - A script to safely rename things in your project"
 MAIN_TRANSACTION_FILE_NAME: Final[str] = "planned_transactions.json"
 DEFAULT_REPLACEMENT_MAPPING_FILE: Final[str] = "replacement_mapping.json"
-
-GREEN: Final[str] = "\033[92m"
-RED: Final[str] = "\033[91m"
-RESET: Final[str] = "\033[0m"
-YELLOW: Final[str] = "\033[93m"
-BLUE: Final[str] = "\033[94m"
-DIM: Final[str] = "\033[2m"
 
 
 def _get_logger(
@@ -75,84 +86,10 @@ def _get_logger(
     return logger
 
 
-def _print_mapping_table(
-    mapping: dict[str, str],
-    logger: logging.Logger | logging.LoggerAdapter[logging.Logger],
-) -> None:
-    """Print the replacement mapping as a formatted table."""
-    if not mapping:
-        logger.info("Replacement mapping is empty.")
-        return
-
-    # Calculate column widths
-    max_key_len = max(len(k) for k in mapping)
-    max_val_len = max(len(v) for v in mapping.values())
-    col1_width = max(max_key_len, 15)
-    col2_width = max(max_val_len, 15)
-
-    # Unicode box drawing characters
-    top_left = "┏"
-    top_right = "┓"
-    bottom_left = "┗"
-    bottom_right = "┛"
-    horizontal = "━"
-    vertical = "┃"
-    cross = "╋"
-    t_down = "┳"
-    t_up = "┻"
-
-    # Print table
-    print(f"\n{top_left}{horizontal * (col1_width + 2)}{t_down}{horizontal * (col2_width + 2)}{top_right}")
-    print(f"{vertical} {'Search'.center(col1_width)} {vertical} {'Replace'.center(col2_width)} {vertical}")
-    print(f"{vertical}{horizontal * (col1_width + 2)}{cross}{horizontal * (col2_width + 2)}{vertical}")
-
-    for key, value in mapping.items():
-        print(f"{vertical} {key.ljust(col1_width)} {vertical} {value.ljust(col2_width)} {vertical}")
-
-    print(f"{bottom_left}{horizontal * (col1_width + 2)}{t_up}{horizontal * (col2_width + 2)}{bottom_right}")
-
-
-def _get_operation_description(skip_file: bool, skip_folder: bool, skip_content: bool) -> str:
-    """Get human-readable description of operations to be performed."""
-    operations = []
-    if not skip_folder:
-        operations.append("folder names")
-    if not skip_file:
-        operations.append("file names")
-    if not skip_content:
-        operations.append("file contents")
-
-    if not operations:
-        return "nothing (all operations skipped)"
-    if len(operations) == 1:
-        return operations[0]
-    if len(operations) == 2:
-        return f"{operations[0]} and {operations[1]}"
-    return f"{', '.join(operations[:-1])}, and {operations[-1]}"
-
-
-def _check_existing_transactions(directory: Path, logger: logging.Logger | logging.LoggerAdapter[logging.Logger]) -> tuple[bool, int]:
-    """Check for existing transaction file and calculate progress."""
-    txn_file = directory / MAIN_TRANSACTION_FILE_NAME
-    if not txn_file.exists():
-        return False, 0
-
-    try:
-        transactions = load_transactions(txn_file, logger=logger)
-        if not transactions:
-            return False, 0
-
-        total = len(transactions)
-        completed = sum(1 for tx in transactions if tx.get("STATUS") == TransactionStatus.COMPLETED.value)
-        progress = int((completed / total) * 100) if total > 0 else 0
-
-        # Check if all are completed
-        if completed == total:
-            return False, 100
-
-        return True, progress
-    except Exception:
-        return False, 0
+# The display and validation functions have been moved to their respective modules:
+# - _print_mapping_table -> ui.display.print_mapping_table
+# - _get_operation_description -> ui.display.get_operation_description
+# - _check_existing_transactions -> workflow.validation.check_existing_transactions
 
 
 @flow(name="Mass Find Replace")
@@ -217,17 +154,8 @@ def main_flow(
     replace_logic.reset_module_state()
 
     # Validate and normalize the directory path
-    try:
-        abs_root_dir = Path(directory).resolve(strict=False)
-    except Exception as e:
-        logger.error(f"Error: Invalid directory path '{directory}': {e}")
-        return
-
-    if not abs_root_dir.exists():
-        logger.error(f"Error: Root directory '{abs_root_dir}' not found.")
-        return
-    if not abs_root_dir.is_dir():
-        logger.error(f"Error: Path '{abs_root_dir}' is not a directory.")
+    abs_root_dir = validate_directory(directory, logger)
+    if abs_root_dir is None:
         return
 
     # Check for existing incomplete transactions
@@ -254,26 +182,11 @@ def main_flow(
         logger.info("All processing types (file rename, folder rename, content) are skipped. Nothing to do.")
         return
 
-    try:
-        if not any(abs_root_dir.iterdir()):
-            logger.info(f"Target directory '{abs_root_dir}' is empty. Nothing to do.")
-            return
-    except FileNotFoundError:
-        logger.error(f"Error: Root directory '{abs_root_dir}' disappeared before empty check.")
-        return
-    except OSError as e:
-        logger.error(f"Error accessing directory '{abs_root_dir}' for empty check: {e}")
-        return
+    # Empty directory check is already done in validate_directory
 
     # Validate mapping file path
-    try:
-        map_file_path = Path(mapping_file).resolve(strict=False)
-    except Exception as e:
-        logger.error(f"Error: Invalid mapping file path '{mapping_file}': {e}")
-        return
-
-    if not map_file_path.is_file():
-        logger.error(f"Error: Mapping file '{map_file_path}' not found or is not a file.")
+    map_file_path = validate_mapping_file(mapping_file, logger)
+    if map_file_path is None:
         return
 
     if not replace_logic.load_replacement_map(map_file_path, logger=logger):
@@ -504,269 +417,24 @@ def main_flow(
         logger.info(f"{RED}Warning: File/folder rename collisions were detected. See '{collisions_log}' for details. These renames were skipped.{RESET}")
 
 
-def _run_subprocess_command(command: list[str], description: str) -> bool:
-    """Helper to run a subprocess command and print status."""
-    import subprocess
-
-    print(f"{BLUE}Running: {' '.join(command)}{RESET}")
-    try:
-        process = subprocess.run(command, check=False, capture_output=True, text=True)
-        if process.stdout:
-            print(f"{GREEN}Output from {description}:{RESET}\n{process.stdout}")
-        if process.stderr:
-            print(f"{YELLOW}Errors/Warnings from {description}:{RESET}\n{process.stderr}")
-        if process.returncode != 0:
-            print(f"{RED}Error: {description} failed with return code {process.returncode}.{RESET}")
-            return False
-        print(f"{GREEN}{description} completed successfully.{RESET}")
-        return True
-    except FileNotFoundError:
-        print(f"{RED}Error: Command for {description} not found. Is it installed and in PATH? ({command[0]}){RESET}")
-        return False
-    except Exception as e:
-        print(f"{RED}An unexpected error occurred while running {description}: {e}{RESET}")
-        return False
+# The CLI functions have been moved to their respective modules:
+# - main_cli -> cli.parser.main_cli
+# - _run_subprocess_command -> cli.parser._run_subprocess_command
 
 
-def main_cli() -> None:
-    """Main CLI entry point for mass find replace."""
-    import sys
-    import importlib.util
-    import argparse
-    # Imports moved to top of file
-
-    # Check required dependencies
-    required_deps = [("prefect", "prefect"), ("chardet", "chardet")]
-    for module_name, display_name in required_deps:
-        try:
-            if importlib.util.find_spec(module_name) is None:
-                sys.stderr.write(f"{RED}CRITICAL ERROR: Missing core dependency: {display_name}. Please install all required packages (e.g., via 'uv sync').{RESET}\n")
-                sys.exit(1)
-        except ImportError:
-            sys.stderr.write(f"{RED}CRITICAL ERROR: Missing core dependency: {display_name} (import error during check). Please install all required packages.{RESET}\n")
-            sys.exit(1)
-
-    parser = argparse.ArgumentParser(
-        description=f"{SCRIPT_NAME}\nFind and replace strings in files and filenames/foldernames within a project directory. "
-        "It operates in three phases: Scan, Plan (creating a transaction log), and Execute. "
-        "The process is designed to be resumable and aims for surgical precision in replacements. "
-        f"Binary file content is NOT modified; matches within them are logged to '{BINARY_MATCHES_LOG_FILE}'.",
-        formatter_class=argparse.RawTextHelpFormatter,
-    )
-    parser.add_argument(
-        "directory",
-        nargs="?",
-        default=".",
-        help="Root directory to process (default: current directory).",
-    )
-    parser.add_argument(
-        "--mapping-file",
-        default=DEFAULT_REPLACEMENT_MAPPING_FILE,
-        help=f"Path to the JSON file with replacement mappings (default: ./{DEFAULT_REPLACEMENT_MAPPING_FILE}).",
-    )
-    parser.add_argument(
-        "--extensions",
-        nargs="+",
-        help="List of file extensions for content scan (e.g. .py .txt .rtf). Default: attempts to process recognized text-like files.",
-    )
-    parser.add_argument(
-        "--exclude-dirs",
-        nargs="+",
-        default=[".git", ".venv", "venv", "node_modules", "__pycache__"],
-        help="Directory names to exclude (space-separated). Default: .git .venv etc.",
-    )
-    parser.add_argument(
-        "--exclude-files",
-        nargs="+",
-        default=[],
-        help="Specific files or relative paths to exclude (space-separated).",
-    )
-
-    ignore_group = parser.add_argument_group("Ignore File Options")
-    ignore_group.add_argument(
-        "--no-gitignore",
-        action="store_false",
-        dest="use_gitignore",
-        default=True,
-        help="Disable using .gitignore file for exclusions. Custom ignore files will also be skipped.",
-    )
-    ignore_group.add_argument(
-        "--ignore-file",
-        dest="custom_ignore_file",
-        metavar="PATH",
-        help="Path to a custom .gitignore-style file for additional exclusions.",
-    )
-
-    symlink_group = parser.add_argument_group("Symlink Handling")
-    symlink_group.add_argument(
-        "--process-symlink-names",
-        action="store_true",
-        help="If set, symlink names WILL BE PROCESSED for renaming. Default: symlink names are NOT processed for renaming. Symlink targets are never followed for content modification by this script.",
-    )
-
-    skip_group = parser.add_argument_group("Skip Operation Options")
-    skip_group.add_argument(
-        "--skip-file-renaming",
-        action="store_true",
-        help="Skip all file renaming operations.",
-    )
-    skip_group.add_argument(
-        "--skip-folder-renaming",
-        action="store_true",
-        help="Skip all folder renaming operations.",
-    )
-    skip_group.add_argument(
-        "--skip-content",
-        action="store_true",
-        help="Skip all file content modifications. If all three --skip-* options are used, the script will exit with 'nothing to do'.",
-    )
-
-    execution_group = parser.add_argument_group("Execution Control")
-    execution_group.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Scan and plan changes, but do not execute them. Reports what would be changed.",
-    )
-    execution_group.add_argument(
-        "--skip-scan",
-        action="store_true",
-        help=f"Skip scan phase; use existing '{MAIN_TRANSACTION_FILE_NAME}' in the root directory for execution.",
-    )
-    execution_group.add_argument(
-        "--resume",
-        action="store_true",
-        help="Resume operation from existing transaction file, attempting to complete pending/failed items and scan for new/modified ones.",
-    )
-    execution_group.add_argument(
-        "--force",
-        "--yes",
-        "-y",
-        action="store_true",
-        help="Force execution without confirmation prompt (use with caution).",
-    )
-    execution_group.add_argument(
-        "-i",
-        "--interactive",
-        action="store_true",
-        help="Run in interactive mode, prompting for approval before each change.",
-    )
-    parser.add_argument(
-        "--timeout",
-        type=float,
-        default=10.0,
-        metavar="MINUTES",
-        help="Maximum minutes for the retry phase when files are locked/inaccessible. Set to 0 for indefinite retries (until CTRL-C). Minimum 1 minute if not 0. Default: 10 minutes.",
-    )
-
-    output_group = parser.add_argument_group("Output Control")
-    output_group.add_argument(
-        "--quiet",
-        "-q",
-        action="store_true",
-        help="Suppress initial script name print and some informational messages from direct print statements (Prefect logs are separate). Also suppresses the confirmation prompt, implying 'yes'.",
-    )
-    output_group.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Enable more verbose output, setting Prefect logger to DEBUG level.",
-    )
-
-    dev_group = parser.add_argument_group("Developer Options")
-    dev_group.add_argument("--self-test", action="store_true", help="Run automated tests for this script.")
-
-    args = parser.parse_args()
-
-    if args.self_test:
-        print(f"{BLUE}--- Running Self-Tests ---{RESET}")
-
-        # Try installing with uv first, then fallback to pip
-        install_cmd_uv = [sys.executable, "-m", "uv", "pip", "install", "-e", ".[dev]"]
-        install_cmd_pip = [sys.executable, "-m", "pip", "install", "-e", ".[dev]"]
-
-        print(f"{BLUE}Attempting to install/update dev dependencies using 'uv'...{RESET}")
-        install_success = _run_subprocess_command(install_cmd_uv, "uv dev dependency installation")
-
-        if not install_success:
-            print(f"{YELLOW}'uv' command failed or not found. Attempting with 'pip'...{RESET}")
-            install_success = _run_subprocess_command(install_cmd_pip, "pip dev dependency installation")
-
-        if not install_success:
-            print(f"{RED}Failed to install dev dependencies. Aborting self-tests.{RESET}")
-            sys.exit(1)
-
-        pytest_cmd = ["pytest", "tests/test_mass_find_replace.py"]  # Use system pytest
-        print(f"{BLUE}Running pytest...{RESET}")
-        test_passed = _run_subprocess_command(pytest_cmd, "pytest execution")
-        sys.exit(0 if test_passed else 1)
-
-    if not args.quiet:
-        print(f"{BLUE}{SCRIPT_NAME}{RESET}")
-
-    timeout_val_for_flow: int
-    if args.timeout < 0:
-        parser.error("--timeout cannot be negative.")
-    if args.timeout == 0:
-        timeout_val_for_flow = 0
-    elif args.timeout < 1.0:
-        if not args.quiet:
-            print(f"{YELLOW}Warning: --timeout value {args.timeout} increased to minimum 1 minute.{RESET}")
-        timeout_val_for_flow = 1
-    else:
-        timeout_val_for_flow = int(args.timeout)
-
-    # Validate ignore file if gitignore is enabled
-    if args.custom_ignore_file and args.use_gitignore:
-        ignore_path = Path(args.custom_ignore_file)
-        if not ignore_path.exists() or not ignore_path.is_file():
-            sys.stderr.write(f"{RED}Error: Ignore file not found: {args.custom_ignore_file}{RESET}\n")
-            sys.exit(1)
-
-    auto_exclude_basenames = [
-        MAIN_TRANSACTION_FILE_NAME,
-        Path(args.mapping_file).name,
-        BINARY_MATCHES_LOG_FILE,
-        COLLISIONS_ERRORS_LOG_FILE,
-        MAIN_TRANSACTION_FILE_NAME + TRANSACTION_FILE_BACKUP_EXT,
-    ]
-    # Remove duplicates while preserving order
-    seen = set()
-    final_exclude_files = []
-    for item in args.exclude_files + auto_exclude_basenames:
-        if item not in seen:
-            seen.add(item)
-            final_exclude_files.append(item)
-
-    if args.verbose and not args.quiet:
-        print("Verbose mode requested. Prefect log level will be set to DEBUG if flow runs.")
-
-    ignore_symlinks_param = not args.process_symlink_names
-
-    main_flow(
-        args.directory,
-        args.mapping_file,
-        args.extensions,
-        args.exclude_dirs,
-        final_exclude_files,
-        args.dry_run,
-        args.skip_scan,
-        args.resume,
-        args.force,
-        ignore_symlinks_param,
-        args.use_gitignore,
-        args.custom_ignore_file,
-        args.skip_file_renaming,
-        args.skip_folder_renaming,
-        args.skip_content,
-        timeout_val_for_flow,
-        args.quiet,
-        args.verbose,
-        args.interactive,
-    )
+# Export main components
+__all__ = [
+    "main_flow",
+    "SCRIPT_NAME",
+    "MAIN_TRANSACTION_FILE_NAME",
+    "DEFAULT_REPLACEMENT_MAPPING_FILE",
+]
 
 
 if __name__ == "__main__":
     import sys
     import traceback
+    from .cli.parser import main_cli
 
     try:
         main_cli()
