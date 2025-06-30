@@ -84,7 +84,6 @@ from .utils import (
     open_file_with_encoding,
 )
 from .core.scanning import (
-    _walk_for_scan,
     scan_directory_for_occurrences,
 )
 from .core.transaction_manager import (
