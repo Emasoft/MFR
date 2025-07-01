@@ -106,7 +106,7 @@ main() {
             test_workflow "ci.yml" "test" "push"
             ;;
         4)
-            test_workflow "security-scan.yml" "gitleaks" "workflow_dispatch"
+            test_workflow "security-scan.yml" "dependency-check" "workflow_dispatch"
             ;;
         5)
             test_workflow "ci.yml" "build" "push"

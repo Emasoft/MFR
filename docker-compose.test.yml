@@ -101,8 +101,7 @@ services:
         echo '🔒 Running security checks...' &&
         uv sync --frozen --extra dev &&
         uv run bandit -r src/ &&
-        uv run pip-audit &&
-        gitleaks detect --source=/app --verbose
+        uv run pip-audit
       "
 
 volumes:

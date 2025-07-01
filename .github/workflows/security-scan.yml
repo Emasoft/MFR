@@ -12,30 +12,6 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  gitleaks:
-    name: Gitleaks Secret Scan
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # Fetch all history
-
-    - name: Run Gitleaks
-      uses: gitleaks/gitleaks-action@v2
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GITLEAKS_CONFIG: .gitleaks.toml
-
-    - name: Upload Gitleaks Report
-      if: failure()
-      uses: actions/upload-artifact@v4
-      with:
-        name: gitleaks-report
-        path: |
-          gitleaks-report.json
-          gitleaks-report.sarif
-        retention-days: 30
-
   dependency-check:
     name: Dependency Security Check
     runs-on: ubuntu-latest

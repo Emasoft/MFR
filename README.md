@@ -41,7 +41,6 @@
 
 <!-- Security & Standards -->
 
-[![Security: Gitleaks](https://img.shields.io/badge/security-gitleaks-blue.svg)](https://github.com/gitleaks/gitleaks)
 [![Dependencies](https://img.shields.io/badge/dependencies-up%20to%20date-brightgreen.svg)](https://github.com/Emasoft/MFR/blob/main/pyproject.toml)
 [![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 
@@ -906,7 +905,6 @@ in the Software without restriction...
 | [uv](https://github.com/astral-sh/uv)            | Lightning-fast Python package management |
 | [Prefect](https://www.prefect.io/)               | Workflow orchestration framework         |
 | [Ruff](https://github.com/astral-sh/ruff)        | Fast Python linter and formatter         |
-| [Gitleaks](https://github.com/gitleaks/gitleaks) | Secret scanning and prevention           |
 | [mypy](https://mypy-lang.org/)                   | Static type checking                     |
 | [pytest](https://pytest.org/)                     | Testing framework                        |
 

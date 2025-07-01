@@ -1,5 +1,0 @@
-# False positives from example/template files
-3d9b939b0f10abbfa0d0b8cb2c96570e643dcee1:.env.local.example:generic-secret:5
-840816696b0d35dad795f8cba5342a1f51ab94d7:.env.local.example:generic-secret:5
-# False positive - version number detected as IPv4
-pyproject.toml:ipv4:103

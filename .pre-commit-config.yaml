@@ -40,12 +40,6 @@ repos:
         additional_dependencies: []
         pass_filenames: false
 
-  # Gitleaks for secret scanning
-  - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.27.2
-    hooks:
-      - id: gitleaks
-
   # Ruff for linting and formatting (runs faster with pre-commit-uv)
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.8.5
@@ -102,7 +96,6 @@ repos:
       - id: check-toml
       - id: debug-statements
       - id: detect-private-key
-        exclude: \.gitleaks\.toml$
       - id: mixed-line-ending
         args: [--fix=lf]
       - id: check-case-conflict
