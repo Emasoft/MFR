@@ -78,7 +78,7 @@ class TestBinaryFileHandling:
 
             # Create mapping file
             map_file = test_dir / "mapping.json"
-            map_data = {"REPLACEMENT_MAPPING": {"OLDNAME": "NEWNAME"}}
+            map_data = {"REPLACEMENT_MAPPING": {"OLDNAME": "NEWNAME", "Oldname": "Newname"}}
             map_file.write_text(json.dumps(map_data))
 
             # Create binary file with pattern

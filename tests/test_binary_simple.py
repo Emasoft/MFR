@@ -92,8 +92,8 @@ def test_binary_file_logging_simple():
         # Verify file path and offsets
         assert "data.bin" in log_content, "Binary filename should be in log"
         assert "Offset: 6" in log_content, "Should have offset for OLDNAME"
-        assert "Offset: 20" in log_content, "Should have offset for oldName"
-        assert "Offset: 38" in log_content, "Should have offset for Oldname"
+        assert "Offset: 21" in log_content, "Should have offset for oldName"
+        assert "Offset: 35" in log_content, "Should have offset for Oldname"
 
         # Verify text file was modified
         txt_content = txt_file.read_text()
