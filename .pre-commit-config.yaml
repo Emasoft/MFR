@@ -155,6 +155,16 @@ repos:
   #       files: ^(src/.*\.py|tests/.*\.py|pyproject\.toml)$
   #       args: [tests/, -v]
 
+  # Trufflehog for secret scanning
+  - repo: https://github.com/trufflesecurity/trufflehog
+    rev: v3.89.2
+    hooks:
+      - id: trufflehog
+        name: TruffleHog
+        entry: trufflehog git file://. --since-commit HEAD --no-verification
+        language: system
+        stages: [pre-commit, pre-push]
+
   # Conventional commits check
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v4.0.0
