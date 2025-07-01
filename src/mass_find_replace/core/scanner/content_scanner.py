@@ -123,6 +123,7 @@ def scan_file_content(
                             line_num,
                             line,
                             new_line,
+                            detected_encoding,
                         )
                     )
 

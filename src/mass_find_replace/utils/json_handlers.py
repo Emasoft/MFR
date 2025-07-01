@@ -43,7 +43,10 @@ class SurrogateHandlingEncoder(json.JSONEncoder):
             return text
         except UnicodeEncodeError:
             # Contains surrogates, encode as base64
-            return {"__surrogate_escaped__": True, "data": base64.b64encode(text.encode("utf-8", errors="surrogateescape")).decode("ascii")}
+            return {
+                "__surrogate_escaped__": True,
+                "data": base64.b64encode(text.encode("utf-8", errors="surrogateescape")).decode("ascii"),
+            }
 
     def encode(self, obj: Any) -> str:
         """Encode object to JSON, handling surrogates in strings.

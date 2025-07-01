@@ -64,6 +64,7 @@ def create_content_transaction(
     line_number: int,
     original_content: str,
     new_content: str,
+    encoding: str | None = None,
 ) -> dict[str, Any]:
     """Create a content modification transaction entry.
 
@@ -72,11 +73,12 @@ def create_content_transaction(
         line_number: Line number in file (1-based)
         original_content: Original line content
         new_content: New line content after replacement
+        encoding: Optional file encoding
 
     Returns:
         Transaction dictionary
     """
-    return {
+    transaction = {
         "id": str(uuid.uuid4()),
         "TYPE": TransactionType.FILE_CONTENT_LINE.value,
         "PATH": relative_path,
@@ -87,6 +89,11 @@ def create_content_transaction(
         "timestamp_created": time.time(),
         "retry_count": 0,
     }
+
+    if encoding:
+        transaction["ORIGINAL_ENCODING"] = encoding
+
+    return transaction
 
 
 def is_duplicate_transaction(

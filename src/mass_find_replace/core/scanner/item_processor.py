@@ -160,36 +160,36 @@ def process_item(
 
     # Process content if applicable
     if not skip_content and is_file:
+        # First check for binary files (regardless of extension)
+        is_rtf = item_path.suffix.lower() == ".rtf"
+        skip_binary_check = is_rtf  # RTF files need special handling
+
+        # Check for binary file
+        if not skip_binary_check:
+            try:
+                if is_binary_file(str(item_path)):
+                    # It's binary - search for patterns and log
+                    raw_keys = replace_logic.get_raw_stripped_keys()
+                    if raw_keys:
+                        search_binary_file(
+                            item_path,
+                            relative_path,
+                            raw_keys,
+                            binary_log_path,
+                            root_dir,
+                            logger,
+                        )
+                    return transactions  # Don't process content of binary files
+            except Exception as e:
+                log_fs_op_message(
+                    logging.WARNING,
+                    f"Could not determine if {item_path} is binary: {e}. Skipping content scan.",
+                    logger,
+                )
+                return transactions
+
         # Check if we should process this file's content
         if should_process_content(item_path, file_extensions):
-            # Check if it's binary
-            is_rtf = item_path.suffix.lower() == ".rtf"
-            skip_binary_check = is_rtf  # RTF files need special handling
-
-            # Check for binary file
-            if not skip_binary_check:
-                try:
-                    if is_binary_file(str(item_path)):
-                        # It's binary - search for patterns and log
-                        raw_keys = replace_logic.get_raw_stripped_keys()
-                        if raw_keys:
-                            search_binary_file(
-                                item_path,
-                                relative_path,
-                                raw_keys,
-                                binary_log_path,
-                                root_dir,
-                                logger,
-                            )
-                        return transactions  # Don't process content of binary files
-                except Exception as e:
-                    log_fs_op_message(
-                        logging.WARNING,
-                        f"Could not determine if {item_path} is binary: {e}. Skipping content scan.",
-                        logger,
-                    )
-                    return transactions
-
             # Scan text file content
             content_transactions = scan_file_content(
                 item_path,

@@ -208,17 +208,15 @@ def execute_workflow(
         interactive_mode: Whether to run in interactive mode
         logger: Logger instance
     """
-    # Clear old logs if starting fresh
+    # Clear old collision log if starting fresh (but NOT the binary log - that's created during scan!)
     if not resume and not skip_scan:
-        binary_log_path = abs_root_dir / BINARY_MATCHES_LOG_FILE
         collision_log_path = abs_root_dir / COLLISIONS_ERRORS_LOG_FILE
-        for log_path in [binary_log_path, collision_log_path]:
-            if log_path.exists():
-                try:
-                    log_path.unlink()
-                    logger.debug(f"Cleared old log file: {log_path}")
-                except Exception as e:
-                    logger.warning(f"Could not clear log file {log_path}: {e}")
+        if collision_log_path.exists():
+            try:
+                collision_log_path.unlink()
+                logger.debug(f"Cleared old collision log file: {collision_log_path}")
+            except Exception as e:
+                logger.warning(f"Could not clear collision log file {collision_log_path}: {e}")
 
     # Load transactions (already created by perform_scan_phase)
     if not txn_json_path.exists():

@@ -24,6 +24,7 @@ from ..file_system_operations import (
     save_transactions,
     load_transactions,
     TransactionStatus,
+    BINARY_MATCHES_LOG_FILE,
 )
 
 __all__ = [
@@ -71,6 +72,16 @@ def perform_scan_phase(
         List of transactions or None if failed
     """
     if not skip_scan:
+        # Clear old binary log at the beginning of scan (not resume)
+        if not resume:
+            binary_log_path = abs_root_dir / BINARY_MATCHES_LOG_FILE
+            if binary_log_path.exists():
+                try:
+                    binary_log_path.unlink()
+                    logger.debug(f"Cleared old binary log file: {binary_log_path}")
+                except Exception as e:
+                    logger.warning(f"Could not clear binary log file {binary_log_path}: {e}")
+
         logger.info(f"Scanning '{abs_root_dir}'...")
         current_txns_for_resume: list[dict[str, Any]] | None = None
         paths_to_force_rescan: set[str] | None = set()

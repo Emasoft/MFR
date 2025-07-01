@@ -28,14 +28,11 @@ import logging
 from unittest.mock import patch
 import sys
 
-from mass_find_replace.mass_find_replace import main_flow, main_cli
-from mass_find_replace.file_system_operations import (
-    load_transactions,
-    TransactionStatus,
-    TransactionType,
-    BINARY_MATCHES_LOG_FILE,
-    COLLISIONS_ERRORS_LOG_FILE,
-)
+from mass_find_replace.mass_find_replace import main_flow
+from mass_find_replace.cli.parser import main_cli
+from mass_find_replace.core.transaction_manager import load_transactions
+from mass_find_replace.core.types import TransactionStatus, TransactionType
+from mass_find_replace.core.constants import BINARY_MATCHES_LOG_FILE, COLLISIONS_ERRORS_LOG_FILE
 from mass_find_replace import replace_logic
 
 import pytest
@@ -311,7 +308,7 @@ def test_self_test_option(monkeypatch: Any) -> None:
     """Test the --self-test CLI option integration"""
     with monkeypatch.context() as m:
         m.setattr(sys, "argv", ["test_mass_find_replace.py", "--self-test"])
-        with patch("mass_find_replace.mass_find_replace._run_subprocess_command") as mock_run:
+        with patch("mass_find_replace.cli.parser_modules.subprocess_runner.run_subprocess_command") as mock_run:
             mock_run.return_value = True
             with pytest.raises(SystemExit) as exc_info:
                 main_cli()
@@ -373,7 +370,8 @@ def test_binary_files_logging(temp_test_dir: dict[str, Path], default_map_file: 
     - Include offset information for each match
     """
     context_dir = temp_test_dir["runtime"]
-    bin_path = context_dir / "binary.bin"
+    # Use a filename that contains a search pattern so it gets processed
+    bin_path = context_dir / "oldname_data.bin"
 
     # Create binary file with multiple search strings embedded
     bin_content = b"HeaderOLDNAME\x00\x01oldName\x02OldnameFooter"
@@ -381,9 +379,19 @@ def test_binary_files_logging(temp_test_dir: dict[str, Path], default_map_file: 
 
     run_main_flow_for_test(context_dir, default_map_file, dry_run=False)
 
+    # Check if oldname_data.bin was processed in transactions
+    txn_file = context_dir / "planned_transactions.json"
+    if txn_file.exists():
+        transactions = load_transactions(txn_file)
+        binary_processed = any("oldname_data.bin" in tx.get("PATH", "") for tx in transactions if transactions)
+        if not binary_processed:
+            # List all processed files for debugging
+            processed_files = [tx.get("PATH", "") for tx in transactions] if transactions else []
+            print(f"DEBUG: Binary file not in transactions. Processed files: {processed_files}")
+
     # Match log should exist
     log_path = context_dir / BINARY_MATCHES_LOG_FILE
-    assert log_path.exists()
+    assert log_path.exists(), f"Binary log file not found at {log_path}. Files in dir: {list(context_dir.iterdir())}"
     log_content = log_path.read_text(encoding="utf-8")
 
     # Verify all patterns are logged

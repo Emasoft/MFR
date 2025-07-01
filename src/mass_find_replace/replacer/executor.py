@@ -58,14 +58,14 @@ def _actual_replace_callback(match: re.Match[str]) -> str:
     )
     log_message(
         logging.DEBUG,
-        f"  Canonicalized lookup_key='{lookup_key}' (len {len(lookup_key)}, " f"ords={[ord(c) for c in lookup_key]})",
+        f"  Canonicalized lookup_key='{lookup_key}' (len {len(lookup_key)}, ords={[ord(c) for c in lookup_key]})",
         get_module_logger(),
     )
 
     raw_mapping = get_raw_mapping()
     log_message(
         logging.DEBUG,
-        f"  _RAW_REPLACEMENT_MAPPING at callback (first 5 keys): " f"{list(raw_mapping.keys())[:5]}...",
+        f"  _RAW_REPLACEMENT_MAPPING at callback (first 5 keys): {list(raw_mapping.keys())[:5]}...",
         get_module_logger(),
     )
 
@@ -90,7 +90,7 @@ def _actual_replace_callback(match: re.Match[str]) -> str:
     log_message(logging.WARNING, warning_msg, get_module_logger())
     log_message(
         logging.DEBUG,
-        f"  Full _RAW_REPLACEMENT_MAPPING keys (first 20): " f"{list(raw_mapping.keys())[:20]}...",
+        f"  Full _RAW_REPLACEMENT_MAPPING keys (first 20): {list(raw_mapping.keys())[:20]}...",
         get_module_logger(),
     )
     return matched_text_from_input
