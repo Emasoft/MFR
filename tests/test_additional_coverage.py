@@ -137,7 +137,17 @@ class TestFileSystemOperations:
         from mass_find_replace.file_system_operations import TransactionType, TransactionStatus
         import uuid
 
-        txn = {"id": str(uuid.uuid4()), "TYPE": TransactionType.FILE_CONTENT_LINE.value, "FILE_PATH": str(test_file), "PATH": "bad_encoding.txt", "LINE_NUMBER": 1, "ORIGINAL_LINE_CONTENT": "Hello \x80 World", "NEW_LINE_CONTENT": "Hi \x80 World", "STATUS": TransactionStatus.PENDING.value, "EXPECTED_CHANGES": 1}
+        txn = {
+            "id": str(uuid.uuid4()),
+            "TYPE": TransactionType.FILE_CONTENT_LINE.value,
+            "FILE_PATH": str(test_file),
+            "PATH": "bad_encoding.txt",
+            "LINE_NUMBER": 1,
+            "ORIGINAL_LINE_CONTENT": "Hello \x80 World",
+            "NEW_LINE_CONTENT": "Hi \x80 World",
+            "STATUS": TransactionStatus.PENDING.value,
+            "EXPECTED_CHANGES": 1,
+        }
 
         # Process the transaction
         process_large_file_content(
@@ -153,12 +163,25 @@ class TestFileSystemOperations:
 
     def test_execute_transaction_os_errors(self, tmp_path):
         """Test various OS errors during execution."""
-        from mass_find_replace.file_system_operations import execute_all_transactions, TransactionType, TransactionStatus
+        from mass_find_replace.file_system_operations import (
+            execute_all_transactions,
+            TransactionType,
+            TransactionStatus,
+        )
 
         test_file = tmp_path / "test.txt"
         test_file.write_text("content")
 
-        transaction = {"id": "1", "TYPE": TransactionType.FILE_NAME.value, "OLD_PATH": str(test_file), "NEW_PATH": str(tmp_path / "new.txt"), "PATH": "test.txt", "ORIGINAL_NAME": "test.txt", "NEW_NAME": "new.txt", "STATUS": TransactionStatus.PENDING.value}
+        transaction = {
+            "id": "1",
+            "TYPE": TransactionType.FILE_NAME.value,
+            "OLD_PATH": str(test_file),
+            "NEW_PATH": str(tmp_path / "new.txt"),
+            "PATH": "test.txt",
+            "ORIGINAL_NAME": "test.txt",
+            "NEW_NAME": "new.txt",
+            "STATUS": TransactionStatus.PENDING.value,
+        }
 
         logger = MagicMock()
 
@@ -187,12 +210,28 @@ class TestFileSystemOperations:
 
     def test_file_locking_error(self, tmp_path):
         """Test file locking errors."""
-        from mass_find_replace.file_system_operations import execute_all_transactions, TransactionType, TransactionStatus
+        from mass_find_replace.file_system_operations import (
+            execute_all_transactions,
+            TransactionType,
+            TransactionStatus,
+            load_transactions,
+        )
 
         test_file = tmp_path / "locked.txt"
         test_file.write_text("content")
 
-        transaction = {"id": "1", "TYPE": TransactionType.FILE_CONTENT_LINE.value, "FILE_PATH": str(test_file), "PATH": "locked.txt", "LINE_NUMBER": 1, "ORIGINAL_LINE_CONTENT": "content", "NEW_LINE_CONTENT": "new content", "STATUS": TransactionStatus.PENDING.value, "EXPECTED_CHANGES": 1}
+        transaction = {
+            "id": "1",
+            "TYPE": TransactionType.FILE_CONTENT_LINE.value,
+            "FILE_PATH": str(test_file),
+            "PATH": "locked.txt",
+            "LINE_NUMBER": 1,
+            "ORIGINAL_LINE_CONTENT": "content",
+            "NEW_LINE_CONTENT": "new content",
+            "STATUS": TransactionStatus.PENDING.value,
+            "EXPECTED_CHANGES": 1,
+            "ORIGINAL_ENCODING": "utf-8",  # Add encoding to ensure proper handling
+        }
 
         logger = MagicMock()
 
@@ -203,8 +242,11 @@ class TestFileSystemOperations:
         save_transactions([transaction], txn_file, logger)
 
         # Mock file operations to raise locking error when trying to process the content
-        # Need to patch in the core.file_processor module where it's actually used
-        with patch("mass_find_replace.core.file_processor.open_file_with_encoding", side_effect=OSError(errno.EACCES, "Permission denied")):
+        # Patch at the module level where it's imported
+        with patch(
+            "mass_find_replace.core.processor.batch_processor.open_file_with_encoding",
+            side_effect=OSError(errno.EACCES, "Permission denied"),
+        ):
             stats = execute_all_transactions(
                 transactions_file_path=txn_file,
                 root_dir=tmp_path,
@@ -409,7 +451,16 @@ class TestMainFlowEdgeCases:
         # Create transaction file with timestamp
         txn_file = tmp_path / "planned_transactions.json"
         past_time = time.time() - 100
-        transactions = [{"id": "1", "TYPE": TransactionType.FILE_CONTENT_LINE.value, "FILE_PATH": str(test_file), "STATUS": TransactionStatus.COMPLETED.value, "PATH": str(test_file), "TIMESTAMP_LAST_PROCESSED": past_time}]
+        transactions = [
+            {
+                "id": "1",
+                "TYPE": TransactionType.FILE_CONTENT_LINE.value,
+                "FILE_PATH": str(test_file),
+                "STATUS": TransactionStatus.COMPLETED.value,
+                "PATH": str(test_file),
+                "TIMESTAMP_LAST_PROCESSED": past_time,
+            }
+        ]
         txn_file.write_text(json.dumps(transactions))
 
         # Modify file after transaction
@@ -441,7 +492,10 @@ class TestMainFlowEdgeCases:
 
         # main_flow returns None, just verify no exceptions were raised
 
-    @pytest.mark.skipif(os.environ.get("CI", "").lower() == "true" or os.environ.get("GITHUB_ACTIONS", "").lower() == "true", reason="Skip KeyboardInterrupt test in CI due to Prefect cleanup issues")
+    @pytest.mark.skipif(
+        os.environ.get("CI", "").lower() == "true" or os.environ.get("GITHUB_ACTIONS", "").lower() == "true",
+        reason="Skip KeyboardInterrupt test in CI due to Prefect cleanup issues",
+    )
     def test_main_flow_keyboard_interrupt(self, tmp_path):
         """Test handling of keyboard interrupt."""
         from mass_find_replace.mass_find_replace import main_flow
@@ -570,8 +624,23 @@ class TestUtilityFunctions:
         test_file.write_text("content")
 
         transactions = [
-            {"id": "1", "TYPE": TransactionType.FILE_NAME.value, "OLD_PATH": str(test_file), "NEW_PATH": str(tmp_path / "renamed.txt"), "PATH": "test.txt"},
-            {"id": "2", "TYPE": TransactionType.FILE_CONTENT_LINE.value, "FILE_PATH": str(test_file), "PATH": "test.txt", "LINE_NUMBER": 1, "ORIGINAL_LINE_CONTENT": "content", "NEW_LINE_CONTENT": "new content", "EXPECTED_CHANGES": 1},
+            {
+                "id": "1",
+                "TYPE": TransactionType.FILE_NAME.value,
+                "OLD_PATH": str(test_file),
+                "NEW_PATH": str(tmp_path / "renamed.txt"),
+                "PATH": "test.txt",
+            },
+            {
+                "id": "2",
+                "TYPE": TransactionType.FILE_CONTENT_LINE.value,
+                "FILE_PATH": str(test_file),
+                "PATH": "test.txt",
+                "LINE_NUMBER": 1,
+                "ORIGINAL_LINE_CONTENT": "content",
+                "NEW_LINE_CONTENT": "new content",
+                "EXPECTED_CHANGES": 1,
+            },
         ]
 
         mapping = {"content": "new content"}

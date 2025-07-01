@@ -128,7 +128,10 @@ class TestGitHubIntegration:
         print(f"\n🔄 Testing MFR on {test_repo}...")
 
         # Clone with minimal depth
-        exit_code, stdout, stderr = run_command(["git", "clone", "--depth", "1", "--single-branch", test_repo, str(clone_dir)], timeout=60 if is_ci_environment() else 300)
+        exit_code, stdout, stderr = run_command(
+            ["git", "clone", "--depth", "1", "--single-branch", test_repo, str(clone_dir)],
+            timeout=60 if is_ci_environment() else 300,
+        )
 
         if exit_code != 0:
             pytest.skip(f"Could not clone test repo: {stderr}")
@@ -144,14 +147,21 @@ class TestGitHubIntegration:
 
         # Run MFR in dry-run mode
         print("🔍 Running MFR in dry-run mode...")
-        exit_code, stdout, stderr = run_command(["uv", "run", "mfr", str(clone_dir), "--dry-run", "--mapping-file", str(test_mapping)], cwd=Path(__file__).parent.parent, timeout=30)
+        exit_code, stdout, stderr = run_command(
+            ["uv", "run", "mfr", str(clone_dir), "--dry-run", "--mapping-file", str(test_mapping)],
+            cwd=Path(__file__).parent.parent,
+            timeout=30,
+        )
 
         assert exit_code == 0, f"MFR failed: {stderr}"
         assert "transaction" in stdout.lower() or "transaction" in stderr.lower(), "No transactions found"
 
         print("✅ MFR dry-run completed successfully")
 
-    @pytest.mark.skipif(is_ci_environment() and not os.environ.get("GH_TOKEN"), reason="GitHub token required for private repo tests in CI")
+    @pytest.mark.skipif(
+        is_ci_environment() and not os.environ.get("GH_TOKEN"),
+        reason="GitHub token required for private repo tests in CI",
+    )
     def test_github_cli_operations(self, temp_workspace: Path):
         """Test GitHub CLI operations if available."""
         # Check if gh is available

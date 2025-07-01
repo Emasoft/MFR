@@ -68,7 +68,7 @@ class TestPrefectIntegration:
 
     def test_subprocess_flush_handlers(self, capsys):
         """Test subprocess stdout flushing with logger handlers."""
-        import mass_find_replace.mass_find_replace as mfr
+        from mass_find_replace.cli.parser_modules.subprocess_runner import run_subprocess_command
 
         # Create a logger with a handler that has flush method
         mock_handler = MagicMock()
@@ -78,8 +78,8 @@ class TestPrefectIntegration:
         mock_logger.handlers = [mock_handler]
 
         # Test command that produces output
-        # _run_subprocess_command doesn't take a logger argument
-        result = mfr._run_subprocess_command(["echo", "test output"], "Test")
+        # run_subprocess_command doesn't take a logger argument
+        result = run_subprocess_command(["echo", "test output"], "Test")
 
         # Result should be True for successful command
         assert result is True
@@ -88,7 +88,7 @@ class TestPrefectIntegration:
 
     def test_subprocess_without_flush(self, capsys):
         """Test subprocess when handler has no flush method."""
-        import mass_find_replace.mass_find_replace as mfr
+        from mass_find_replace.cli.parser_modules.subprocess_runner import run_subprocess_command
 
         # Create handler without flush method
         mock_handler = MagicMock()
@@ -98,7 +98,7 @@ class TestPrefectIntegration:
         mock_logger.handlers = [mock_handler]
 
         # Should handle gracefully
-        result = mfr._run_subprocess_command(["echo", "test"], "Test")
+        result = run_subprocess_command(["echo", "test"], "Test")
         assert result is True
 
 
@@ -111,7 +111,7 @@ class TestMainCLIEdgeCases:
 
         with patch.object(sys, "argv", test_args):
             with patch("mass_find_replace.mass_find_replace.main_flow", side_effect=Exception("Unexpected error")):
-                from mass_find_replace.mass_find_replace import main_cli
+                from mass_find_replace.cli.parser import main_cli
 
                 # main_cli doesn't handle exceptions, it lets them propagate
                 with pytest.raises(Exception, match="Unexpected error"):
@@ -127,7 +127,7 @@ class TestMainCLIEdgeCases:
             with patch("mass_find_replace.mass_find_replace.main_flow") as mock_flow:
                 # JSON validation happens in main_flow
                 mock_flow.side_effect = lambda *args, **kwargs: None
-                from mass_find_replace.mass_find_replace import main_cli
+                from mass_find_replace.cli.parser import main_cli
 
                 main_cli()  # Validation happens in main_flow
 
@@ -141,7 +141,7 @@ class TestMainCLIEdgeCases:
             with patch("mass_find_replace.mass_find_replace.main_flow") as mock_flow:
                 # Cyclic validation would happen in main_flow
                 mock_flow.side_effect = lambda *args, **kwargs: None
-                from mass_find_replace.mass_find_replace import main_cli
+                from mass_find_replace.cli.parser import main_cli
 
                 main_cli()  # Validation happens in main_flow
 
@@ -158,7 +158,7 @@ class TestMainCLIEdgeCases:
             with patch("mass_find_replace.mass_find_replace.main_flow") as mock_flow:
                 # User confirmation happens in main_flow
                 mock_flow.return_value = None
-                from mass_find_replace.mass_find_replace import main_cli
+                from mass_find_replace.cli.parser import main_cli
 
                 main_cli()  # Should complete normally
 
@@ -171,7 +171,7 @@ class TestMainCLIEdgeCases:
         with patch.object(sys, "argv", test_args):
             with patch("mass_find_replace.mass_find_replace.main_flow") as mock_flow:
                 mock_flow.return_value = (True, 0, 0, 0)
-                from mass_find_replace.mass_find_replace import main_cli
+                from mass_find_replace.cli.parser import main_cli
 
                 main_cli()
 
@@ -195,8 +195,20 @@ class TestCheckExistingTransactions:
         # Create transaction file with all completed
         txn_file = tmp_path / "planned_transactions.json"
         transactions = [
-            {"id": "1", "TYPE": "FILE_CONTENT_LINE", "PATH": "test.txt", "LINE_NUMBER": 1, "STATUS": TransactionStatus.COMPLETED.value},
-            {"id": "2", "TYPE": "FILE_CONTENT_LINE", "PATH": "test.txt", "LINE_NUMBER": 2, "STATUS": TransactionStatus.COMPLETED.value},
+            {
+                "id": "1",
+                "TYPE": "FILE_CONTENT_LINE",
+                "PATH": "test.txt",
+                "LINE_NUMBER": 1,
+                "STATUS": TransactionStatus.COMPLETED.value,
+            },
+            {
+                "id": "2",
+                "TYPE": "FILE_CONTENT_LINE",
+                "PATH": "test.txt",
+                "LINE_NUMBER": 2,
+                "STATUS": TransactionStatus.COMPLETED.value,
+            },
         ]
         txn_file.write_text(json.dumps(transactions))
 
@@ -224,7 +236,12 @@ class TestTransactionProcessing:
 
     def test_symlink_rename_dry_run(self, tmp_path):
         """Test symlink rename in dry run mode."""
-        from mass_find_replace.file_system_operations import execute_all_transactions, save_transactions, TransactionType, TransactionStatus
+        from mass_find_replace.file_system_operations import (
+            execute_all_transactions,
+            save_transactions,
+            TransactionType,
+            TransactionStatus,
+        )
 
         if os.name == "nt":
             pytest.skip("Symlinks not supported on Windows")
@@ -235,7 +252,14 @@ class TestTransactionProcessing:
         old_link.symlink_to(target)
 
         # Test symlink rename using FILE_NAME type
-        transaction = {"id": "1", "TYPE": TransactionType.FILE_NAME.value, "PATH": str(old_link.relative_to(tmp_path)), "ORIGINAL_NAME": "old_link", "NEW_NAME": "new_link", "STATUS": TransactionStatus.PENDING.value}
+        transaction = {
+            "id": "1",
+            "TYPE": TransactionType.FILE_NAME.value,
+            "PATH": str(old_link.relative_to(tmp_path)),
+            "ORIGINAL_NAME": "old_link",
+            "NEW_NAME": "new_link",
+            "STATUS": TransactionStatus.PENDING.value,
+        }
 
         logger = MagicMock()
 
@@ -261,12 +285,26 @@ class TestTransactionProcessing:
 
     def test_file_rename_permission_error(self, tmp_path):
         """Test file rename with permission error."""
-        from mass_find_replace.file_system_operations import execute_all_transactions, save_transactions, TransactionType, TransactionStatus
+        from mass_find_replace.file_system_operations import (
+            execute_all_transactions,
+            save_transactions,
+            TransactionType,
+            TransactionStatus,
+        )
 
         test_file = tmp_path / "test.txt"
         test_file.write_text("content")
 
-        transaction = {"id": "1", "TYPE": TransactionType.FILE_NAME.value, "PATH": str(test_file.relative_to(tmp_path)), "ORIGINAL_NAME": "test.txt", "NEW_NAME": "new.txt", "STATUS": TransactionStatus.PENDING.value}
+        transaction = {
+            "id": "1",
+            "TYPE": TransactionType.FILE_NAME.value,
+            "PATH": "test.txt",  # Relative path
+            "OLD_PATH": str(test_file),  # Add OLD_PATH field
+            "NEW_PATH": str(tmp_path / "new.txt"),  # Add NEW_PATH field
+            "ORIGINAL_NAME": "test.txt",
+            "NEW_NAME": "new.txt",
+            "STATUS": TransactionStatus.PENDING.value,
+        }
 
         logger = MagicMock()
 
@@ -274,8 +312,8 @@ class TestTransactionProcessing:
         txn_file = tmp_path / "planned_transactions.json"
         save_transactions([transaction], txn_file, logger)
 
-        # Mock to raise permission error
-        with patch("os.rename", side_effect=PermissionError("Access denied")):
+        # Mock to raise permission error in the transaction executor module
+        with patch("mass_find_replace.core.transaction_executor.os.rename", side_effect=PermissionError("Access denied")):
             stats = execute_all_transactions(
                 transactions_file_path=txn_file,
                 root_dir=tmp_path,
@@ -288,11 +326,17 @@ class TestTransactionProcessing:
                 interactive_mode=False,
                 logger=logger,
             )
-            assert stats["failed"] == 1
+            # PermissionError is treated as a retriable error, not a permanent failure
+            assert stats["retry_later"] == 1
 
     def test_content_change_with_no_changes(self, tmp_path):
         """Test content change when no actual changes occur."""
-        from mass_find_replace.file_system_operations import execute_all_transactions, save_transactions, TransactionType, TransactionStatus
+        from mass_find_replace.file_system_operations import (
+            execute_all_transactions,
+            save_transactions,
+            TransactionType,
+            TransactionStatus,
+        )
 
         test_file = tmp_path / "test.txt"
         test_file.write_text("content without matches")

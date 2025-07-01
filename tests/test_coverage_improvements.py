@@ -30,7 +30,7 @@ class TestMainCLI:
         test_args = ["mfr", "--help"]
         with patch.object(sys, "argv", test_args):
             with pytest.raises(SystemExit) as exc_info:
-                from mass_find_replace.mass_find_replace import main_cli
+                from mass_find_replace.cli.parser import main_cli
 
                 main_cli()
             assert exc_info.value.code == 0
@@ -49,7 +49,7 @@ class TestMainCLI:
 
         with patch.object(sys, "argv", test_args):
             with patch("subprocess.run", return_value=mock_result) as mock_run:
-                from mass_find_replace.mass_find_replace import main_cli
+                from mass_find_replace.cli.parser import main_cli
 
                 with pytest.raises(SystemExit) as exc_info:
                     main_cli()
@@ -65,14 +65,12 @@ class TestMainCLI:
         test_args = ["mfr", "--self-test"]
 
         # Mock subprocess.run to simulate test failure
-        mock_result = MagicMock()
-        mock_result.returncode = 1
-        mock_result.stdout = "Tests failed"
-        mock_result.stderr = "Error"
+        # Since check=True is used, we need to raise CalledProcessError
+        mock_error = subprocess.CalledProcessError(1, ["pytest"], output="Tests failed", stderr="Error")
 
         with patch.object(sys, "argv", test_args):
-            with patch("subprocess.run", return_value=mock_result):
-                from mass_find_replace.mass_find_replace import main_cli
+            with patch("subprocess.run", side_effect=mock_error):
+                from mass_find_replace.cli.parser import main_cli
 
                 # main_cli doesn't return a value, it exits with sys.exit(1)
                 with pytest.raises(SystemExit) as exc_info:
@@ -85,7 +83,7 @@ class TestMainCLI:
 
         with patch.object(sys, "argv", test_args):
             with patch("mass_find_replace.mass_find_replace._get_logger") as mock_logger:
-                from mass_find_replace.mass_find_replace import main_cli
+                from mass_find_replace.cli.parser import main_cli
 
                 # main_cli doesn't check for conflicting flags, main_flow does
                 # Let's mock main_flow to avoid actual execution
@@ -101,7 +99,7 @@ class TestMainCLI:
             with patch("mass_find_replace.mass_find_replace.main_flow") as mock_flow:
                 # main_flow will handle the error
                 mock_flow.side_effect = lambda *args, **kwargs: None
-                from mass_find_replace.mass_find_replace import main_cli
+                from mass_find_replace.cli.parser import main_cli
 
                 main_cli()  # Directory validation happens in main_flow
 
@@ -115,7 +113,7 @@ class TestMainCLI:
             with patch("mass_find_replace.mass_find_replace.main_flow") as mock_flow:
                 # main_flow will handle the error
                 mock_flow.side_effect = lambda *args, **kwargs: None
-                from mass_find_replace.mass_find_replace import main_cli
+                from mass_find_replace.cli.parser import main_cli
 
                 main_cli()  # Directory validation happens in main_flow
 
@@ -127,7 +125,7 @@ class TestMainCLI:
             with patch("mass_find_replace.mass_find_replace.main_flow") as mock_flow:
                 # main_flow will handle the error
                 mock_flow.side_effect = lambda *args, **kwargs: None
-                from mass_find_replace.mass_find_replace import main_cli
+                from mass_find_replace.cli.parser import main_cli
 
                 main_cli()  # Mapping file validation happens in main_flow
 
@@ -141,7 +139,7 @@ class TestMainCLI:
             with patch("mass_find_replace.mass_find_replace.main_flow") as mock_flow:
                 # main_flow will handle the error
                 mock_flow.side_effect = lambda *args, **kwargs: None
-                from mass_find_replace.mass_find_replace import main_cli
+                from mass_find_replace.cli.parser import main_cli
 
                 main_cli()  # JSON validation happens in main_flow
 
@@ -155,7 +153,7 @@ class TestMainCLI:
             with patch("mass_find_replace.mass_find_replace.main_flow") as mock_flow:
                 # main_flow will handle the empty mapping
                 mock_flow.side_effect = lambda *args, **kwargs: None
-                from mass_find_replace.mass_find_replace import main_cli
+                from mass_find_replace.cli.parser import main_cli
 
                 main_cli()  # Empty mapping check happens in main_flow
 
@@ -164,7 +162,7 @@ class TestMainCLI:
         test_args = ["mfr", str(tmp_path), "--ignore-file", "nonexistent.gitignore"]
 
         with patch.object(sys, "argv", test_args):
-            from mass_find_replace.mass_find_replace import main_cli
+            from mass_find_replace.cli.parser import main_cli
 
             with pytest.raises(SystemExit) as exc_info:
                 main_cli()
@@ -184,7 +182,7 @@ class TestMainCLI:
             with patch("mass_find_replace.mass_find_replace.main_flow") as mock_flow:
                 # main_flow doesn't return a value
                 mock_flow.return_value = None
-                from mass_find_replace.mass_find_replace import main_cli
+                from mass_find_replace.cli.parser import main_cli
 
                 main_cli()
                 # Check that timeout was adjusted to 1
@@ -203,7 +201,7 @@ class TestMainCLI:
             with patch("mass_find_replace.mass_find_replace.main_flow") as mock_flow:
                 # main_flow doesn't return a value
                 mock_flow.return_value = None
-                from mass_find_replace.mass_find_replace import main_cli
+                from mass_find_replace.cli.parser import main_cli
 
                 # main_cli doesn't exit on success, it just returns
                 main_cli()
@@ -219,7 +217,7 @@ class TestMainCLI:
             with patch("mass_find_replace.mass_find_replace.main_flow") as mock_flow:
                 # main_flow doesn't return a value, it would log errors
                 mock_flow.return_value = None
-                from mass_find_replace.mass_find_replace import main_cli
+                from mass_find_replace.cli.parser import main_cli
 
                 main_cli()
                 assert mock_flow.called
@@ -361,13 +359,24 @@ class TestExecuteTransactions:
 
     def test_interactive_mode_skip(self, tmp_path):
         """Test interactive mode with skip response."""
-        from mass_find_replace.file_system_operations import execute_all_transactions, TransactionType, TransactionStatus
+        from mass_find_replace.file_system_operations import (
+            execute_all_transactions,
+            TransactionType,
+            TransactionStatus,
+        )
 
         test_file = tmp_path / "old_test.txt"
         test_file.write_text("content")
 
         # Use a file rename transaction instead since content transactions are batch processed
-        transaction = {"id": "1", "TYPE": TransactionType.FILE_NAME.value, "PATH": str(test_file.relative_to(tmp_path)), "ORIGINAL_NAME": "old_test.txt", "NEW_NAME": "new_test.txt", "STATUS": TransactionStatus.PENDING.value}
+        transaction = {
+            "id": "1",
+            "TYPE": TransactionType.FILE_NAME.value,
+            "PATH": str(test_file.relative_to(tmp_path)),
+            "ORIGINAL_NAME": "old_test.txt",
+            "NEW_NAME": "new_test.txt",
+            "STATUS": TransactionStatus.PENDING.value,
+        }
 
         logger = MagicMock()
 
@@ -379,18 +388,42 @@ class TestExecuteTransactions:
         save_transactions([transaction], txn_file, logger)
 
         with patch("builtins.input", return_value="S"):
-            stats = execute_all_transactions(transactions_file_path=txn_file, root_dir=tmp_path, dry_run=False, resume=False, timeout_minutes=30, skip_file_renaming=False, skip_folder_renaming=False, skip_content=False, interactive_mode=True, logger=logger)
+            stats = execute_all_transactions(
+                transactions_file_path=txn_file,
+                root_dir=tmp_path,
+                dry_run=False,
+                resume=False,
+                timeout_minutes=30,
+                skip_file_renaming=False,
+                skip_folder_renaming=False,
+                skip_content=False,
+                interactive_mode=True,
+                logger=logger,
+            )
         assert stats["skipped"] == 1
         assert stats["completed"] == 0
 
     def test_interactive_mode_apply_all(self, tmp_path):
         """Test interactive mode with apply all response."""
-        from mass_find_replace.file_system_operations import execute_all_transactions, TransactionType, TransactionStatus
+        from mass_find_replace.file_system_operations import (
+            execute_all_transactions,
+            TransactionType,
+            TransactionStatus,
+        )
 
         test_file = tmp_path / "test.txt"
         test_file.write_text("old content")
 
-        transaction = {"id": "1", "TYPE": TransactionType.FILE_CONTENT_LINE.value, "PATH": str(test_file.relative_to(tmp_path)), "LINE_NUMBER": 1, "ORIGINAL_LINE_CONTENT": "old content", "NEW_LINE_CONTENT": "new content", "STATUS": TransactionStatus.PENDING.value, "EXPECTED_CHANGES": 1}
+        transaction = {
+            "id": "1",
+            "TYPE": TransactionType.FILE_CONTENT_LINE.value,
+            "PATH": str(test_file.relative_to(tmp_path)),
+            "LINE_NUMBER": 1,
+            "ORIGINAL_LINE_CONTENT": "old content",
+            "NEW_LINE_CONTENT": "new content",
+            "STATUS": TransactionStatus.PENDING.value,
+            "EXPECTED_CHANGES": 1,
+        }
 
         logger = MagicMock()
 
@@ -402,12 +435,27 @@ class TestExecuteTransactions:
         save_transactions([transaction], txn_file, logger)
 
         with patch("builtins.input", return_value="a"):
-            stats = execute_all_transactions(transactions_file_path=txn_file, root_dir=tmp_path, dry_run=False, resume=False, timeout_minutes=30, skip_file_renaming=False, skip_folder_renaming=False, skip_content=False, interactive_mode=True, logger=logger)
+            stats = execute_all_transactions(
+                transactions_file_path=txn_file,
+                root_dir=tmp_path,
+                dry_run=False,
+                resume=False,
+                timeout_minutes=30,
+                skip_file_renaming=False,
+                skip_folder_renaming=False,
+                skip_content=False,
+                interactive_mode=True,
+                logger=logger,
+            )
         assert stats["completed"] == 1
 
     def test_transaction_with_high_retry_count(self, tmp_path):
         """Test transaction with high retry count."""
-        from mass_find_replace.file_system_operations import execute_all_transactions, TransactionType, TransactionStatus
+        from mass_find_replace.file_system_operations import (
+            execute_all_transactions,
+            TransactionType,
+            TransactionStatus,
+        )
 
         test_file = tmp_path / "test.txt"
         test_file.write_text("content")
@@ -516,9 +564,27 @@ class TestHelperFunctions:
         # Create transaction file with mixed statuses
         txn_file = tmp_path / "planned_transactions.json"
         transactions = [
-            {"id": "1", "TYPE": "FILE_CONTENT_LINE", "PATH": "test.txt", "LINE_NUMBER": 1, "STATUS": TransactionStatus.COMPLETED.value},
-            {"id": "2", "TYPE": "FILE_CONTENT_LINE", "PATH": "test.txt", "LINE_NUMBER": 2, "STATUS": TransactionStatus.PENDING.value},
-            {"id": "3", "TYPE": "FILE_CONTENT_LINE", "PATH": "test.txt", "LINE_NUMBER": 3, "STATUS": TransactionStatus.FAILED.value},
+            {
+                "id": "1",
+                "TYPE": "FILE_CONTENT_LINE",
+                "PATH": "test.txt",
+                "LINE_NUMBER": 1,
+                "STATUS": TransactionStatus.COMPLETED.value,
+            },
+            {
+                "id": "2",
+                "TYPE": "FILE_CONTENT_LINE",
+                "PATH": "test.txt",
+                "LINE_NUMBER": 2,
+                "STATUS": TransactionStatus.PENDING.value,
+            },
+            {
+                "id": "3",
+                "TYPE": "FILE_CONTENT_LINE",
+                "PATH": "test.txt",
+                "LINE_NUMBER": 3,
+                "STATUS": TransactionStatus.FAILED.value,
+            },
         ]
         txn_file.write_text(json.dumps(transactions))
 
@@ -528,16 +594,16 @@ class TestHelperFunctions:
 
     def test_run_subprocess_command(self, capsys):
         """Test subprocess command execution."""
-        import mass_find_replace.mass_find_replace as mfr
+        from mass_find_replace.cli.parser_modules.subprocess_runner import run_subprocess_command
 
         # Test successful command
-        result = mfr._run_subprocess_command(["echo", "test"], "Echo test")
+        result = run_subprocess_command(["echo", "test"], "Echo test")
         assert result is True
         captured = capsys.readouterr()
         assert "test" in captured.out
 
         # Test failed command
-        result = mfr._run_subprocess_command(["false"], "Fail test")
+        result = run_subprocess_command(["false"], "Fail test")
         assert result is False
 
 
@@ -624,7 +690,10 @@ class TestFileOperations:
         from mass_find_replace.file_system_operations import update_transaction_status_in_list, TransactionStatus
 
         logger = MagicMock()
-        transactions = [{"id": "1", "STATUS": TransactionStatus.PENDING.value}, {"id": "2", "STATUS": TransactionStatus.PENDING.value}]
+        transactions = [
+            {"id": "1", "STATUS": TransactionStatus.PENDING.value},
+            {"id": "2", "STATUS": TransactionStatus.PENDING.value},
+        ]
 
         # Update existing
         result = update_transaction_status_in_list(transactions, "1", TransactionStatus.COMPLETED, "", logger)
@@ -654,14 +723,25 @@ class TestFileOperations:
 
     def test_folder_rename_collision(self, tmp_path):
         """Test folder rename when target exists."""
-        from mass_find_replace.file_system_operations import execute_all_transactions, TransactionType, TransactionStatus
+        from mass_find_replace.file_system_operations import (
+            execute_all_transactions,
+            TransactionType,
+            TransactionStatus,
+        )
 
         old_dir = tmp_path / "old_folder"
         new_dir = tmp_path / "new_folder"
         old_dir.mkdir()
         new_dir.mkdir()  # Target already exists
 
-        transaction = {"id": "1", "TYPE": TransactionType.FOLDER_NAME.value, "PATH": str(old_dir.relative_to(tmp_path)), "ORIGINAL_NAME": "old_folder", "NEW_NAME": "new_folder", "STATUS": TransactionStatus.PENDING.value}
+        transaction = {
+            "id": "1",
+            "TYPE": TransactionType.FOLDER_NAME.value,
+            "PATH": str(old_dir.relative_to(tmp_path)),
+            "ORIGINAL_NAME": "old_folder",
+            "NEW_NAME": "new_folder",
+            "STATUS": TransactionStatus.PENDING.value,
+        }
 
         logger = MagicMock()
 
@@ -671,7 +751,18 @@ class TestFileOperations:
 
         save_transactions([transaction], txn_file, logger)
 
-        stats = execute_all_transactions(transactions_file_path=txn_file, root_dir=tmp_path, dry_run=False, resume=False, timeout_minutes=30, skip_file_renaming=False, skip_folder_renaming=False, skip_content=False, interactive_mode=False, logger=logger)
+        stats = execute_all_transactions(
+            transactions_file_path=txn_file,
+            root_dir=tmp_path,
+            dry_run=False,
+            resume=False,
+            timeout_minutes=30,
+            skip_file_renaming=False,
+            skip_folder_renaming=False,
+            skip_content=False,
+            interactive_mode=False,
+            logger=logger,
+        )
 
         assert stats["failed"] == 1
 
