@@ -102,6 +102,11 @@ NOTES.md
 
 # Security scan reports
 
+# TruffleHog v3
+# Note: We track these files to ensure consistent security scanning
+# .trufflehog-exclude.txt
+# .trufflehog.yaml
+
 # Hook backups
 .githooks.backup/
 

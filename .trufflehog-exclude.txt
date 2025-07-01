@@ -1,0 +1,39 @@
+# TruffleHog v3 path exclusion patterns
+# One regex pattern per line
+
+# Version control
+.*\.git/.*
+.*\.gitignore$
+.*\.gitconfig$
+
+# Dependencies and build artifacts
+.*node_modules/.*
+.*\.venv/.*
+.*__pycache__/.*
+.*\.pytest_cache/.*
+.*\.mypy_cache/.*
+.*dist/.*
+.*build/.*
+.*\.egg-info/.*
+.*htmlcov/.*
+
+# Lock files
+.*\.lock$
+.*package-lock\.json$
+.*yarn\.lock$
+.*pnpm-lock\.yaml$
+
+# Logs and temporary files
+.*\.log$
+.*\.tmp$
+.*\.temp$
+.*\.bak$
+.*\.swp$
+.*\.DS_Store$
+
+# Binary files
+.*\.(jpg|jpeg|png|gif|ico|svg|pdf|zip|tar|gz|bz2|7z|rar|exe|dll|so|dylib|bin|dat|db|sqlite)$
+
+# Test fixtures
+.*test.*fixtures/.*
+.*test.*data/.*

@@ -1,0 +1,14 @@
+# TruffleHog v3 configuration
+# https://github.com/trufflesecurity/trufflehog
+
+# Note: TruffleHog v3 does not support allowlisting specific patterns like Git user info.
+# We can only exclude paths and detectors.
+
+detectors:
+  # Exclude detectors that might flag Git configuration
+  exclude:
+  - generic-api-key  # Often flags Git configs
+  - email            # Would flag Git author emails
+
+# For GitHub Actions, the action uses different configuration
+# This file is primarily for local scanning
