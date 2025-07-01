@@ -120,3 +120,4 @@ act-*.log
 pytest-*.log
 pre-commit-*.log
 mypy_lint_log.txt
+.pre-commit-logs/

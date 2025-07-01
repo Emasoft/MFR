@@ -1,20 +1,20 @@
-# See https://pre-commit.com for more information
-# See https://pre-commit.com/hooks.html for more hooks
-#
-# This configuration is optimized for use with pre-commit-uv
-# Install with: uv tool install pre-commit --with pre-commit-uv
-# This speeds up Python-based hooks significantly
+# Sequential pre-commit configuration
+# All hooks run one at a time to minimize resource usage
+
 default_language_version:
   python: python3.11
+
+default_stages: [pre-commit]
 
 # Ensure pre-commit uses uv for all Python-based hooks
 default_install_hook_types: [pre-commit, pre-push, commit-msg]
 minimum_pre_commit_version: '4.0.0'
 
-# This section configures CI-only hooks (use with: pre-commit run --hook-stage manual)
+# CI configuration
 ci:
-  autofix_prs: false  # Don't auto-fix PRs, let developers handle it
-  autoupdate_commit_msg: 'chore: pre-commit autoupdate'
+  skip:
+    - mypy-limited
+    - trufflehog-limited
 
 repos:
   # UV for dependency management and formatting
@@ -25,94 +25,100 @@ repos:
       - id: uv-lock
         files: ^(pyproject\.toml|uv\.lock)$
         pass_filenames: false
+        require_serial: true
       # Export requirements for compatibility
       - id: uv-export
         args: [--frozen, --no-hashes, -o, requirements.txt]
         files: ^(pyproject\.toml|uv\.lock)$
+        require_serial: true
       # Export dev requirements
       - id: uv-export
         name: uv-export dev-requirements
         args: [--frozen, --no-hashes, --extra=dev, -o, requirements-dev.txt]
         files: ^(pyproject\.toml|uv\.lock)$
-      # CI-only: verify dependencies are synced
-      - id: uv-sync
-        stages: [manual]
-        additional_dependencies: []
-        pass_filenames: false
-
-  # Ruff for linting and formatting (runs faster with pre-commit-uv)
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.5
-    hooks:
-      - id: ruff
-        args: [--ignore, "E203,E402,E501,E266,W505,F841,F842,F401,W293,I001,UP015,C901,W291", --isolated, --fix, --output-format=full]
-      - id: ruff-format
-        args: [--line-length=320, --isolated]
-
-  # Mypy for type checking (run with uv)
-  - repo: local
-    hooks:
-      - id: mypy
-        name: mypy
-        entry: uv run mypy
-        language: system
-        types: [python]
-        files: ^src/
-        exclude: ^tests/
-        args:
-          [
-            --strict,
-            --show-error-codes,
-            --show-error-context,
-            --pretty,
-            --ignore-missing-imports,
-            --no-warn-unused-ignores,
-            --allow-untyped-decorators,  # For pytest fixtures
-          ]
         require_serial: true
 
-  # Deptry for dependency checking (run with uv)
-  - repo: local
-    hooks:
-      - id: deptry
-        name: deptry
-        entry: uv run deptry
-        language: system
-        pass_filenames: false
-        files: ^(src/|pyproject\.toml)$
-        args: [src]
-
-  # Standard pre-commit hooks
+  # Basic file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
+        stages: [pre-commit]
       - id: end-of-file-fixer
+        stages: [pre-commit]
       - id: check-yaml
+        stages: [pre-commit]
         args: [--allow-multiple-documents]
       - id: check-added-large-files
-        args: [--maxkb=1000]
-      - id: check-merge-conflict
+        stages: [pre-commit]
+        args: ['--maxkb=1000']
       - id: check-toml
+        stages: [pre-commit]
+      - id: check-json
+        stages: [pre-commit]
+      - id: check-merge-conflict
+        stages: [pre-commit]
       - id: debug-statements
       - id: detect-private-key
       - id: mixed-line-ending
         args: [--fix=lf]
       - id: check-case-conflict
       - id: check-docstring-first
-      - id: check-json
       - id: pretty-format-json
         args: [--autofix, --no-sort-keys]
 
-  # YAML linting (run with uv)
+  # Python tools (all with require_serial: true)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.5
+    hooks:
+      - id: ruff
+        args: [--ignore, "E203,E402,E501,E266,W505,F841,F842,F401,W293,I001,UP015,C901,W291", --isolated, --fix, --output-format=full]
+        stages: [pre-commit]
+        require_serial: true
+      - id: ruff-format
+        args: [--line-length=320, --isolated]
+        stages: [pre-commit]
+        require_serial: true
+
+  # Resource-intensive hooks using project-local wrappers
   - repo: local
     hooks:
-      - id: yamllint
-        name: yamllint
-        entry: uv run yamllint
+      - id: mypy-limited
+        name: Type checking (memory limited)
+        entry: .pre-commit-wrappers/memory-limited-hook.sh uv run mypy
+        language: system
+        types: [python]
+        require_serial: true
+        pass_filenames: true
+        stages: [pre-commit]
+        files: ^src/
+        exclude: ^tests/
+        args: [--strict, --ignore-missing-imports, --show-error-codes, --show-error-context, --pretty, --no-warn-unused-ignores, --allow-untyped-decorators]
+
+      - id: deptry-limited
+        name: Dependency checking (memory limited)
+        entry: .pre-commit-wrappers/memory-limited-hook.sh uv run deptry
+        language: system
+        pass_filenames: false
+        require_serial: true
+        files: ^(src/|pyproject\.toml)$
+        args: [src]
+
+      - id: yamllint-limited
+        name: YAML linting (memory limited)
+        entry: .pre-commit-wrappers/memory-limited-hook.sh uv run yamllint
         language: system
         types: [yaml]
+        require_serial: true
         args: [-c=.yamllint.yml]
+
+      - id: trufflehog-limited
+        name: Secret detection (resource limited)
+        entry: .pre-commit-wrappers/trufflehog-limited.sh
+        language: system
+        pass_filenames: false
+        require_serial: true
+        stages: [pre-commit, pre-push]
 
   # YAML formatting with yamlfmt (GitHub Actions workflows only)
   - repo: local
@@ -131,9 +137,9 @@ repos:
     hooks:
       - id: shellcheck
         args: [--severity=warning]
+        require_serial: true
 
-  # GitHub Actions linting - actionlint must be installed separately
-  # Install with: brew install actionlint (macOS) or download from GitHub
+  # GitHub Actions linting
   - repo: local
     hooks:
       - id: actionlint
@@ -142,29 +148,7 @@ repos:
         language: system
         files: ^\.github/workflows/.*\.(yml|yaml)$
         pass_filenames: true
-
-  # Run tests before committing (only when Python files change)
-  # Temporarily disabled while fixing test failures
-  # - repo: local
-  #   hooks:
-  #     - id: pytest
-  #       name: pytest
-  #       entry: uv run pytest
-  #       language: system
-  #       pass_filenames: false
-  #       files: ^(src/.*\.py|tests/.*\.py|pyproject\.toml)$
-  #       args: [tests/, -v]
-
-  # Trufflehog v3 for secret scanning
-  - repo: https://github.com/trufflesecurity/trufflehog
-    rev: v3.89.2
-    hooks:
-      - id: trufflehog
-        name: TruffleHog v3
-        entry: trufflehog filesystem . --exclude-paths .trufflehog-exclude.txt --fail
-        language: system
-        stages: [pre-commit, pre-push]
-        pass_filenames: false
+        require_serial: true
 
   # Conventional commits check
   - repo: https://github.com/compilerla/conventional-pre-commit
@@ -173,9 +157,7 @@ repos:
       - id: conventional-pre-commit
         stages: [commit-msg]
         args: []
-        # Allow these commit types
         additional_dependencies: ['conventional-pre-commit']
-
 
 # Configuration for specific hooks
 exclude: |
