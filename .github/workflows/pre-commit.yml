@@ -65,6 +65,18 @@ jobs:
         go install github.com/google/yamlfmt/cmd/yamlfmt@latest
         echo "$HOME/go/bin" >> "$GITHUB_PATH"
 
+    - name: Install TruffleHog
+      run: |
+        # Install TruffleHog v3
+        VERSION=$(curl -s https://api.github.com/repos/trufflesecurity/trufflehog/releases/latest | \
+          jq -r '.tag_name')
+        VERSION_NUM=${VERSION#v}
+        DL_URL="https://github.com/trufflesecurity/trufflehog/releases/download/${VERSION}/"
+        DL_URL="${DL_URL}trufflehog_${VERSION_NUM}_linux_amd64.tar.gz"
+        curl -L "${DL_URL}" | sudo tar xz -C /usr/local/bin trufflehog
+        sudo chmod +x /usr/local/bin/trufflehog
+        trufflehog --version
+
     - name: Cache pre-commit environments
       uses: actions/cache@v4
       with:
