@@ -293,7 +293,7 @@ monitor_resources() {
 
             # Get process tree before killing
             echo "[$timestamp] Process tree before termination:" >> "$LOG_FILE"
-            ps auxf | grep -E "(pre-commit|python|node|npm)" >> "$LOG_FILE" 2>/dev/null || true
+            ps aux | grep -E "(pre-commit|python|node|npm)" >> "$LOG_FILE" 2>/dev/null || true
 
             # Kill all child processes first
             for child_pid in $(pgrep -P "$parent_pid" 2>/dev/null); do
