@@ -264,6 +264,8 @@ else
     timeout_cmd=""
 fi
 
+# IMPORTANT: Use --only-verified to match GitHub Actions configuration
+# This ensures consistent behavior between local and CI/CD environments
 $timeout_cmd trufflehog git file://. \
     --only-verified \
     --fail \
@@ -1997,6 +1999,43 @@ export PRE_COMMIT_TO_REF=HEAD       # Between commits
 export TRUFFLEHOG_MAX_DEPTH=10      # Limit history scan
 export TRUFFLEHOG_EXCLUDE_PATHS=".trufflehog-exclude"
 ```
+
+## Important: TruffleHog Configuration Consistency
+
+When using TruffleHog for secret detection, it's critical to maintain consistency between local and GitHub Actions configurations:
+
+### Local Configuration (pre-commit wrapper)
+The local wrapper script uses:
+```bash
+trufflehog git file://. \
+    --only-verified \     # Only report verified secrets
+    --fail \              # Exit with error if secrets found
+    --no-update \         # Don't auto-update TruffleHog
+    --concurrency="1"     # Single-threaded execution
+```
+
+### GitHub Actions Configuration
+When using the TruffleHog GitHub Action, ensure you use matching settings:
+```yaml
+- name: Run TruffleHog v3
+  uses: trufflesecurity/trufflehog@main
+  with:
+    path: ./
+    base: ${{ github.event.repository.default_branch }}
+    head: HEAD
+    extra_args: --only-verified  # Match local configuration
+```
+
+**Important Notes:**
+1. Always use `--only-verified` in both local and CI/CD environments
+2. Never use `--no-verification` as it skips verification entirely (opposite behavior)
+3. The TruffleHog GitHub Action already includes `--fail` by default - do not duplicate it
+4. Do not use invalid detector names like `generic-api-key` or `email` - use the exact names from TruffleHog's protobuf definitions
+
+This consistency ensures:
+- Same secrets are detected locally and in CI/CD
+- No false positives from unverified patterns
+- Predictable behavior across all environments
 
 ## Summary
 
