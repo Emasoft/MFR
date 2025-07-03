@@ -1,0 +1,128 @@
+TruffleHog Secret Scan	Run TruffleHog v3	﻿2025-07-03T10:22:57.4450493Z ##[group]Run trufflesecurity/trufflehog@main
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4451744Z with:
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4452512Z   path: ./
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4453434Z   base: 3f89fce5b2c4f5ba6bc9a311998564fcd7a3ed40
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4454720Z   head: de75854221261bc1292f44802d03c58229ee0aa3
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4456327Z   extra_args: --no-verification --exclude-detectors generic-api-key,email
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4457848Z   version: latest
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4458681Z env:
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4459645Z   PYTHON_VERSION: 3.11
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4460567Z   UV_VERSION: 0.7.13
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4461479Z   GIT_AUTHOR_NAME: Emasoft
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4462676Z   GIT_AUTHOR_EMAIL: 713559+Emasoft@users.noreply.github.com
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4464064Z   GIT_COMMITTER_NAME: Emasoft
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4465342Z   GIT_COMMITTER_EMAIL: 713559+Emasoft@users.noreply.github.com
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4466701Z ##[endgroup]
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4618271Z ##[group]Run ##########################################
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4619889Z [36;1m##########################################[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4621181Z [36;1m## ADVANCED USAGE                       ##[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4622487Z [36;1m## Scan by BASE & HEAD user inputs      ##[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4623775Z [36;1m## If BASE == HEAD, exit with error     ##[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4625000Z [36;1m##########################################[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4626283Z [36;1m# Check if jq is installed, if not, install it[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4627596Z [36;1mif ! command -v jq &> /dev/null[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4628652Z [36;1mthen[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4629737Z [36;1m  echo "jq could not be found, installing..."[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4631142Z [36;1m  apt-get -y update && apt-get install -y jq[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4632337Z [36;1mfi[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4633062Z [36;1m[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4634148Z [36;1mgit status >/dev/null  # make sure we are in a git repository[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4635662Z [36;1mif [ -n "$BASE" ] || [ -n "$HEAD" ]; then[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4636824Z [36;1m  if [ -n "$BASE" ]; then[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4638117Z [36;1m    base_commit=$(git rev-parse "$BASE" 2>/dev/null) || true[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4639551Z [36;1m  else[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4640348Z [36;1m    base_commit=""[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4641258Z [36;1m  fi[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4642034Z [36;1m  if [ -n "$HEAD" ]; then[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4643343Z [36;1m    head_commit=$(git rev-parse "$HEAD" 2>/dev/null) || true[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4644654Z [36;1m  else[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4645450Z [36;1m    head_commit=""[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4646355Z [36;1m  fi[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4647264Z [36;1m  if [ "$base_commit" == "$head_commit" ] ; then[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4650678Z [36;1m    echo "::error::BASE and HEAD commits are the same. TruffleHog won't scan anything. Please see documentation (https://github.com/trufflesecurity/trufflehog#octocat-trufflehog-github-action)."[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4653870Z [36;1m    exit 1[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4654684Z [36;1m  fi[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4655499Z [36;1m##########################################[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4656708Z [36;1m## Scan commits based on event type     ##[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4657906Z [36;1m##########################################[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4658971Z [36;1melse[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4659954Z [36;1m  if [ "push" == "push" ]; then[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4661230Z [36;1m    COMMIT_LENGTH=$(printenv COMMIT_IDS | jq length)[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4662547Z [36;1m    if [ $COMMIT_LENGTH == "0" ]; then[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4663698Z [36;1m      echo "No commits to scan"[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4664945Z [36;1m      exit 0[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4665753Z [36;1m    fi[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4666708Z [36;1m    HEAD=de75854221261bc1292f44802d03c58229ee0aa3[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4668741Z [36;1m    if [ 3f89fce5b2c4f5ba6bc9a311998564fcd7a3ed40 == "0000000000000000000000000000000000000000" ]; then[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4670749Z [36;1m      BASE=""[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4671833Z [36;1m    else[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4672816Z [36;1m      BASE=3f89fce5b2c4f5ba6bc9a311998564fcd7a3ed40[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4674035Z [36;1m    fi[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4675229Z [36;1m  elif [ "push" == "workflow_dispatch" ] || [ "push" == "schedule" ]; then[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4676671Z [36;1m    BASE=""[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4677499Z [36;1m    HEAD=""[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4678424Z [36;1m  elif [ "push" == "pull_request" ]; then[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4679662Z [36;1m    BASE=[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4680453Z [36;1m    HEAD=[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4681236Z [36;1m  fi[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4681984Z [36;1mfi[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4682796Z [36;1m##########################################[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4683961Z [36;1m##          Run TruffleHog              ##[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4685112Z [36;1m##########################################[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4686285Z [36;1mdocker run --rm -v .:/tmp -w /tmp \[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4687619Z [36;1mghcr.io/trufflesecurity/trufflehog:${VERSION} \[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4688893Z [36;1mgit file:///tmp/ \[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4689933Z [36;1m--since-commit \[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4690824Z [36;1m${BASE:-''} \[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4691670Z [36;1m--branch \[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4692475Z [36;1m${HEAD:-''} \[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4693312Z [36;1m--fail \[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4694096Z [36;1m--no-update \[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4694983Z [36;1m--github-actions \[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4695889Z [36;1m${ARGS:-''}[0m
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4785755Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4787092Z env:
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4787812Z   PYTHON_VERSION: 3.11
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4788671Z   UV_VERSION: 0.7.13
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4789728Z   GIT_AUTHOR_NAME: Emasoft
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4790880Z   GIT_AUTHOR_EMAIL: 713559+Emasoft@users.noreply.github.com
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4792167Z   GIT_COMMITTER_NAME: Emasoft
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4793381Z   GIT_COMMITTER_EMAIL: 713559+Emasoft@users.noreply.github.com
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4794812Z   BASE: 3f89fce5b2c4f5ba6bc9a311998564fcd7a3ed40
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4796012Z   HEAD: de75854221261bc1292f44802d03c58229ee0aa3
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4797446Z   ARGS: --no-verification --exclude-detectors generic-api-key,email
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4798999Z   COMMIT_IDS: [
+TruffleHog Secret Scan	Run TruffleHog v3	  "de75854221261bc1292f44802d03c58229ee0aa3"
+TruffleHog Secret Scan	Run TruffleHog v3	]
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4800342Z   VERSION: latest
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.4801108Z ##[endgroup]
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:57.5891239Z Unable to find image 'ghcr.io/trufflesecurity/trufflehog:latest' locally
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:58.3795652Z latest: Pulling from trufflesecurity/trufflehog
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:58.5374492Z f18232174bc9: Pulling fs layer
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:58.5375320Z a308771bf1d8: Pulling fs layer
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:58.5377528Z 4f4fb700ef54: Pulling fs layer
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:58.5378171Z be1f57adb53d: Pulling fs layer
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:58.5378558Z 7fb20409f32b: Pulling fs layer
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:58.5378940Z be1f57adb53d: Waiting
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:58.5379460Z 7fb20409f32b: Waiting
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:58.6908754Z 4f4fb700ef54: Verifying Checksum
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:58.6910359Z 4f4fb700ef54: Download complete
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:58.7220427Z f18232174bc9: Verifying Checksum
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:58.7222859Z f18232174bc9: Download complete
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:58.8266570Z f18232174bc9: Pull complete
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:58.8473243Z a308771bf1d8: Verifying Checksum
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:58.8473759Z a308771bf1d8: Download complete
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:58.9088576Z 7fb20409f32b: Verifying Checksum
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:58.9089104Z 7fb20409f32b: Download complete
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:58.9507367Z be1f57adb53d: Verifying Checksum
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:58.9508245Z be1f57adb53d: Download complete
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:59.1342591Z a308771bf1d8: Pull complete
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:59.1452200Z 4f4fb700ef54: Pull complete
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:59.3375163Z be1f57adb53d: Pull complete
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:59.3490507Z 7fb20409f32b: Pull complete
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:59.3608839Z Digest: sha256:e6d0180c4fce66c6bb18b4b08ad1eab3eb6024e57034a1f0efc91e571adda4a2
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:22:59.3622509Z Status: Downloaded newer image for ghcr.io/trufflesecurity/trufflehog:latest
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:23:01.6309988Z 🐷🔑🐷  TruffleHog. Unearth your secrets. 🐷🔑🐷
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:23:01.6310633Z 
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:23:01.6316548Z 2025-07-03T10:23:01Z	error	trufflehog	error running scan	{"error": "error initializing engine: invalid exclude list detector configuration: unrecognized detector type: api-key"}
+TruffleHog Secret Scan	Run TruffleHog v3	2025-07-03T10:23:01.7066050Z ##[error]Process completed with exit code 1.

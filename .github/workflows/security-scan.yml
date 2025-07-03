@@ -26,9 +26,7 @@ jobs:
       with:
         path: ./
         # For scheduled runs, scan entire repository
-        extra_args: >-
-          --no-verification
-          --exclude-detectors generic-api-key,email
+        extra_args: --no-verification
 
   dependency-check:
     name: Dependency Security Check

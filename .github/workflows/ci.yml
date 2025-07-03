@@ -89,9 +89,7 @@ jobs:
         path: ./
         base: ${{ github.event.repository.default_branch }}
         head: HEAD
-        extra_args: >-
-          --no-verification
-          --exclude-detectors generic-api-key,email
+        extra_args: --no-verification
 
     - name: Install uv
       uses: astral-sh/setup-uv@v6
