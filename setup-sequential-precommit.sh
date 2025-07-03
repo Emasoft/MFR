@@ -2,27 +2,209 @@
 # Universal setup script for sequential execution with resource monitoring
 # Works in all environments: local, Docker, CI/CD
 # All configuration is project-local - no system files are modified
+# Version: 1.0.0
 
 set -euo pipefail
+
+# Script version
+readonly SCRIPT_VERSION="1.0.0"
+
+# Constants
+readonly DEFAULT_MEMORY_LIMIT_MB=2048
+readonly DEFAULT_TIMEOUT_SECONDS=600
+readonly DEFAULT_GLOBAL_TIMEOUT=900
+readonly DEFAULT_STALL_TIMEOUT=60
+readonly DEFAULT_MONITOR_KILL_THRESHOLD_MB=4096
+readonly MIN_FREE_MEMORY_MB=512
+readonly MIN_FREE_DISK_MB=100
+readonly LOCK_WAIT_SECONDS=30
+readonly PYTHON_VERSION="3.11"
+
+# Help function
+show_help() {
+    cat << EOF
+Universal Sequential Pre-commit Setup Script v${SCRIPT_VERSION}
+
+Usage: $0 [OPTIONS]
+
+Options:
+    -h, --help          Show this help message
+    -v, --version       Show version information
+    -f, --force         Force reinstall even if already configured
+    -q, --quiet         Suppress non-error output
+    --no-color          Disable colored output
+
+Environment Variables:
+    PROJECT_ROOT        Project root directory (default: current directory)
+    MEMORY_LIMIT_MB     Memory limit for hooks (default: ${DEFAULT_MEMORY_LIMIT_MB})
+    TIMEOUT_SECONDS     Timeout for individual hooks (default: ${DEFAULT_TIMEOUT_SECONDS})
+
+This script sets up a robust sequential pre-commit execution environment
+with three-layer defense against hanging processes.
+EOF
+    exit 0
+}
+
+# Parse command line arguments
+FORCE_INSTALL=false
+QUIET_MODE=false
+NO_COLOR=false
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help)
+            show_help
+            ;;
+        -v|--version)
+            echo "Sequential Pre-commit Setup v${SCRIPT_VERSION}"
+            exit 0
+            ;;
+        -f|--force)
+            FORCE_INSTALL=true
+            shift
+            ;;
+        -q|--quiet)
+            QUIET_MODE=true
+            shift
+            ;;
+        --no-color)
+            NO_COLOR=true
+            shift
+            ;;
+        *)
+            echo "Error: Unknown option $1" >&2
+            echo "Use $0 --help for usage information" >&2
+            exit 1
+            ;;
+    esac
+done
+
+# Color output functions
+if [[ "$NO_COLOR" == "false" ]] && [[ -t 1 ]]; then
+    RED='\033[0;31m'
+    GREEN='\033[0;32m'
+    YELLOW='\033[0;33m'
+    BLUE='\033[0;34m'
+    NC='\033[0m' # No Color
+else
+    RED=''
+    GREEN=''
+    YELLOW=''
+    BLUE=''
+    NC=''
+fi
+
+# Output functions
+info() {
+    [[ "$QUIET_MODE" == "false" ]] && echo -e "${BLUE}[INFO]${NC} $*"
+}
+
+warn() {
+    echo -e "${YELLOW}[WARN]${NC} $*" >&2
+}
+
+error() {
+    echo -e "${RED}[ERROR]${NC} $*" >&2
+}
+
+success() {
+    [[ "$QUIET_MODE" == "false" ]] && echo -e "${GREEN}[OK]${NC} $*"
+}
+
+# Progress indicator
+show_progress() {
+    local message="$1"
+    [[ "$QUIET_MODE" == "false" ]] && echo -ne "${BLUE}[*]${NC} ${message}..."
+}
+
+progress_done() {
+    [[ "$QUIET_MODE" == "false" ]] && echo -e " ${GREEN}done${NC}"
+}
+
+# Interrupt handler
+interrupt_handler() {
+    echo
+    error "Setup interrupted by user"
+    exit 130
+}
+trap interrupt_handler INT TERM
 
 # Detect environment
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="${PROJECT_ROOT:-$SCRIPT_DIR}"
-cd "$PROJECT_ROOT"
 
-# Platform detection
+# Validate PROJECT_ROOT
+if [[ ! -d "$PROJECT_ROOT" ]]; then
+    error "Project root directory does not exist: $PROJECT_ROOT"
+    exit 1
+fi
+
+# Check if it's a git repository
+if [[ ! -d "$PROJECT_ROOT/.git" ]]; then
+    warn "Not a git repository. Some features may not work correctly."
+fi
+
+cd "$PROJECT_ROOT" || exit 1
+
+# Platform detection with better Windows support
 detect_platform() {
     case "$OSTYPE" in
         linux-gnu*) echo "linux" ;;
         darwin*) echo "macos" ;;
         msys*|cygwin*|mingw*) echo "windows" ;;
-        *) echo "unknown" ;;
+        *)
+            # Fallback detection
+            if [[ -f /proc/version ]] && grep -qi microsoft /proc/version; then
+                echo "wsl"
+            else
+                echo "unknown"
+            fi
+            ;;
     esac
 }
 
+# Check system requirements
+check_system_requirements() {
+    show_progress "Checking system requirements"
+
+    # Check disk space
+    local free_disk_mb
+    if [[ "$PLATFORM" == "macos" ]]; then
+        free_disk_mb=$(df -m "$PROJECT_ROOT" | awk 'NR==2 {print $4}')
+    else
+        free_disk_mb=$(df -m "$PROJECT_ROOT" | awk 'NR==2 {print $4}')
+    fi
+
+    if [[ -n "$free_disk_mb" ]] && [[ "$free_disk_mb" -lt "$MIN_FREE_DISK_MB" ]]; then
+        error "Insufficient disk space: ${free_disk_mb}MB free (need at least ${MIN_FREE_DISK_MB}MB)"
+        exit 1
+    fi
+
+    # Check required commands
+    local missing_commands=()
+    for cmd in git curl awk sed; do
+        if ! command -v "$cmd" &> /dev/null; then
+            missing_commands+=("$cmd")
+        fi
+    done
+
+    if [[ ${#missing_commands[@]} -gt 0 ]]; then
+        error "Missing required commands: ${missing_commands[*]}"
+        error "Please install them before running this script"
+        exit 1
+    fi
+
+    progress_done
+}
+
 PLATFORM=$(detect_platform)
-echo "Setting up sequential execution protocol for platform: $PLATFORM"
-echo "Project root: $PROJECT_ROOT"
+info "Setting up sequential execution protocol"
+info "Platform: $PLATFORM"
+info "Project root: $PROJECT_ROOT"
+info "Script version: $SCRIPT_VERSION"
+
+# Run system checks
+check_system_requirements
 
 # Create virtual environment if it doesn't exist
 if [ ! -d ".venv" ]; then
@@ -105,8 +287,12 @@ else
 fi
 
 # Install pre-commit in the virtual environment
-echo "Installing pre-commit..."
-uv pip install pre-commit pre-commit-uv
+show_progress "Installing pre-commit"
+if ! uv pip install pre-commit pre-commit-uv; then
+    error "Failed to install pre-commit"
+    exit 1
+fi
+progress_done
 
 # Create wrapper scripts directory
 mkdir -p .pre-commit-wrappers
@@ -230,7 +416,20 @@ LOG_DIR=".pre-commit-logs"
 LOG_FILE="$LOG_DIR/resource_usage_${TIMESTAMP}.log"
 ERROR_FILE="$LOG_DIR/errors_${TIMESTAMP}.log"
 STATUS_FILE="$LOG_DIR/status_${TIMESTAMP}.log"
-LOCKFILE="/tmp/pre-commit-$(echo "$PROJECT_ROOT" | md5sum | cut -d' ' -f1).lock"
+# Cross-platform hash function
+get_project_hash() {
+    if command -v md5sum &> /dev/null; then
+        echo "$1" | md5sum | cut -d' ' -f1
+    elif command -v md5 &> /dev/null; then
+        echo "$1" | md5 -q
+    else
+        # Fallback: use cksum
+        echo "$1" | cksum | cut -d' ' -f1
+    fi
+}
+
+PROJECT_HASH=$(get_project_hash "$PROJECT_ROOT")
+LOCKFILE="/tmp/pre-commit-${PROJECT_HASH}.lock"
 COMM_PIPE="/tmp/pre-commit-comm-$$.pipe"
 
 # Process tracking
@@ -366,6 +565,14 @@ export PRE_COMMIT_NO_CONCURRENCY=1
 export PYTHONDONTWRITEBYTECODE=1
 export UV_NO_CACHE=1
 
+# Platform detection
+PLATFORM="unknown"
+case "$OSTYPE" in
+    linux-gnu*) PLATFORM="linux" ;;
+    darwin*) PLATFORM="macos" ;;
+    msys*|cygwin*|mingw*) PLATFORM="windows" ;;
+esac
+
 # Global watchdog - kills everything after timeout
 {
     sleep $GLOBAL_TIMEOUT
@@ -383,13 +590,28 @@ report_status "INIT: Watchdog started (PID: $WATCHDOG_PID)"
 heartbeat_monitor() {
     local last_heartbeat=$(date +%s)
     local check_interval=10
+    local max_iterations=$((GLOBAL_TIMEOUT / check_interval + 1))
+    local iteration=0
 
-    while true; do
+    while [ $iteration -lt $max_iterations ]; do
         sleep $check_interval
+        iteration=$((iteration + 1))
+
+        # Check if parent process is still alive
+        if ! kill -0 $$ 2>/dev/null; then
+            # Parent is gone, exit
+            exit 0
+        fi
 
         # Check if log file is being updated
         if [ -f "$LOG_FILE" ]; then
-            local last_modified=$(stat -f %m "$LOG_FILE" 2>/dev/null || stat -c %Y "$LOG_FILE" 2>/dev/null || echo 0)
+            # Cross-platform file modification time
+            local last_modified
+            if [[ "$PLATFORM" == "macos" ]] || [[ "$PLATFORM" == "darwin" ]]; then
+                last_modified=$(stat -f %m "$LOG_FILE" 2>/dev/null || echo 0)
+            else
+                last_modified=$(stat -c %Y "$LOG_FILE" 2>/dev/null || echo 0)
+            fi
             local current_time=$(date +%s)
             local stall_time=$((current_time - last_modified))
 
@@ -408,6 +630,9 @@ heartbeat_monitor() {
             break
         fi
     done
+
+    # Safety exit after max iterations
+    report_status "INFO: Heartbeat monitor exiting after ${iteration} iterations"
 }
 
 # Start heartbeat monitor
@@ -418,8 +643,11 @@ report_status "INIT: Heartbeat monitor started (PID: $HEARTBEAT_PID)"
 # Resource monitor function (simplified for robustness)
 monitor_resources() {
     local parent_pid=$1
+    local max_iterations=$GLOBAL_TIMEOUT
+    local iteration=0
 
-    while kill -0 "$parent_pid" 2>/dev/null; do
+    while [ $iteration -lt $max_iterations ] && kill -0 "$parent_pid" 2>/dev/null; do
+        iteration=$((iteration + 1))
         local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
         local memory_mb=$(ps -o rss= -p "$parent_pid" 2>/dev/null | awk '{print int($1/1024)}' || echo "0")
 
@@ -433,8 +661,21 @@ monitor_resources() {
             break
         fi
 
+        # Log rotation to prevent disk fill
+        if [ $((iteration % 300)) -eq 0 ]; then
+            # Every 5 minutes, check log size
+            local log_size=$(wc -c < "$LOG_FILE" 2>/dev/null || echo 0)
+            if [ "$log_size" -gt $((10 * 1024 * 1024)) ]; then
+                # If log is over 10MB, rotate it
+                mv "$LOG_FILE" "${LOG_FILE}.old"
+                echo "[$timestamp] Log rotated at ${log_size} bytes" > "$LOG_FILE"
+            fi
+        fi
+
         sleep 1
     done
+
+    report_status "INFO: Resource monitor exiting after ${iteration} iterations"
 }
 
 # Check system resources before starting
@@ -535,7 +776,12 @@ if ! grep -q ".pre-commit-logs" .gitignore 2>/dev/null; then
     echo ".pre-commit-logs/" >> .gitignore
 fi
 
-echo "✓ Sequential pre-commit with robust monitoring setup complete!"
+# Create version file
+cat > .sequential-precommit-version << EOF
+${SCRIPT_VERSION}
+EOF
+
+success "Sequential pre-commit with robust monitoring setup complete!"
 echo ""
 echo "Environment configuration saved to: .sequential-precommit-env"
 echo "To manually source the environment:"

@@ -5,21 +5,52 @@ services:
     build:
       context: ../..
       dockerfile: docker/sequential-precommit/Dockerfile
+      args:
+        UV_VERSION: "0.5.14"
+        TRUFFLEHOG_VERSION: "latest"
     image: sequential-precommit:latest
     container_name: sequential-precommit-${PROJECT_NAME:-default}
     volumes:
       - ../../:/workspace
       - /workspace/.venv  # Exclude venv from volume mount
       - /workspace/node_modules  # Exclude node_modules if present
+      - /workspace/.git  # Exclude .git to avoid corruption
     environment:
       - PROJECT_ROOT=/workspace
       - PRE_COMMIT_MAX_WORKERS=1
       - MEMORY_LIMIT_MB=${MEMORY_LIMIT_MB:-2048}
       - DOCKER_MEMORY_LIMIT=${DOCKER_MEMORY_LIMIT:-4g}
       - DOCKER_CPU_LIMIT=${DOCKER_CPU_LIMIT:-2}
-    mem_limit: ${DOCKER_MEMORY_LIMIT:-4g}
-    cpus: ${DOCKER_CPU_LIMIT:-2}
+    deploy:
+      resources:
+        limits:
+          memory: ${DOCKER_MEMORY_LIMIT:-4g}
+          cpus: '${DOCKER_CPU_LIMIT:-2}'
+        reservations:
+          memory: 512m
+          cpus: '0.5'
     working_dir: /workspace
     stdin_open: true
     tty: true
-    command: /bin/bash -c "source .sequential-precommit-env && pre-commit run --all-files"
+    init: true  # Proper signal handling
+    security_opt:
+      - no-new-privileges:true
+    command: >
+      /bin/bash -c "
+      set -euo pipefail;
+      if [[ -f '.sequential-precommit-env' ]]; then
+        source .sequential-precommit-env;
+      fi;
+      if [[ -f '.venv/bin/activate' ]]; then
+        source .venv/bin/activate;
+      else
+        echo 'Virtual environment not found. Run setup first.';
+        exit 1;
+      fi;
+      pre-commit run --all-files --show-diff-on-failure
+      "
+
+# Network configuration
+networks:
+  default:
+    driver: bridge

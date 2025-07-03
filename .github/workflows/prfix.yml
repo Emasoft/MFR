@@ -64,9 +64,15 @@ jobs:
     - name: Commit fixes
       if: steps.autofix.outputs.fixes_applied == 'true'
       run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
+        git config --local user.email "713559+Emasoft@users.noreply.github.com"
+        git config --local user.name "Emasoft"
         git add -A
+        # Verify no sensitive files are being committed
+        if git diff --cached --name-only | grep -E '\.(env|key|pem|secret)$'; then
+          echo "Error: Attempting to commit sensitive files"
+          git reset
+          exit 1
+        fi
         git commit -m "fix: Auto-fix formatting and linting issues (sequential)"
         git push
 
@@ -79,5 +85,5 @@ jobs:
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: '✅ Sequential auto-fixes applied! Please pull the latest changes.'
+            body: '✅ Sequential auto-fixes applied! Please pull the latest changes.\n\nThe following hooks made changes:\n- Formatting: ruff, prettier\n- Linting: trailing-whitespace, end-of-file-fixer'
           })

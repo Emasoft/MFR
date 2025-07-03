@@ -51,10 +51,17 @@ jobs:
 
     - name: Install local tools
       run: |
-        # Install Trufflehog to project bin
+        # Install Trufflehog to project bin (secure method)
         mkdir -p .venv/bin
-        curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | \
-          sh -s -- -b .venv/bin
+        INSTALLER_SCRIPT="$(mktemp)"
+        curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh -o "$INSTALLER_SCRIPT"
+        if head -1 "$INSTALLER_SCRIPT" | grep -q '^#!/'; then
+          sh "$INSTALLER_SCRIPT" -b .venv/bin
+        else
+          echo "Error: Invalid installer script"
+          exit 1
+        fi
+        rm -f "$INSTALLER_SCRIPT"
 
     - name: Run pre-commit hooks sequentially
       run: |
@@ -69,6 +76,16 @@ jobs:
 
     - name: Memory usage report
       if: always()
-      run: |-
+      run: |
         echo "Final memory usage:"
         free -h || true
+        echo "Disk usage:"
+        df -h . || true
+
+    - name: Upload logs
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: pre-commit-logs
+        path: .pre-commit-logs/
+        retention-days: 7
