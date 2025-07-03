@@ -97,7 +97,7 @@ def load_replacement_map(
         if not isinstance(k_orig_json, str) or not isinstance(v_original, str):
             log_message(
                 logging.WARNING,
-                f"Skipping invalid key-value pair (must be strings): key={repr(k_orig_json)} " f"(type={type(k_orig_json).__name__}), value={repr(v_original)} " f"(type={type(v_original).__name__})",
+                f"Skipping invalid key-value pair (must be strings): key={repr(k_orig_json)} (type={type(k_orig_json).__name__}), value={repr(v_original)} (type={type(v_original).__name__})",
                 logger,
             )
             continue
@@ -124,22 +124,22 @@ def load_replacement_map(
 
         log_message(
             logging.DEBUG,
-            f"  DEBUG MAP LOAD: JSON Key='{k_orig_json}' (len {len(k_orig_json)}, " f"ords={[ord(c) for c in k_orig_json]})",
+            f"  DEBUG MAP LOAD: JSON Key='{k_orig_json}' (len {len(k_orig_json)}, ords={[ord(c) for c in k_orig_json]})",
             logger,
         )
         log_message(
             logging.DEBUG,
-            f"    -> NoControls='{temp_stripped_key_no_controls}' " f"(len {len(temp_stripped_key_no_controls)}, " f"ords={[ord(c) for c in temp_stripped_key_no_controls]})",
+            f"    -> NoControls='{temp_stripped_key_no_controls}' (len {len(temp_stripped_key_no_controls)}, ords={[ord(c) for c in temp_stripped_key_no_controls]})",
             logger,
         )
         log_message(
             logging.DEBUG,
-            f"    -> NoDiacritics='{temp_stripped_key_no_diacritics}' " f"(len {len(temp_stripped_key_no_diacritics)}, " f"ords={[ord(c) for c in temp_stripped_key_no_diacritics]})",
+            f"    -> NoDiacritics='{temp_stripped_key_no_diacritics}' (len {len(temp_stripped_key_no_diacritics)}, ords={[ord(c) for c in temp_stripped_key_no_diacritics]})",
             logger,
         )
         log_message(
             logging.DEBUG,
-            f"    -> CanonicalKey (NFC)='{canonical_key}' (len {len(canonical_key)}, " f"ords={[ord(c) for c in canonical_key]})",
+            f"    -> CanonicalKey (NFC)='{canonical_key}' (len {len(canonical_key)}, ords={[ord(c) for c in canonical_key]})",
             logger,
         )
         log_message(logging.DEBUG, f"    -> Maps to Value: '{v_original}'", logger)
@@ -152,7 +152,7 @@ def load_replacement_map(
     set_raw_mapping(temp_raw_mapping)
     log_message(
         logging.DEBUG,
-        f"DEBUG MAP LOAD: _RAW_REPLACEMENT_MAPPING populated with {len(temp_raw_mapping)} entries: " f"{list(temp_raw_mapping.keys())[:10]}...",
+        f"DEBUG MAP LOAD: _RAW_REPLACEMENT_MAPPING populated with {len(temp_raw_mapping)} entries: {list(temp_raw_mapping.keys())[:10]}...",
         logger,
     )
 
@@ -180,7 +180,7 @@ def load_replacement_map(
                     break
             log_message(
                 logging.ERROR,
-                f"Recursive mapping potential! Value '{value_original_from_map}' " f"(for original JSON key '{original_json_key_for_error_report}', " f"its canonical form '{normalized_value_stripped_for_check}' is also a canonical key). " f"This is disallowed. Aborting.",
+                f"Recursive mapping potential! Value '{value_original_from_map}' (for original JSON key '{original_json_key_for_error_report}', its canonical form '{normalized_value_stripped_for_check}' is also a canonical key). This is disallowed. Aborting.",
                 logger,
             )
             set_raw_mapping({})

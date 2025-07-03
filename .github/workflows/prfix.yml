@@ -50,16 +50,13 @@ jobs:
         source .venv/bin/activate
         source .sequential-precommit-env || true
 
-        # Track if changes were made
-        git diff --exit-code && NO_CHANGES=true || NO_CHANGES=false
-
         # Run auto-fixable hooks only
         pre-commit run --all-files || true
 
         # Check if fixes were applied
         git diff --exit-code && FIXES_APPLIED=false || FIXES_APPLIED=true
 
-        echo "fixes_applied=$FIXES_APPLIED" >> $GITHUB_OUTPUT
+        echo "fixes_applied=$FIXES_APPLIED" >> "$GITHUB_OUTPUT"
 
     - name: Commit fixes
       if: steps.autofix.outputs.fixes_applied == 'true'
@@ -80,10 +77,15 @@ jobs:
       if: steps.autofix.outputs.fixes_applied == 'true'
       uses: actions/github-script@v7
       with:
-        script: |
+        script: |-
           github.rest.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: '✅ Sequential auto-fixes applied! Please pull the latest changes.\n\nThe following hooks made changes:\n- Formatting: ruff, prettier\n- Linting: trailing-whitespace, end-of-file-fixer'
+            body: |
+              ✅ Sequential auto-fixes applied! Please pull the latest changes.
+
+              The following hooks made changes:
+              - Formatting: ruff, prettier
+              - Linting: trailing-whitespace, end-of-file-fixer
           })

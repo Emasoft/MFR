@@ -123,7 +123,7 @@ def perform_scan_phase(
                                 continue
                             mtime = item_fs.stat().st_mtime
                             if rel_p in path_last_processed_time and mtime > path_last_processed_time[rel_p]:
-                                logger.info(f"File '{rel_p}' (mtime:{mtime:.0f}) modified after last process " f"(ts:{path_last_processed_time[rel_p]:.0f}). Re-scan.")
+                                logger.info(f"File '{rel_p}' (mtime:{mtime:.0f}) modified after last process (ts:{path_last_processed_time[rel_p]:.0f}). Re-scan.")
                                 if paths_to_force_rescan is not None:
                                     paths_to_force_rescan.add(rel_p)
                     except OSError as e:

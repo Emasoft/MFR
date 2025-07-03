@@ -106,7 +106,7 @@ def replace_occurrences(input_string: str) -> str:
         String with all replacements applied
     """
     if is_debug_enabled():
-        entry_debug_msg = f"REPLACE_OCC_ENTRY: input='{input_string[:30] if isinstance(input_string, str) else str(input_string)[:30]}...', " f"_MAPPING_LOADED={is_mapping_loaded()}, " f"pattern_is_set={get_replace_pattern() is not None}, " f"map_is_populated={bool(get_raw_mapping())}"
+        entry_debug_msg = f"REPLACE_OCC_ENTRY: input='{input_string[:30] if isinstance(input_string, str) else str(input_string)[:30]}...', _MAPPING_LOADED={is_mapping_loaded()}, pattern_is_set={get_replace_pattern() is not None}, map_is_populated={bool(get_raw_mapping())}"
         log_message(logging.DEBUG, entry_debug_msg, get_module_logger())
 
     # Ensure input is normalized to NFC for consistent matching
@@ -121,7 +121,7 @@ def replace_occurrences(input_string: str) -> str:
     if not is_mapping_loaded() or not pattern or not raw_mapping or not isinstance(normalized_input, str):
         log_message(
             logging.DEBUG,
-            f"DEBUG_REPLACE_OCCURRENCES: Early exit. _MAPPING_LOADED={is_mapping_loaded()}, " f"_COMPILED_PATTERN_FOR_ACTUAL_REPLACE is {'None' if pattern is None else 'Set'}, " f"_RAW_REPLACEMENT_MAPPING is {'Empty' if not raw_mapping else 'Populated'}",
+            f"DEBUG_REPLACE_OCCURRENCES: Early exit. _MAPPING_LOADED={is_mapping_loaded()}, _COMPILED_PATTERN_FOR_ACTUAL_REPLACE is {'None' if pattern is None else 'Set'}, _RAW_REPLACEMENT_MAPPING is {'Empty' if not raw_mapping else 'Populated'}",
             get_module_logger(),
         )
         return normalized_input if isinstance(normalized_input, str) else input_string
@@ -130,7 +130,7 @@ def replace_occurrences(input_string: str) -> str:
     search_result = pattern.search(normalized_input)
     log_message(
         logging.DEBUG,
-        f"DEBUG_REPLACE_OCCURRENCES: Input (original): {input_string!r}, " f"Search found: {'YES' if search_result else 'NO'}",
+        f"DEBUG_REPLACE_OCCURRENCES: Input (original): {input_string!r}, Search found: {'YES' if search_result else 'NO'}",
         get_module_logger(),
     )
     if search_result:

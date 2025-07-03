@@ -103,7 +103,7 @@ def search_binary_file(
                             else:
                                 log_path_str = str(file_path.relative_to(root_dir)).replace("\\", "/")
                             with binary_log_path.open("a", encoding="utf-8") as log_f:
-                                log_f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - MATCH: " f"File: {log_path_str}, Key: '{key_str}', Offset: {actual_offset}\n")
+                                log_f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - MATCH: File: {log_path_str}, Key: '{key_str}', Offset: {actual_offset}\n")
                         offset = idx + len(key_bytes)
 
                 # Update global offset
