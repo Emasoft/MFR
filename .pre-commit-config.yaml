@@ -44,28 +44,41 @@ repos:
     hooks:
       - id: trailing-whitespace
         stages: [pre-commit]
+        require_serial: true
       - id: end-of-file-fixer
         stages: [pre-commit]
+        require_serial: true
       - id: check-yaml
         stages: [pre-commit]
         args: [--allow-multiple-documents]
+        require_serial: true
       - id: check-added-large-files
         stages: [pre-commit]
         args: ['--maxkb=1000']
+        require_serial: true
       - id: check-toml
         stages: [pre-commit]
+        require_serial: true
       - id: check-json
         stages: [pre-commit]
+        require_serial: true
       - id: check-merge-conflict
         stages: [pre-commit]
+        require_serial: true
       - id: debug-statements
+        require_serial: true
       - id: detect-private-key
+        require_serial: true
       - id: mixed-line-ending
         args: [--fix=lf]
+        require_serial: true
       - id: check-case-conflict
+        require_serial: true
       - id: check-docstring-first
+        require_serial: true
       - id: pretty-format-json
         args: [--autofix, --no-sort-keys]
+        require_serial: true
 
   # Python tools (all with require_serial: true)
   - repo: https://github.com/astral-sh/ruff-pre-commit

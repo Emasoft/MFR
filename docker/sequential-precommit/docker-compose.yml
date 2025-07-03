@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  precommit:
+    build:
+      context: ../..
+      dockerfile: docker/sequential-precommit/Dockerfile
+    image: sequential-precommit:latest
+    container_name: sequential-precommit-${PROJECT_NAME:-default}
+    volumes:
+      - ../../:/workspace
+      - /workspace/.venv  # Exclude venv from volume mount
+      - /workspace/node_modules  # Exclude node_modules if present
+    environment:
+      - PROJECT_ROOT=/workspace
+      - PRE_COMMIT_MAX_WORKERS=1
+      - MEMORY_LIMIT_MB=${MEMORY_LIMIT_MB:-2048}
+      - DOCKER_MEMORY_LIMIT=${DOCKER_MEMORY_LIMIT:-4g}
+      - DOCKER_CPU_LIMIT=${DOCKER_CPU_LIMIT:-2}
+    mem_limit: ${DOCKER_MEMORY_LIMIT:-4g}
+    cpus: ${DOCKER_CPU_LIMIT:-2}
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    command: /bin/bash -c "source .sequential-precommit-env && pre-commit run --all-files"

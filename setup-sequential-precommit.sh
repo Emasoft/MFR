@@ -1,44 +1,112 @@
 #!/usr/bin/env bash
-# Enhanced setup script for sequential pre-commit execution with resource monitoring
+# Universal setup script for sequential execution with resource monitoring
+# Works in all environments: local, Docker, CI/CD
 # All configuration is project-local - no system files are modified
 
 set -euo pipefail
 
-echo "Setting up project-local sequential pre-commit with resource monitoring..."
+# Detect environment
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="${PROJECT_ROOT:-$SCRIPT_DIR}"
+cd "$PROJECT_ROOT"
+
+# Platform detection
+detect_platform() {
+    case "$OSTYPE" in
+        linux-gnu*) echo "linux" ;;
+        darwin*) echo "macos" ;;
+        msys*|cygwin*|mingw*) echo "windows" ;;
+        *) echo "unknown" ;;
+    esac
+}
+
+PLATFORM=$(detect_platform)
+echo "Setting up sequential execution protocol for platform: $PLATFORM"
+echo "Project root: $PROJECT_ROOT"
 
 # Create virtual environment if it doesn't exist
 if [ ! -d ".venv" ]; then
     echo "Creating virtual environment..."
-    uv venv
+    if command -v uv &> /dev/null; then
+        uv venv --python 3.11
+    elif command -v python3 &> /dev/null; then
+        python3 -m venv .venv
+    else
+        echo "Error: Neither uv nor python3 found"
+        exit 1
+    fi
 fi
 
-# Create activation hooks directory for environment variables
+# Create project-local environment configuration
 echo "Setting up project-local environment configuration..."
-mkdir -p .venv/bin/activate.d 2>/dev/null || mkdir -p .venv/Scripts/activate.d 2>/dev/null
 
-# Create environment configuration that will be sourced on activation
-cat > .venv/bin/activate.d/sequential-precommit.sh << 'EOF'
+# Create the main environment file with relocatable paths
+cat > .sequential-precommit-env << 'EOF'
 #!/usr/bin/env bash
-# Project-local environment configuration
-export PRE_COMMIT_MAX_WORKERS=1
-export PYTHONDONTWRITEBYTECODE=1
-export UV_NO_CACHE=1
-export PRE_COMMIT_NO_CONCURRENCY=1
-export MEMORY_LIMIT_MB=2048
-export TIMEOUT_SECONDS=600
-export TRUFFLEHOG_TIMEOUT=300
-export TRUFFLEHOG_MEMORY_MB=1024
-export TRUFFLEHOG_CONCURRENCY=1
+# Project-local environment configuration for sequential execution
+# Relocatable - uses relative paths from PROJECT_ROOT
+
+# Get the directory of this script
+if [ -n "${BASH_SOURCE[0]}" ]; then
+    _ENV_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+else
+    _ENV_DIR="$(pwd)"
+fi
+
+# Export PROJECT_ROOT for all scripts
+export PROJECT_ROOT="${PROJECT_ROOT:-$_ENV_DIR}"
+
+# Core pre-commit settings - force sequential execution
+export PRE_COMMIT_MAX_WORKERS=1              # Limit pre-commit to single worker
+export PRE_COMMIT_NO_CONCURRENCY=1           # Additional safety flag
+export PRE_COMMIT_COLOR=always               # Keep color output
+
+# Python settings
+export PYTHONDONTWRITEBYTECODE=1             # Don't create .pyc files
+export PYTHONUNBUFFERED=1                    # Unbuffered output for real-time logs
+
+# UV package manager settings
+export UV_NO_CACHE=1                         # Disable cache to reduce memory usage
+export UV_SYSTEM_PYTHON=0                    # Use venv Python only
+
+# Resource limits for hooks
+export MEMORY_LIMIT_MB=${MEMORY_LIMIT_MB:-2048}        # Max memory per hook (2GB)
+export TIMEOUT_SECONDS=${TIMEOUT_SECONDS:-600}         # Global timeout (10 minutes)
+
+# TruffleHog specific settings
+export TRUFFLEHOG_TIMEOUT=${TRUFFLEHOG_TIMEOUT:-300}   # 5 minute timeout
+export TRUFFLEHOG_MEMORY_MB=${TRUFFLEHOG_MEMORY_MB:-1024}  # 1GB memory limit
+export TRUFFLEHOG_CONCURRENCY=1                        # Single thread
+export TRUFFLEHOG_MAX_DEPTH=50                         # Limit git history depth
+
+# Monitoring settings
+export MONITOR_KILL_THRESHOLD_MB=${MONITOR_KILL_THRESHOLD_MB:-4096}  # Kill if exceeds 4GB
+export MONITOR_INTERVAL_SECONDS=1                      # Check resources every second
+export MAX_LOG_FILES=10                                # Rotate logs to prevent disk fill
+
+# Docker-specific settings
+export DOCKER_MEMORY_LIMIT="${DOCKER_MEMORY_LIMIT:-4g}"
+export DOCKER_CPU_LIMIT="${DOCKER_CPU_LIMIT:-2}"
+
+# CI/CD settings
+export CI_SEQUENTIAL_MODE=1                            # Force sequential in CI
+export CI_TIMEOUT_MINUTES=${CI_TIMEOUT_MINUTES:-45}    # CI job timeout
 EOF
 
-chmod +x .venv/bin/activate.d/sequential-precommit.sh 2>/dev/null || true
+# Make it executable
+chmod +x .sequential-precommit-env
 
 # Activate virtual environment
-source .venv/bin/activate
+if [ -f ".venv/bin/activate" ]; then
+    source .venv/bin/activate
+else
+    echo "Error: Failed to create virtual environment"
+    exit 1
+fi
 
-# Install pre-commit as a uv tool (project-local)
+# Install pre-commit in the virtual environment
 echo "Installing pre-commit..."
-uv tool install pre-commit --with pre-commit-uv
+uv pip install pre-commit pre-commit-uv
 
 # Create wrapper scripts directory
 mkdir -p .pre-commit-wrappers
@@ -68,7 +136,11 @@ fi
 
 # Cleanup on exit
 cleanup() {
-    pkill -P $$ 2>/dev/null || true
+    # Kill child processes of this script
+    local children=$(jobs -p)
+    if [ -n "$children" ]; then
+        kill $children 2>/dev/null || true
+    fi
     if [[ "$COMMAND" == *"python"* ]] || [[ "$COMMAND" == *"uv"* ]]; then
         python3 -c "import gc; gc.collect()" 2>/dev/null || true
     fi
@@ -94,7 +166,6 @@ set -euo pipefail
 
 # Use project-local environment variables
 TIMEOUT="${TRUFFLEHOG_TIMEOUT:-300}"
-MEMORY_LIMIT="${TRUFFLEHOG_MEMORY_MB:-1024}"
 CONCURRENCY="${TRUFFLEHOG_CONCURRENCY:-1}"
 
 # Check if trufflehog is installed
@@ -136,270 +207,339 @@ EOF
 
 chmod +x .pre-commit-wrappers/*.sh
 
-# Create git hook with resource monitoring
-cat > .git/hooks/pre-commit << 'EOF'
+# Create robust pre-commit wrapper with three-layer defense
+cat > .git/hooks/pre-commit-wrapper-robust << 'EOF'
 #!/usr/bin/env bash
-# Git pre-commit hook with resource monitoring
-# Monitors memory, file descriptors, and processes during pre-commit execution
+# Robust pre-commit wrapper with three-layer defense against hanging processes
+# Prevents: 1) Zombie processes 2) Silent failures 3) Indefinite hangs
 
+# Enable strict mode and job control
+set -euo pipefail
+set -m  # Enable job control for process group management
+
+# Global configuration
+GLOBAL_TIMEOUT=900                    # 15 minutes max for entire pre-commit
+STALL_TIMEOUT=60                     # 1 minute without activity = stalled
+MEMORY_LIMIT_MB="${MEMORY_LIMIT_MB:-4096}"
 PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "$PROJECT_ROOT" || exit 1
 
-# Source project virtual environment
-if [ -f ".venv/bin/activate" ]; then
-    source .venv/bin/activate
-fi
-
-# Source sequential configuration
-if [ -f ".venv/bin/activate.d/sequential-precommit.sh" ]; then
-    source .venv/bin/activate.d/sequential-precommit.sh
-fi
-
-# Configuration
-MEMORY_LIMIT_MB="${MEMORY_LIMIT_MB:-4096}"
+# File paths
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 LOG_DIR=".pre-commit-logs"
-MONITOR_INTERVAL=1
+LOG_FILE="$LOG_DIR/resource_usage_${TIMESTAMP}.log"
+ERROR_FILE="$LOG_DIR/errors_${TIMESTAMP}.log"
+STATUS_FILE="$LOG_DIR/status_${TIMESTAMP}.log"
+LOCKFILE="/tmp/pre-commit-$(echo "$PROJECT_ROOT" | md5sum | cut -d' ' -f1).lock"
+COMM_PIPE="/tmp/pre-commit-comm-$$.pipe"
 
-# Create log directory
+# Process tracking
+MONITOR_PID=""
+PRE_COMMIT_PID=""
+WATCHDOG_PID=""
+HEARTBEAT_PID=""
+EXIT_CODE=0
+
+# Ensure directories exist
 mkdir -p "$LOG_DIR"
 
-# Generate timestamp for log file
-TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-LOG_FILE="$LOG_DIR/resource_usage_${TIMESTAMP}.log"
-MONITOR_PID_FILE="/tmp/pre-commit-monitor-$$.pid"
+# Create communication pipe
+mkfifo "$COMM_PIPE" 2>/dev/null || true
 
-# Function to get memory usage in MB
-get_memory_usage() {
+# Initialize log
+{
+    echo "=== Robust Pre-commit Wrapper ==="
+    echo "Started: $(date)"
+    echo "PID: $$"
+    echo "Process Group: -$$"
+    echo "Global Timeout: ${GLOBAL_TIMEOUT}s"
+    echo "Stall Timeout: ${STALL_TIMEOUT}s"
+    echo "================================"
+} > "$LOG_FILE"
+
+# Function to report status through pipe
+report_status() {
+    local status="$1"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $status" >> "$STATUS_FILE"
+    echo "$status" > "$COMM_PIPE" 2>/dev/null || true
+}
+
+# Function to kill entire process tree
+kill_process_tree() {
     local pid=$1
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        # macOS: Get RSS in bytes and convert to MB
-        ps -o rss= -p "$pid" 2>/dev/null | awk '{print int($1/1024)}' || echo "0"
-    else
-        # Linux: Get RSS in KB and convert to MB
-        ps -o rss= -p "$pid" 2>/dev/null | awk '{print int($1/1024)}' || echo "0"
-    fi
+    local signal=${2:-TERM}
+
+    # First, try to kill the process group
+    kill -$signal -$pid 2>/dev/null || true
+
+    # Then kill individual processes
+    for child in $(pgrep -P "$pid" 2>/dev/null); do
+        kill_process_tree "$child" "$signal"
+    done
+
+    kill -$signal "$pid" 2>/dev/null || true
 }
 
-# Function to get open file descriptors
-get_fd_count() {
-    local pid=$1
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        lsof -p "$pid" 2>/dev/null | wc -l || echo "0"
-    else
-        ls /proc/"$pid"/fd 2>/dev/null | wc -l || echo "0"
-    fi
-}
+# Master cleanup function - ALWAYS runs
+cleanup() {
+    local exit_code=$?
+    report_status "CLEANUP: Starting cleanup (exit code: $exit_code)"
 
-# Function to count child processes
-get_child_count() {
-    local pid=$1
-    pgrep -P "$pid" 2>/dev/null | wc -l || echo "0"
-}
+    # Disable traps during cleanup
+    trap '' EXIT INT TERM
 
-# Function to get system-wide metrics
-get_system_metrics() {
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    local mem_free mem_total
-
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        # macOS
-        mem_info=$(vm_stat | grep -E "(free|inactive|active|wired)")
-        page_size=$(pagesize 2>/dev/null || echo 16384)
-        mem_free=$(echo "$mem_info" | grep "Pages free" | awk '{print $3}' | sed 's/\.//')
-        mem_free=$((mem_free * page_size / 1024 / 1024))
-    else
-        # Linux
-        mem_free=$(free -m | awk 'NR==2{print $4}')
+    # Kill watchdog first to prevent it from killing us
+    if [ -n "$WATCHDOG_PID" ] && kill -0 "$WATCHDOG_PID" 2>/dev/null; then
+        kill -KILL "$WATCHDOG_PID" 2>/dev/null || true
     fi
 
-    echo "[$timestamp] System - Free Memory: ${mem_free}MB"
+    # Kill heartbeat monitor
+    if [ -n "$HEARTBEAT_PID" ] && kill -0 "$HEARTBEAT_PID" 2>/dev/null; then
+        kill -TERM "$HEARTBEAT_PID" 2>/dev/null || true
+    fi
+
+    # Kill resource monitor
+    if [ -n "$MONITOR_PID" ] && kill -0 "$MONITOR_PID" 2>/dev/null; then
+        kill -TERM "$MONITOR_PID" 2>/dev/null || true
+        wait "$MONITOR_PID" 2>/dev/null || true
+    fi
+
+    # Kill pre-commit if still running
+    if [ -n "$PRE_COMMIT_PID" ] && kill -0 "$PRE_COMMIT_PID" 2>/dev/null; then
+        report_status "CLEANUP: Force killing pre-commit $PRE_COMMIT_PID"
+        kill_process_tree "$PRE_COMMIT_PID" TERM
+        sleep 2
+        kill_process_tree "$PRE_COMMIT_PID" KILL
+    fi
+
+    # Kill entire process group (belt and suspenders)
+    kill -TERM -$$ 2>/dev/null || true
+
+    # Clean up files
+    rm -f "$COMM_PIPE" 2>/dev/null || true
+
+    # Release lock
+    if [ -n "${LOCK_FD:-}" ]; then
+        flock -u "$LOCK_FD" 2>/dev/null || true
+    fi
+
+    # Final report
+    {
+        echo ""
+        echo "=== Cleanup Complete ==="
+        echo "Exit Code: ${EXIT_CODE:-$exit_code}"
+        echo "Ended: $(date)"
+        echo "======================="
+    } >> "$LOG_FILE"
+
+    # Display summary
+    echo ""
+    echo "Pre-commit completed with exit code: ${EXIT_CODE:-$exit_code}"
+    echo "Logs: $LOG_FILE"
+    [ -s "$ERROR_FILE" ] && echo "Errors: $ERROR_FILE" && cat "$ERROR_FILE" >&2
+
+    exit ${EXIT_CODE:-$exit_code}
 }
 
-# Monitoring function
+# Set master trap
+trap cleanup EXIT INT TERM
+
+# Acquire lock with timeout
+exec 200>"$LOCKFILE"
+LOCK_FD=200
+if ! flock -n 200; then
+    echo "Pre-commit is already running. Waiting (max 30s)..." >&2
+    if ! flock -w 30 200; then
+        echo "ERROR: Could not acquire lock after 30s" >&2
+        EXIT_CODE=1
+        exit 1
+    fi
+fi
+
+# Source environment
+[ -f ".venv/bin/activate" ] && source .venv/bin/activate
+[ -f ".sequential-precommit-env" ] && source .sequential-precommit-env
+
+# Force sequential execution
+export PRE_COMMIT_MAX_WORKERS=1
+export PRE_COMMIT_NO_CONCURRENCY=1
+export PYTHONDONTWRITEBYTECODE=1
+export UV_NO_CACHE=1
+
+# Global watchdog - kills everything after timeout
+{
+    sleep $GLOBAL_TIMEOUT
+    report_status "ERROR: Global timeout reached (${GLOBAL_TIMEOUT}s)"
+    echo "FATAL: Pre-commit global timeout!" >&2
+    kill_process_tree $$ TERM
+    sleep 5
+    kill_process_tree $$ KILL
+} &
+WATCHDOG_PID=$!
+
+report_status "INIT: Watchdog started (PID: $WATCHDOG_PID)"
+
+# Heartbeat monitor - detects stalled processes
+heartbeat_monitor() {
+    local last_heartbeat=$(date +%s)
+    local check_interval=10
+
+    while true; do
+        sleep $check_interval
+
+        # Check if log file is being updated
+        if [ -f "$LOG_FILE" ]; then
+            local last_modified=$(stat -f %m "$LOG_FILE" 2>/dev/null || stat -c %Y "$LOG_FILE" 2>/dev/null || echo 0)
+            local current_time=$(date +%s)
+            local stall_time=$((current_time - last_modified))
+
+            if [ "$stall_time" -gt "$STALL_TIMEOUT" ]; then
+                report_status "ERROR: Process stalled for ${stall_time}s"
+                echo "ERROR: Pre-commit appears to be stalled (no activity for ${stall_time}s)" >&2
+                kill_process_tree $$ TERM
+                EXIT_CODE=124  # Timeout exit code
+                exit 124
+            fi
+        fi
+
+        # Check if pre-commit is still alive
+        if [ -n "$PRE_COMMIT_PID" ] && ! kill -0 "$PRE_COMMIT_PID" 2>/dev/null; then
+            report_status "INFO: Pre-commit process ended"
+            break
+        fi
+    done
+}
+
+# Start heartbeat monitor
+heartbeat_monitor &
+HEARTBEAT_PID=$!
+report_status "INIT: Heartbeat monitor started (PID: $HEARTBEAT_PID)"
+
+# Resource monitor function (simplified for robustness)
 monitor_resources() {
     local parent_pid=$1
-    echo "=== Pre-commit Resource Monitor ===" > "$LOG_FILE"
-    echo "Started: $(date)" >> "$LOG_FILE"
-    echo "Memory limit: ${MEMORY_LIMIT_MB}MB" >> "$LOG_FILE"
-    echo "Monitoring PID: $parent_pid" >> "$LOG_FILE"
-    echo "===================================" >> "$LOG_FILE"
-
-    local warning_issued=false
-    local critical_issued=false
-    local max_memory=0
-    local max_fd=0
-    local max_children=0
 
     while kill -0 "$parent_pid" 2>/dev/null; do
         local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-        local memory_mb=$(get_memory_usage "$parent_pid")
-        local fd_count=$(get_fd_count "$parent_pid")
-        local child_count=$(get_child_count "$parent_pid")
+        local memory_mb=$(ps -o rss= -p "$parent_pid" 2>/dev/null | awk '{print int($1/1024)}' || echo "0")
 
-        # Track maximums
-        [ "$memory_mb" -gt "$max_memory" ] && max_memory=$memory_mb
-        [ "$fd_count" -gt "$max_fd" ] && max_fd=$fd_count
-        [ "$child_count" -gt "$max_children" ] && max_children=$child_count
+        echo "[$timestamp] PID $parent_pid - Memory: ${memory_mb}MB" >> "$LOG_FILE"
 
-        # Log current metrics
-        echo "[$timestamp] PID $parent_pid - Memory: ${memory_mb}MB, FDs: $fd_count, Children: $child_count" >> "$LOG_FILE"
-
-        # Get all child processes and their memory
-        local total_memory=$memory_mb
-        for child_pid in $(pgrep -P "$parent_pid" 2>/dev/null); do
-            local child_mem=$(get_memory_usage "$child_pid")
-            local child_cmd=$(ps -p "$child_pid" -o comm= 2>/dev/null || echo "unknown")
-            total_memory=$((total_memory + child_mem))
-            if [ "$child_mem" -gt 10 ]; then  # Only log children using >10MB
-                echo "  └─ Child PID $child_pid ($child_cmd) - Memory: ${child_mem}MB" >> "$LOG_FILE"
-            fi
-        done
-
-        # Check for issues
-        local issues=()
-
-        # Memory checks
-        if [ "$total_memory" -gt "$MEMORY_LIMIT_MB" ]; then
-            issues+=("CRITICAL: Total memory usage (${total_memory}MB) exceeds limit (${MEMORY_LIMIT_MB}MB)")
-            critical_issued=true
-        elif [ "$total_memory" -gt $((MEMORY_LIMIT_MB * 80 / 100)) ] && [ "$warning_issued" = false ]; then
-            issues+=("WARNING: Memory usage (${total_memory}MB) is above 80% of limit")
-            warning_issued=true
-        fi
-
-        # File descriptor checks
-        if [ "$fd_count" -gt 1000 ]; then
-            issues+=("WARNING: High file descriptor count: $fd_count")
-        elif [ "$fd_count" -gt 500 ]; then
-            issues+=("NOTICE: Elevated file descriptor count: $fd_count")
-        fi
-
-        # Child process checks
-        if [ "$child_count" -gt 50 ]; then
-            issues+=("WARNING: High child process count: $child_count")
-        elif [ "$child_count" -gt 20 ]; then
-            issues+=("NOTICE: Elevated child process count: $child_count")
-        fi
-
-        # Log issues
-        for issue in "${issues[@]}"; do
-            echo "[$timestamp] $issue" >> "$LOG_FILE"
-        done
-
-        # Kill if memory exceeded
-        if [ "$critical_issued" = true ]; then
-            echo "[$timestamp] !!! KILLING PROCESS DUE TO MEMORY LIMIT EXCEEDED !!!" >> "$LOG_FILE"
-            get_system_metrics >> "$LOG_FILE"
-
-            # Get process tree before killing
-            echo "[$timestamp] Process tree before termination:" >> "$LOG_FILE"
-            ps aux | grep -E "(pre-commit|python|node|npm)" >> "$LOG_FILE" 2>/dev/null || true
-
-            # Kill all child processes first
-            for child_pid in $(pgrep -P "$parent_pid" 2>/dev/null); do
-                echo "[$timestamp] Killing child process $child_pid" >> "$LOG_FILE"
-                kill -TERM "$child_pid" 2>/dev/null || true
-            done
-
-            sleep 1
-
-            # Kill parent
-            echo "[$timestamp] Killing parent process $parent_pid" >> "$LOG_FILE"
-            kill -TERM "$parent_pid" 2>/dev/null || true
-            sleep 1
-            kill -KILL "$parent_pid" 2>/dev/null || true
-
-            echo "[$timestamp] Process terminated due to resource limits" >> "$LOG_FILE"
+        # Check memory limit
+        if [ "$memory_mb" -gt "$MEMORY_LIMIT_MB" ]; then
+            report_status "ERROR: Memory limit exceeded (${memory_mb}MB > ${MEMORY_LIMIT_MB}MB)"
+            kill_process_tree "$parent_pid" TERM
+            EXIT_CODE=137  # Out of memory exit code
             break
         fi
 
-        # Log system metrics every 10 seconds
-        if [ $(($(date +%s) % 10)) -eq 0 ]; then
-            get_system_metrics >> "$LOG_FILE"
-        fi
-
-        sleep "$MONITOR_INTERVAL"
+        sleep 1
     done
-
-    # Final summary
-    echo "" >> "$LOG_FILE"
-    echo "=== Resource Usage Summary ===" >> "$LOG_FILE"
-    echo "Ended: $(date)" >> "$LOG_FILE"
-    echo "Peak Memory: ${max_memory}MB" >> "$LOG_FILE"
-    echo "Peak File Descriptors: $max_fd" >> "$LOG_FILE"
-    echo "Peak Child Processes: $max_children" >> "$LOG_FILE"
-    echo "=============================" >> "$LOG_FILE"
 }
 
-# Start resource monitor in background
-monitor_resources $$ &
-MONITOR_PID=$!
-echo "$MONITOR_PID" > "$MONITOR_PID_FILE"
-
-# Cleanup function
-cleanup_monitor() {
-    if [ -f "$MONITOR_PID_FILE" ]; then
-        local monitor_pid=$(cat "$MONITOR_PID_FILE")
-        if kill -0 "$monitor_pid" 2>/dev/null; then
-            kill -TERM "$monitor_pid" 2>/dev/null || true
-        fi
-        rm -f "$MONITOR_PID_FILE"
-    fi
-
-    # Display log summary
-    if [ -f "$LOG_FILE" ]; then
-        echo ""
-        echo "Resource usage log saved to: $LOG_FILE"
-        tail -n 20 "$LOG_FILE" | grep -E "(Peak|WARNING|CRITICAL|Summary)" || true
-    fi
-}
-
-# Set trap to cleanup monitor on exit
-trap cleanup_monitor EXIT INT TERM
-
-# Check memory before running
+# Check system resources before starting
 if [[ "$OSTYPE" == "darwin"* ]]; then
     FREE_MB=$(vm_stat | grep "Pages free" | awk '{print $3}' | sed 's/\.//')
-    PAGE_SIZE=$(pagesize 2>/dev/null || echo 16384)
+    PAGE_SIZE=$(sysctl -n hw.pagesize 2>/dev/null || echo 16384)
     FREE_MB=$((FREE_MB * PAGE_SIZE / 1024 / 1024))
-elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    FREE_MB=$(free -m | awk 'NR==2{print $4}')
+else
+    FREE_MB=$(free -m 2>/dev/null | awk 'NR==2{print $4}' || echo 1024)
 fi
 
-if [ "${FREE_MB:-1024}" -lt 512 ]; then
-    echo "Warning: Low memory (${FREE_MB}MB). Consider closing other applications."
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] WARNING: Starting with low system memory: ${FREE_MB}MB" >> "$LOG_FILE"
+if [ "$FREE_MB" -lt 512 ]; then
+    report_status "WARNING: Low memory (${FREE_MB}MB free)"
 fi
 
-# Run pre-commit
-echo "Starting pre-commit with resource monitoring..."
-echo "Monitor log: $LOG_FILE"
-pre-commit run "$@"
-PRE_COMMIT_EXIT_CODE=$?
+# Start resource monitor
+monitor_resources $$ &
+MONITOR_PID=$!
+report_status "INIT: Resource monitor started (PID: $MONITOR_PID)"
 
-# Give monitor time to write final metrics
-sleep 2
+# Run pre-commit with proper error handling
+report_status "STARTING: Pre-commit execution"
+echo "Starting pre-commit with robust monitoring..."
+echo "Logs: $LOG_FILE"
+echo "Global timeout: ${GLOBAL_TIMEOUT}s"
+echo "Stall detection: ${STALL_TIMEOUT}s"
 
-# Return pre-commit's exit code
-exit $PRE_COMMIT_EXIT_CODE
+INSTALL_PYTHON="$PROJECT_ROOT/.venv/bin/python"
+if [ -x "$INSTALL_PYTHON" ]; then
+    report_status "EXEC: Using venv Python"
+    "$INSTALL_PYTHON" -mpre_commit hook-impl \
+        --config=.pre-commit-config.yaml \
+        --hook-type=pre-commit \
+        --hook-dir "$(dirname "$0")" \
+        -- "$@" \
+        >"${LOG_FILE}.stdout" 2>"$ERROR_FILE" &
+    PRE_COMMIT_PID=$!
+elif command -v pre-commit > /dev/null; then
+    report_status "EXEC: Using system pre-commit"
+    pre-commit hook-impl \
+        --config=.pre-commit-config.yaml \
+        --hook-type=pre-commit \
+        --hook-dir "$(dirname "$0")" \
+        -- "$@" \
+        >"${LOG_FILE}.stdout" 2>"$ERROR_FILE" &
+    PRE_COMMIT_PID=$!
+else
+    report_status "ERROR: pre-commit not found"
+    echo "ERROR: pre-commit not found. Activate your virtualenv!" >&2
+    EXIT_CODE=127
+    exit 127
+fi
+
+report_status "RUNNING: Pre-commit PID $PRE_COMMIT_PID"
+
+# Wait for pre-commit with timeout
+SECONDS=0
+while kill -0 "$PRE_COMMIT_PID" 2>/dev/null; do
+    if [ $SECONDS -gt $GLOBAL_TIMEOUT ]; then
+        report_status "ERROR: Pre-commit timeout"
+        kill_process_tree "$PRE_COMMIT_PID" TERM
+        EXIT_CODE=124
+        break
+    fi
+    sleep 1
+done
+
+# Get exit code if process completed normally
+if wait "$PRE_COMMIT_PID" 2>/dev/null; then
+    EXIT_CODE=0
+    report_status "COMPLETE: Pre-commit succeeded"
+else
+    EXIT_CODE=$?
+    report_status "FAILED: Pre-commit exited with code $EXIT_CODE"
+fi
+
+# Cleanup will run automatically via trap
 EOF
 
-chmod +x .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit-wrapper-robust
 
-# Install pre-commit hooks
+# Install pre-commit hooks (this will create the basic hook)
 echo "Installing pre-commit hooks..."
 pre-commit install --install-hooks
 pre-commit install --hook-type commit-msg
+
+# Now replace the pre-commit hook with our wrapper caller
+echo "Setting up robust resource monitoring wrapper..."
+cat > .git/hooks/pre-commit << 'HOOK_EOF'
+#!/usr/bin/env bash
+# This hook calls our robust wrapper that prevents hanging processes
+exec "$(dirname "$0")/pre-commit-wrapper-robust" "$@"
+HOOK_EOF
+chmod +x .git/hooks/pre-commit
 
 # Create .gitignore entry for logs
 if ! grep -q ".pre-commit-logs" .gitignore 2>/dev/null; then
     echo ".pre-commit-logs/" >> .gitignore
 fi
 
-echo "✓ Sequential pre-commit with resource monitoring setup complete!"
+echo "✓ Sequential pre-commit with robust monitoring setup complete!"
 echo ""
-echo "To activate the environment:"
-echo "  source .venv/bin/activate"
+echo "Environment configuration saved to: .sequential-precommit-env"
+echo "To manually source the environment:"
+echo "  source .sequential-precommit-env"
 echo ""
 echo "The following variables are now set (project-local):"
 echo "  PRE_COMMIT_MAX_WORKERS=1"
@@ -410,8 +550,13 @@ echo "Resource usage logs will be saved to: .pre-commit-logs/"
 echo ""
 echo "Features enabled:"
 echo "  • Sequential hook execution (no parallelism)"
-echo "  • Memory usage monitoring and logging"
-echo "  • File descriptor tracking"
-echo "  • Child process monitoring"
+echo "  • Three-layer defense against hanging processes:"
+echo "    1. Global watchdog (15 min timeout)"
+echo "    2. Heartbeat monitor (60s stall detection)"
+echo "    3. Comprehensive cleanup with process groups"
+echo "  • Memory usage monitoring and limiting"
 echo "  • Automatic process termination at 4GB memory"
-echo "  • Peak usage statistics"
+echo "  • Proper error propagation and logging"
+echo ""
+echo "IMPORTANT: After running 'pre-commit install', you must run this setup again"
+echo "to restore the robust wrapper, as pre-commit overwrites git hooks."

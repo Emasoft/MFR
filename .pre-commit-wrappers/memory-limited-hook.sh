@@ -21,7 +21,11 @@ fi
 
 # Cleanup on exit
 cleanup() {
-    pkill -P $$ 2>/dev/null || true
+    # Kill child processes of this script
+    local children=$(jobs -p)
+    if [ -n "$children" ]; then
+        kill $children 2>/dev/null || true
+    fi
     if [[ "$COMMAND" == *"python"* ]] || [[ "$COMMAND" == *"uv"* ]]; then
         python3 -c "import gc; gc.collect()" 2>/dev/null || true
     fi

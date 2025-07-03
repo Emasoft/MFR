@@ -1,83 +1,83 @@
-name: PR Auto-Fix
+name: Sequential PR Auto-Fix
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize]
 
-# Cancel previous auto-fix runs for the same PR
+# Prevent concurrent PR fixes
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
-
-env:
-  PYTHON_VERSION: "3.11"
-  UV_VERSION: "0.7.13"
+  group: prfix-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
   pull-requests: write
 
+env:
+  PRE_COMMIT_MAX_WORKERS: 1
+  CI_SEQUENTIAL_MODE: 1
+
 jobs:
-  autofix:
-    name: Auto-fix PR
+  sequential-autofix:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    timeout-minutes: 30
+
     steps:
-    - name: Checkout PR
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         ref: ${{ github.event.pull_request.head.ref }}
+        fetch-depth: 0
 
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: '3.11'
 
     - name: Install uv
-      uses: astral-sh/setup-uv@v6
-      with:
-        version: ${{ env.UV_VERSION }}
-        enable-cache: true
+      uses: astral-sh/setup-uv@v5
 
-    - name: Install dependencies
+    - name: Setup environment
       run: |
-        uv sync --frozen --all-extras
+        uv venv
+        source .venv/bin/activate
+        uv sync --all-extras
+        uv pip install pre-commit
 
-    - name: Run ruff format
+    - name: Run sequential fixes
+      id: autofix
       run: |
-        uv run ruff format --line-length=320 --isolated src/ tests/
+        source .venv/bin/activate
+        source .sequential-precommit-env || true
 
-    - name: Run ruff check with fixes
-      run: |
-        uv run ruff check --ignore E203,E402,E501,E266,W505,F841,F842,F401,W293,I001,UP015,C901,W291 \
-          --isolated --fix --output-format full src/ tests/ || true
+        # Track if changes were made
+        git diff --exit-code && NO_CHANGES=true || NO_CHANGES=false
 
-    - name: Format YAML files in .github
-      run: |
-        if command -v yamlfmt &> /dev/null || [ -f "$HOME/go/bin/yamlfmt" ]; then
-          yamlfmt -path .github/workflows || "$HOME/go/bin/yamlfmt" -path .github/workflows || true
-        fi
+        # Run auto-fixable hooks only
+        pre-commit run --all-files || true
 
-    - name: Check for changes
-      id: check-changes
+        # Check if fixes were applied
+        git diff --exit-code && FIXES_APPLIED=false || FIXES_APPLIED=true
+
+        echo "fixes_applied=$FIXES_APPLIED" >> $GITHUB_OUTPUT
+
+    - name: Commit fixes
+      if: steps.autofix.outputs.fixes_applied == 'true'
       run: |
-        git config --local user.email "713559+Emasoft@users.noreply.github.com"
-        git config --local user.name "Emasoft"
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
         git add -A
-        if git diff --staged --quiet; then
-          echo "has_changes=false" >> "$GITHUB_OUTPUT"
-        else
-          echo "has_changes=true" >> "$GITHUB_OUTPUT"
-        fi
-
-    - name: Commit and push changes
-      if: steps.check-changes.outputs.has_changes == 'true'
-      run: |-
-        git commit -m "style: auto-fix formatting issues
-
-        Applied automatic formatting fixes:
-        - Python formatting with ruff (line length 400)
-        - Python linting fixes with ruff
-        - YAML formatting for GitHub workflows"
+        git commit -m "fix: Auto-fix formatting and linting issues (sequential)"
         git push
+
+    - name: Comment on PR
+      if: steps.autofix.outputs.fixes_applied == 'true'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '✅ Sequential auto-fixes applied! Please pull the latest changes.'
+          })
