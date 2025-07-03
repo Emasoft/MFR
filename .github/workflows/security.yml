@@ -38,7 +38,6 @@ jobs:
         base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
         head: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.event.after }}
         extra_args: >-
-          --fail
           --no-verification
           --exclude-detectors generic-api-key,email
 

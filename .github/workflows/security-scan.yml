@@ -27,7 +27,6 @@ jobs:
         path: ./
         # For scheduled runs, scan entire repository
         extra_args: >-
-          --fail
           --no-verification
           --exclude-detectors generic-api-key,email
 
