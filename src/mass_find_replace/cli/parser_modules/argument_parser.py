@@ -15,10 +15,8 @@ from __future__ import annotations
 import argparse
 from typing import Final
 
-# Import constants - duplicated here to avoid circular imports
-SCRIPT_NAME: Final[str] = "MFR - Mass Find Replace - A script to safely rename things in your project"
-MAIN_TRANSACTION_FILE_NAME: Final[str] = "planned_transactions.json"
-DEFAULT_REPLACEMENT_MAPPING_FILE: Final[str] = "replacement_mapping.json"
+# Import constants from core.config
+from ...core.config import SCRIPT_NAME, MAIN_TRANSACTION_FILE_NAME, DEFAULT_REPLACEMENT_MAPPING_FILE
 
 __all__ = ["create_argument_parser"]
 

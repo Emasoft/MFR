@@ -13,10 +13,8 @@ This module provides functions for validating directories, files, and workflow s
 
 from __future__ import annotations
 
-import json
 import logging
 from pathlib import Path
-from typing import Any
 
 from ..file_system_operations import (
     load_transactions,
@@ -24,11 +22,8 @@ from ..file_system_operations import (
 )
 from typing import Final
 
-# Import color codes from ui module
-from ..ui.display import YELLOW, RESET
-
-# Duplicate constant to avoid circular import
-MAIN_TRANSACTION_FILE_NAME: Final[str] = "planned_transactions.json"
+# Import constants from core
+from ..core.config import MAIN_TRANSACTION_FILE_NAME
 
 __all__ = [
     "check_existing_transactions",

@@ -17,9 +17,7 @@ from __future__ import annotations
 import time
 import logging
 from pathlib import Path
-from typing import Any
 
-from ..constants import DEFAULT_ENCODING_FALLBACK
 from ..types import LoggerType
 from ...utils import log_fs_op_message
 

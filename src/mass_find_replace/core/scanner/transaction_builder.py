@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import time
 import uuid
-from pathlib import Path
 from typing import Any
 
 from ..types import TransactionType, TransactionStatus

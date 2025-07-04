@@ -19,7 +19,6 @@ from typing import Any, TYPE_CHECKING
 if TYPE_CHECKING:
     from ..types import LoggerType
 
-from ...utils import log_collision_error
 from ..transaction_executor import _get_current_absolute_path
 from ... import replace_logic
 

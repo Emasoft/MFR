@@ -14,7 +14,6 @@ compiled patterns, and other module-level variables.
 
 from __future__ import annotations
 import re
-import logging
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

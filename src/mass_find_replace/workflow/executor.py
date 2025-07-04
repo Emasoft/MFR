@@ -17,7 +17,6 @@ import logging
 import pathspec
 import sys
 from pathlib import Path
-from typing import Any
 
 from ..ui.display import (
     GREEN,
@@ -26,8 +25,6 @@ from ..ui.display import (
     BLUE,
     DIM,
     RESET,
-    print_mapping_table as _print_mapping_table,
-    get_operation_description as _get_operation_description,
 )
 from ..file_system_operations import (
     load_transactions,

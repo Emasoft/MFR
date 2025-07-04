@@ -19,7 +19,7 @@ import unicodedata
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from logging import Logger, LoggerAdapter
+    pass
 
 from .normalization import strip_diacritics, strip_control_characters
 from .state import (

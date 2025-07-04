@@ -20,9 +20,7 @@ if TYPE_CHECKING:
     from ..types import LoggerType
 
 from ..types import TransactionType, TransactionStatus
-from ..transaction_manager import update_transaction_status_in_list
 from ..transaction_executor import execute_rename_transaction as _execute_rename_transaction
-from ... import replace_logic
 
 __all__ = [
     "process_rename_transaction",

@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# seq - Short alias for sequential execution
+exec "$(dirname "$0")/sequential-executor.sh" "$@"

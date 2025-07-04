@@ -33,7 +33,6 @@ from .state import (
     set_sorted_keys,
     set_module_logger,
     add_key_characters,
-    get_raw_mapping,
 )
 from .logging_utils import log_message
 

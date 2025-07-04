@@ -22,7 +22,7 @@ from typing import Any
 from ..types import LoggerType, TransactionType
 from ...utils import log_fs_op_message
 from ... import replace_logic
-from .transaction_builder import create_rename_transaction, create_content_transaction
+from .transaction_builder import create_rename_transaction
 from .content_scanner import scan_file_content
 from .binary_handler import search_binary_file
 from .file_type_detector import should_process_content

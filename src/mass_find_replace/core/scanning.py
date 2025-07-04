@@ -27,7 +27,7 @@ import pathspec
 from .. import replace_logic
 from ..utils import log_fs_op_message
 from .constants import BINARY_MATCHES_LOG_FILE
-from .types import LoggerType, TransactionType, TransactionStatus
+from .types import LoggerType, TransactionType
 
 # Import from scanner submodules
 from .scanner.directory_walker import walk_for_scan

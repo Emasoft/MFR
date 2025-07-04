@@ -16,26 +16,15 @@
 
 from __future__ import annotations
 
-import logging
 import sys
 from pathlib import Path
-from typing import Any, Final
 
 from prefect import flow
 
 from . import replace_logic
-from .file_system_operations import (
-    load_transactions,
-    save_transactions,
-    TransactionStatus,
-    TRANSACTION_FILE_BACKUP_EXT,
-    BINARY_MATCHES_LOG_FILE,
-    COLLISIONS_ERRORS_LOG_FILE,
-)
 from .ui.display import (
     print_mapping_table as _print_mapping_table,
     get_operation_description as _get_operation_description,
-    GREEN,
     RED,
     RESET,
     YELLOW,
@@ -117,15 +106,9 @@ def main_flow(
         verbose_mode: Enable verbose output
         interactive_mode: Prompt for approval before each change
     """
-    from pathlib import Path
-    import pathspec
 
     logger = _get_logger(verbose_mode)
 
-    from .file_system_operations import (
-        scan_directory_for_occurrences,
-        execute_all_transactions,
-    )
 
     if verbose_mode:
         logger.debug("Verbose mode enabled.")

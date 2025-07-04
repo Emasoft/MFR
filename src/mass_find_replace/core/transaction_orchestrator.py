@@ -16,11 +16,8 @@ coordinates the execution of all rename and content modification transactions.
 
 from __future__ import annotations
 import time
-import logging
 from pathlib import Path
-from typing import Any
 
-from ..utils import log_fs_op_message
 from .types import (
     LoggerType,
     TransactionType,

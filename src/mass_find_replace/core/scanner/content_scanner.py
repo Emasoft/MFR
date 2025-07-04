@@ -22,7 +22,6 @@ from striprtf.striprtf import rtf_to_text
 from isbinary import is_binary_file
 
 from ..constants import (
-    LARGE_FILE_SIZE_THRESHOLD,
     SAFE_LINE_LENGTH_THRESHOLD,
     DEFAULT_ENCODING_FALLBACK,
 )

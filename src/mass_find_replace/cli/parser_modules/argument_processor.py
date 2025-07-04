@@ -17,10 +17,10 @@ import argparse
 from pathlib import Path
 from typing import Any, Final
 
-from ...ui.display import RED, YELLOW, BLUE, RESET
+from ...ui.display import RED, YELLOW, RESET
 
-# Import constants - duplicated here to avoid circular imports
-MAIN_TRANSACTION_FILE_NAME: Final[str] = "planned_transactions.json"
+# Import constants from core.config
+from ...core.config import MAIN_TRANSACTION_FILE_NAME
 
 __all__ = ["process_arguments", "validate_timeout", "prepare_exclude_files"]
 
