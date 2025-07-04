@@ -222,7 +222,7 @@ while true; do
             if is_our_process_alive "$CURRENT_PID"; then
                 # Still running, keep waiting
                 if [ $((WAIT_COUNT % 30)) -eq 0 ]; then
-                    local cmd=$(ps -p "$CURRENT_PID" -o args= 2>/dev/null | head -1 || echo "unknown")
+                    cmd=$(ps -p "$CURRENT_PID" -o args= 2>/dev/null | head -1 || echo "unknown")
                     log_queue "Still waiting... Current process: PID=$CURRENT_PID CMD=$cmd"
                 fi
             else
@@ -243,8 +243,8 @@ while true; do
     
     # Check queue position
     if [ -f "$QUEUE_FILE" ] && [ $((WAIT_COUNT % 60)) -eq 0 ]; then
-        local position=$(grep -n "^$$:" "$QUEUE_FILE" 2>/dev/null | cut -d: -f1 || echo "?")
-        local total=$(wc -l < "$QUEUE_FILE" 2>/dev/null || echo "?")
+        position=$(grep -n "^$$:" "$QUEUE_FILE" 2>/dev/null | cut -d: -f1 || echo "?")
+        total=$(wc -l < "$QUEUE_FILE" 2>/dev/null || echo "?")
         log_queue "Queue position: $position of $total"
     fi
     
